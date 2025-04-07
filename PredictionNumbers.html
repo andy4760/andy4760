@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Predictor Numbers</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+    .black { color: black; font-weight: bold; }
+    .section {
+      margin-top: 20px;
+    }
+    .number-list span {
+      margin: 0 5px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Predictive Number Tracker</h2>
+  <input type="text" id="numberInput" placeholder="Enter number (0-36 or 00)" />
+  <button onclick="addNumber()">Add</button>
+  <button onclick="undo()">Undo</button>
+
+  <div class="section">
+    <h3>Entered Numbers</h3>
+    <div id="historyList" class="number-list">None</div>
+  </div>
+
+  <div class="section">
+    <h3>Stats</h3>
+    <p id="hitCounter">Hits: 0</p>
+    <p id="missCounter">Misses: 0</p>
+  </div>
+
+  <div class="section">
+    <h3>Hot Numbers (Most Frequent)</h3>
+    <div id="hotNumbers"></div>
+  </div>
+
+  <div class="section">
+    <h3>Cold Numbers (Longest Missing)</h3>
+    <div id="coldNumbers"></div>
+  </div>
+
+  <div class="section">
+    <h3>Predicted Next Picks</h3>
+    <div id="predictions"></div>
+  </div>
+
+  <script>
+    const allowedNumbers = new Set(["0", "00", ...Array.from({length: 36}, (_, i) => (i + 1).toString())]);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    let history = [];
+    let frequency = {};
+    let lastSeen = {};
+    let historyStack = [];
+    let hitCounter = 0;
+    let missCounter = 0;
+
+    const input = document.getElementById("numberInput");
+
+    function addNumber() {
+      const num = input.value.trim();
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid input.");
+        input.value = "";
+        return;
+      }
+
+      historyStack.push([...history]);
+      history.push(num);
+
+      // Update hit or miss
+      const last18 = history.slice(-18);
+      if (last18.slice(0, -1).includes(num)) {
+        hitCounter++;
+        missCounter = 0;
+      } else {
+        missCounter++;
+        hitCounter = 0;
+      }
+
+      // Update frequency and lastSeen
+      frequency[num] = (frequency[num] || 0) + 1;
+      for (let n of allowedNumbers) {
+        lastSeen[n] = history.lastIndexOf(n);
+      }
+
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function undo() {
+      if (historyStack.length === 0) {
+        alert("Nothing to undo.");
+        return;
+      }
+      history = historyStack.pop();
+      // Recalculate frequency and lastSeen
+      frequency = {};
+      lastSeen = {};
+      for (let i = 0; i < history.length; i++) {
+        const n = history[i];
+        frequency[n] = (frequency[n] || 0) + 1;
+        lastSeen[n] = i;
+      }
+      updateDisplay();
+    }
+
+    function getColorClass(num) {
+      if (num === "0" || num === "00") return "green";
+      if (redNumbers.has(num)) return "red";
+      if (blackNumbers.has(num)) return "black";
+      return "";
+    }
+
+    function getSortedByFrequency(desc = true) {
+      return Array.from(allowedNumbers)
+        .filter(n => frequency[n])
+        .sort((a, b) => desc ? frequency[b] - frequency[a] : frequency[a] - frequency[b]);
+    }
+
+    function getSortedByMissing() {
+      return Array.from(allowedNumbers)
+        .sort((a, b) => {
+          const aSeen = lastSeen[a] ?? -1;
+          const bSeen = lastSeen[b] ?? -1;
+          return (aSeen === -1 ? -Infinity : aSeen) - (bSeen === -1 ? -Infinity : bSeen);
+        });
+    }
+
+    function updateDisplay() {
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = history.slice().reverse().map(n =>
+        `<span class="${getColorClass(n)}">${n}</span>`
+      ).join(" ");
+
+      document.getElementById("hitCounter").textContent = `Hits: ${hitCounter}`;
+      document.getElementById("missCounter").textContent = `Misses: ${missCounter}`;
+
+      // Hot Numbers
+      const hot = getSortedByFrequency().slice(0, 5);
+      document.getElementById("hotNumbers").innerHTML = hot.map(n =>
+        `<span class="${getColorClass(n)}">${n} (${frequency[n]})</span>`
+      ).join(" ");
+
+      // Cold Numbers
+      const cold = getSortedByMissing().slice(0, 5);
+      document.getElementById("coldNumbers").innerHTML = cold.map(n =>
+        `<span class="${getColorClass(n)}">${n}</span>`
+      ).join(" ");
+
+      // Prediction: Top 3 from hot and 2 longest missing
+      const predicted = [...hot.slice(0, 3), ...cold.slice(0, 2)];
+      document.getElementById("predictions").innerHTML = predicted.map(n =>
+        `<span class="${getColorClass(n)}">${n}</span>`
+      ).join(" ");
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Number Tracker with Dual Logic</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    #numberList {
+      font-size: 1.8em;
+      margin: 20px 0;
+    }
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+    .black { color: black; font-weight: bold; }
+
+    .logic-section {
+      display: flex;
+      justify-content: center;
+      gap: 100px;
+      margin-top: 30px;
+    }
+    .logic-box {
+      text-align: left;
+    }
+    h3 {
+      margin: 10px 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Number Tracker</h2>
+  <input type="tel" id="numberInput" placeholder="Enter number" />
+  <button onclick="addNumber()">Add</button>
+  <button onclick="undo()">Undo</button>
+  <button onclick="resetAll()">Reset</button>
+
+  <div>
+    <h3>Last 18 Numbers:</h3>
+    <p id="numberList">None</p>
+  </div>
+
+  <div class="logic-section">
+    <!-- Switched sides: Track 9 on left, Track 18 on right -->
+    <div class="logic-box">
+      <h3>Track 9 Numbers Logic</h3>
+      <p id="misses9">Misses: 0</p>
+      <p id="hits9">Hits: 0</p>
+    </div>
+    <div class="logic-box">
+      <h3>Track 18 Numbers Logic</h3>
+      <p id="misses18">Misses: 0</p>
+      <p id="hits18">Hits: 0</p>
+    </div>
+  </div>
+
+  <script>
+    const allowedNumbers = new Set(["0", "00", ...Array.from({ length: 36 }, (_, i) => (i + 1).toString())]);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    let trackingList = [];  // Last 18 unique numbers
+    let recent9 = [];       // Last 9 recent entries
+
+    let historyMisses9 = 0;
+    let historyHits9 = 0;
+
+    let historyMisses18 = 0;
+    let historyHits18 = 0;
+
+    let historyStack = [];
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const num = input.value.trim();
+
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid number. Please enter 0-36 or '00'.");
+        input.value = "";
+        return;
+      }
+
+      // Save state for undo
+      historyStack.push({
+        trackingList: [...trackingList],
+        recent9: [...recent9],
+        historyMisses9,
+        historyHits9,
+        historyMisses18,
+        historyHits18
+      });
+
+      // === Track 18 Logic ===
+      const isHitIn18 = trackingList.includes(num);
+      if (isHitIn18) {
+        historyHits18++;
+        historyMisses18 = 0;
+      } else {
+        historyMisses18++;
+        historyHits18 = 0;
+      }
+
+      // === Track 9 Logic ===
+      const isHitIn9 = recent9.includes(num);
+      if (isHitIn9) {
+        historyHits9++;
+        historyMisses9 = 0;
+      } else {
+        historyMisses9++;
+        historyHits9 = 0;
+      }
+
+      // Update recent 9
+      recent9.push(num);
+      if (recent9.length > 9) recent9.shift();
+
+      // Update tracking list (18 numbers)
+      trackingList = trackingList.filter(n => n !== num); // remove old instance
+      trackingList.unshift(num);
+      if (trackingList.length > 18) trackingList.pop();
+
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function undo() {
+      if (historyStack.length > 0) {
+        const previous = historyStack.pop();
+        trackingList = [...previous.trackingList];
+        recent9 = [...previous.recent9];
+        historyMisses9 = previous.historyMisses9;
+        historyHits9 = previous.historyHits9;
+        historyMisses18 = previous.historyMisses18;
+        historyHits18 = previous.historyHits18;
+        updateDisplay();
+      } else {
+        alert("Nothing to undo.");
+      }
+    }
+
+    function resetAll() {
+      trackingList = [];
+      recent9 = [];
+      historyMisses9 = 0;
+      historyHits9 = 0;
+      historyMisses18 = 0;
+      historyHits18 = 0;
+      historyStack = [];
+      updateDisplay();
+      document.getElementById("numberInput").value = "";
+    }
+
+    function updateDisplay() {
+      const listElement = document.getElementById("numberList");
+      listElement.innerHTML = trackingList.length > 0
+        ? trackingList.map(n =>
+            n === "0" || n === "00" ? `<span class="green">${n}</span>` :
+            redNumbers.has(n) ? `<span class="red">${n}</span>` :
+            blackNumbers.has(n) ? `<span class="black">${n}</span>` : n
+          ).join(", ")
+        : "None";
+
+      document.getElementById("misses9").textContent = `Misses: ${historyMisses9}`;
+      document.getElementById("hits9").textContent = `Hits: ${historyHits9}`;
+      document.getElementById("misses18").textContent = `Misses: ${historyMisses18}`;
+      document.getElementById("hits18").textContent = `Hits: ${historyHits18}`;
+    }
+
+    document.getElementById("numberInput").addEventListener("keyup", function (event) {
+      if (event.key === "Enter") {
+        addNumber();
+      }
+    });
+  </script>
+</body>
+</html>

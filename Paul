@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Number Tracker with Triple Logic</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    #numberList {
+      font-size: 1.8em;
+      margin: 20px 0;
+    }
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+    .black { color: black; font-weight: bold; }
 
+    .logic-section {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      margin-top: 30px;
+    }
+    .logic-box {
+      text-align: left;
+    }
+    h3 {
+      margin: 10px 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Number Tracker</h2>
+  <input type="tel" id="numberInput" placeholder="Enter number" />
+  <button onclick="addNumber()">Add</button>
+  <button onclick="undo()">Undo</button>
+  <button onclick="resetAll()">Reset</button>
+
+  <div>
+    <h3>Last 18 Numbers:</h3>
+    <p id="numberList">None</p>
+  </div>
+
+  <div class="logic-section">
+    <div class="logic-box">
+      <h3>Track 9 Recent Numbers Logic</h3>
+      <p id="misses9">Misses: 0</p>
+      <p id="hits9">Hits: 0</p>
+    </div>
+    <div class="logic-box">
+      <h3>Track 18 Numbers Logic</h3>
+      <p id="misses18">Misses: 0</p>
+      <p id="hits18">Hits: 0</p>
+    </div>
+    <div class="logic-box">
+      <h3>Track 9 Old Numbers Logic</h3>
+      <p id="missesOld9">Misses: 0</p>
+      <p id="hitsOld9">Hits: 0</p>
+    </div>
+  </div>
+
+  <script>
+    const allowedNumbers = new Set(["0", "00", ...Array.from({ length: 36 }, (_, i) => (i + 1).toString())]);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    let trackingList = [];  // Last 18 numbers
+    let historyStack = [];
+
+    let historyHits9 = 0, historyMisses9 = 0;
+    let historyHits18 = 0, historyMisses18 = 0;
+    let historyHitsOld9 = 0, historyMissesOld9 = 0;
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const num = input.value.trim();
+
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid number. Please enter 0-36 or '00'.");
+        input.value = "";
+        return;
+      }
+
+      // Save for undo
+      historyStack.push({
+        trackingList: [...trackingList],
+        historyHits9,
+        historyMisses9,
+        historyHits18,
+        historyMisses18,
+        historyHitsOld9,
+        historyMissesOld9
+      });
+
+      // === DETECT BEFORE UPDATING trackingList ===
+      const tempList = [...trackingList]; // use current state
+      const recent9 = tempList.slice(0, 9);
+      const old9 = tempList.slice(9, 18);
+
+      // === 9 Recent Logic ===
+      if (recent9.includes(num)) {
+        historyHits9++;
+        historyMisses9 = 0;
+      } else {
+        historyMisses9++;
+        historyHits9 = 0;
+      }
+
+      // === 18 Logic ===
+      if (tempList.includes(num)) {
+        historyHits18++;
+        historyMisses18 = 0;
+      } else {
+        historyMisses18++;
+        historyHits18 = 0;
+      }
+
+      // === 9 Old Logic ===
+      if (old9.includes(num)) {
+        historyHitsOld9++;
+        historyMissesOld9 = 0;
+      } else {
+        historyMissesOld9++;
+        historyHitsOld9 = 0;
+      }
+
+      // === UPDATE TRACKING LIST ===
+      trackingList = trackingList.filter(n => n !== num);
+      trackingList.unshift(num);
+      if (trackingList.length > 18) trackingList.pop();
+
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function undo() {
+      if (historyStack.length > 0) {
+        const prev = historyStack.pop();
+        trackingList = [...prev.trackingList];
+        historyHits9 = prev.historyHits9;
+        historyMisses9 = prev.historyMisses9;
+        historyHits18 = prev.historyHits18;
+        historyMisses18 = prev.historyMisses18;
+        historyHitsOld9 = prev.historyHitsOld9;
+        historyMissesOld9 = prev.historyMissesOld9;
+        updateDisplay();
+      } else {
+        alert("Nothing to undo.");
+      }
+    }
+
+    function resetAll() {
+      trackingList = [];
+      historyStack = [];
+      historyHits9 = historyMisses9 = 0;
+      historyHits18 = historyMisses18 = 0;
+      historyHitsOld9 = historyMissesOld9 = 0;
+      updateDisplay();
+      document.getElementById("numberInput").value = "";
+    }
+
+    function updateDisplay() {
+      const listEl = document.getElementById("numberList");
+
+      if (trackingList.length === 0) {
+        listEl.innerHTML = "None";
+      } else {
+        const recent9 = trackingList.slice(0, 9).map(n => colorize(n));
+        const old9 = trackingList.slice(9, 18).map(n => colorize(n));
+        listEl.innerHTML = recent9.join(", ") + " &nbsp;&nbsp;&nbsp;&nbsp; " + old9.join(", ");
+      }
+
+      document.getElementById("misses9").textContent = `Misses: ${historyMisses9}`;
+      document.getElementById("hits9").textContent = `Hits: ${historyHits9}`;
+      document.getElementById("misses18").textContent = `Misses: ${historyMisses18}`;
+      document.getElementById("hits18").textContent = `Hits: ${historyHits18}`;
+      document.getElementById("missesOld9").textContent = `Misses: ${historyMissesOld9}`;
+      document.getElementById("hitsOld9").textContent = `Hits: ${historyHitsOld9}`;
+    }
+
+    function colorize(n) {
+      if (n === "0" || n === "00") return `<span class="green">${n}</span>`;
+      if (redNumbers.has(n)) return `<span class="red">${n}</span>`;
+      if (blackNumbers.has(n)) return `<span class="black">${n}</span>`;
+      return n;
+    }
+
+    document.getElementById("numberInput").addEventListener("keyup", function (e) {
+      if (e.key === "Enter") addNumber();
+    });
+  </script>
+</body>
+</html>

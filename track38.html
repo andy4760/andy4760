@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track All Numbers</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1rem;
+    }
+    input, button {
+      font-size: 1.2rem;
+      padding: 0.4rem 0.6rem;
+      margin: 0.3rem;
+    }
+    #numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.3rem;
+      margin: 1rem 0;
+    }
+    .number {
+      min-width: 2.5rem;
+      height: 2.5rem;
+      line-height: 2.5rem;
+      border-radius: 0.4rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: white;
+      text-align: center;
+    }
+    .green { background-color: green; }
+    .red { background-color: red; }
+    .black { background-color: black; }
+
+    #allStatus {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 80px;
+    }
+
+    .column-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Track All 38 Numbers</h2>
+  <input type="text" id="input" placeholder="Enter number (0–36, 00)" />
+  <button onclick="addNumber()">Enter</button>
+  <button onclick="undo()">Undo</button>
+  <button onclick="reset()">Reset</button>
+
+  <div id="numbers"></div>
+  <div id="allStatus">
+    <div id="redColumn" class="column">
+      <div class="column-title">Red</div>
+    </div>
+    <div id="blackColumn" class="column">
+      <div class="column-title">Black</div>
+    </div>
+    <div id="greenColumn" class="column">
+      <div class="column-title">Green</div>
+    </div>
+  </div>
+
+  <script>
+    const entries = [];
+    const displayCount = 20;
+    const allTargets = Array.from({ length: 37 }, (_, i) => i.toString()).concat("00");
+
+    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+
+    const trackingData = {};
+    allTargets.forEach(num => {
+      trackingData[num] = {
+        tracking: false,
+        watchList: [],
+        misses: 0
+      };
+    });
+
+    function getColorClass(num) {
+      if (num === "0" || num === "00") return "green";
+      if (redNumbers.includes(Number(num))) return "red";
+      if (blackNumbers.includes(Number(num))) return "black";
+      return "";
+    }
+
+    function updateDisplay() {
+      const container = document.getElementById("numbers");
+      container.innerHTML = "";
+      for (let i = entries.length - 1; i >= Math.max(0, entries.length - displayCount); i--) {
+        const div = document.createElement("div");
+        div.className = `number ${getColorClass(entries[i])}`;
+        div.textContent = entries[i];
+        container.appendChild(div);
+      }
+
+      const redCol = document.getElementById("redColumn");
+      const blackCol = document.getElementById("blackColumn");
+      const greenCol = document.getElementById("greenColumn");
+
+      redCol.innerHTML = '<div class="column-title">Red</div>';
+      blackCol.innerHTML = '<div class="column-title">Black</div>';
+      greenCol.innerHTML = '<div class="column-title">Green</div>';
+
+      const sortedMisses = allTargets
+        .map(num => ({ num, ...trackingData[num] }))
+        .filter(item => item.misses >= 4)  // Changed to 4 or more misses
+        .sort((a, b) => b.misses - a.misses);
+
+      sortedMisses.forEach(item => {
+        const div = document.createElement("div");
+        div.textContent = `${item.num} Misses: ${item.misses}`;
+        div.className = `number ${getColorClass(item.num)}`;
+        div.style.width = "auto";
+        div.style.padding = "0 0.5rem";
+        div.style.height = "2rem";
+        div.style.lineHeight = "2rem";
+
+        const color = getColorClass(item.num);
+        if (color === "red") redCol.appendChild(div);
+        else if (color === "black") blackCol.appendChild(div);
+        else greenCol.appendChild(div);
+      });
+    }
+
+    function addNumber() {
+      let val = document.getElementById("input").value.trim();
+      if (val === "") return;
+
+      if (val === "00" || (!isNaN(val) && Number(val) >= 0 && Number(val) <= 36)) {
+        entries.push(val);
+
+        allTargets.forEach(target => {
+          const data = trackingData[target];
+
+          if (!data.tracking && val === target) {
+            data.tracking = true;
+            data.watchList = [];
+          } else if (data.tracking) {
+            data.watchList.push(val);
+
+            if (val === target) {
+              data.misses = 0;
+              data.watchList = [];
+              data.tracking = true;
+            } else if (data.watchList.length >= 20) {
+              if (!data.watchList.includes(target)) {
+                data.misses++;
+              }
+              data.tracking = false;
+              data.watchList = [];
+            }
+          }
+        });
+
+        document.getElementById("input").value = "";
+        updateDisplay();
+      }
+    }
+
+    function undo() {
+      if (entries.length === 0) return;
+      const removed = entries.pop();
+
+      allTargets.forEach(target => {
+        const data = trackingData[target];
+
+        if (data.tracking) {
+          if (removed === target && data.watchList.length === 0) {
+            data.tracking = false;
+          } else {
+            data.watchList.pop();
+          }
+        }
+      });
+
+      updateDisplay();
+    }
+
+    function reset() {
+      entries.length = 0;
+      allTargets.forEach(num => {
+        trackingData[num].tracking = false;
+        trackingData[num].watchList = [];
+        trackingData[num].misses = 0;
+      });
+      updateDisplay();
+    }
+
+    document.getElementById("input").addEventListener("keyup", function(e) {
+      if (e.key === "Enter") {
+        addNumber();
+      }
+    });
+
+    updateDisplay();
+  </script>
+
+</body>
+</html>

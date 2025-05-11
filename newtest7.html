@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track All 38 Numbers</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    input, button {
+      font-size: 1.2rem;
+      padding: 0.4rem 0.6rem;
+      margin: 0.3rem;
+    }
+
+    #numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      margin: 1rem 0;
+      font-size: 1.4rem;
+    }
+
+    .entry-box {
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      padding: 0.3rem 0.5rem;
+    }
+
+    .green { color: green; }
+    .red { color: red; }
+    .black { color: black; }
+
+    #missGroups {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+
+    .miss-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .miss-title {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    #numpad {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: #f8f8f8;
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-top: 1px solid #ccc;
+    }
+
+    #numpad button {
+      font-size: 1.4rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #ffffff;
+      min-width: 60px;
+    }
+
+    #controls {
+      margin-bottom: 1rem;
+    }
+
+    #entryCount {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Track All 38 Numbers</h2>
+
+  <div id="controls">
+    <input type="text" id="input" placeholder="Enter number (0–36, 00)" inputmode="numeric" />
+    <button onclick="addNumber()">Enter</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="reset()">Reset</button>
+    <div id="entryCount">Entries: 0</div>
+  </div>
+
+  <div id="numbers"></div>
+
+  <div id="missGroups">
+    <div id="miss2" class="miss-group">
+      <div class="miss-title">Misses 2 ONLY</div>
+    </div>
+    <div id="miss3" class="miss-group">
+      <div class="miss-title">Misses 3 ONLY</div>
+    </div>
+    <div id="miss4" class="miss-group">
+      <div class="miss-title">Misses 4 ONLY</div>
+    </div>
+    <div id="miss5" class="miss-group">
+      <div class="miss-title">Misses 5 ONLY</div>
+    </div>
+    <div id="miss6plus" class="miss-group">
+      <div class="miss-title">Misses 6+</div>
+    </div>
+  </div>
+
+  <div id="numpad">
+    <button onclick="appendToInput('1')">1</button>
+    <button onclick="appendToInput('2')">2</button>
+    <button onclick="appendToInput('3')">3</button>
+    <button onclick="appendToInput('4')">4</button>
+    <button onclick="appendToInput('5')">5</button>
+    <button onclick="appendToInput('6')">6</button>
+    <button onclick="appendToInput('7')">7</button>
+    <button onclick="appendToInput('8')">8</button>
+    <button onclick="appendToInput('9')">9</button>
+    <button onclick="appendToInput('0')">0</button>
+    <button onclick="appendToInput('00')">00</button>
+    <button onclick="backspaceInput()">?</button>
+    <button onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    const entries = [];
+    const displayCount = 20;
+    const allTargets = Array.from({ length: 37 }, (_, i) => i.toString()).concat("00");
+
+    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+
+    const trackingData = {};
+    allTargets.forEach(num => {
+      trackingData[num] = {
+        tracking: false,
+        watchList: [],
+        misses: 0
+      };
+    });
+
+    function getColorClass(num) {
+      if (num === "0" || num === "00") return "green";
+      if (redNumbers.includes(Number(num))) return "red";
+      if (blackNumbers.includes(Number(num))) return "black";
+      return "";
+    }
+
+    function updateDisplay() {
+      const container = document.getElementById("numbers");
+      container.innerHTML = "";
+      for (let i = entries.length - 1; i >= Math.max(0, entries.length - displayCount); i--) {
+        const span = document.createElement("span");
+        span.className = `entry-box ${getColorClass(entries[i])}`;
+        span.textContent = entries[i];
+        container.appendChild(span);
+      }
+
+      document.getElementById("entryCount").textContent = `Entries: ${entries.length}`;
+
+      const miss2 = document.getElementById("miss2");
+      const miss3 = document.getElementById("miss3");
+      const miss4 = document.getElementById("miss4");
+      const miss5 = document.getElementById("miss5");
+      const miss6plus = document.getElementById("miss6plus");
+
+      miss2.innerHTML = '<div class="miss-title">Misses 2 ONLY</div>';
+      miss3.innerHTML = '<div class="miss-title">Misses 3 ONLY</div>';
+      miss4.innerHTML = '<div class="miss-title">Misses 4 ONLY</div>';
+      miss5.innerHTML = '<div class="miss-title">Misses 5 ONLY</div>';
+      miss6plus.innerHTML = '<div class="miss-title">Misses 6+</div>';
+
+      allTargets.forEach(num => {
+        const data = trackingData[num];
+        if (data.misses >= 2) {
+          const div = document.createElement("div");
+          div.className = getColorClass(num);
+          div.textContent = num;
+
+          if (data.misses === 2) miss2.appendChild(div);
+          else if (data.misses === 3) miss3.appendChild(div);
+          else if (data.misses === 4) miss4.appendChild(div);
+          else if (data.misses === 5) miss5.appendChild(div);
+          else miss6plus.appendChild(div);
+        }
+      });
+    }
+
+    function appendToInput(val) {
+      const input = document.getElementById("input");
+      input.value += val;
+    }
+
+    function backspaceInput() {
+      const input = document.getElementById("input");
+      input.value = input.value.slice(0, -1);
+    }
+
+    function addNumber() {
+      let val = document.getElementById("input").value.trim();
+      if (val === "") return;
+
+      if (val === "00" || (!isNaN(val) && Number(val) >= 0 && Number(val) <= 36)) {
+        entries.push(val);
+
+        allTargets.forEach(target => {
+          const data = trackingData[target];
+
+          if (!data.tracking && val === target) {
+            data.tracking = true;
+            data.watchList = [];
+          } else if (data.tracking) {
+            data.watchList.push(val);
+
+            if (val === target) {
+              data.misses = 0;
+              data.watchList = [];
+              data.tracking = true;
+            } else if (data.watchList.length >= 20) {
+              if (!data.watchList.includes(target)) {
+                data.misses++;
+              }
+              data.tracking = false;
+              data.watchList = [];
+            }
+          }
+        });
+
+        document.getElementById("input").value = "";
+        updateDisplay();
+      }
+    }
+
+    function undo() {
+      if (entries.length === 0) return;
+      const removed = entries.pop();
+
+      allTargets.forEach(target => {
+        const data = trackingData[target];
+
+        if (data.tracking) {
+          if (removed === target && data.watchList.length === 0) {
+            data.tracking = false;
+          } else {
+            data.watchList.pop();
+          }
+        }
+      });
+
+      updateDisplay();
+    }
+
+    function reset() {
+      entries.length = 0;
+      allTargets.forEach(num => {
+        trackingData[num].tracking = false;
+        trackingData[num].watchList = [];
+        trackingData[num].misses = 0;
+      });
+      updateDisplay();
+    }
+
+    document.getElementById("input").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        addNumber();
+      }
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>

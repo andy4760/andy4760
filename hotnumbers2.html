@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Number Tracker with Hits</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    #numberList {
+      font-size: 1.8em;
+      margin: 20px 0;
+      text-align: left;
+      display: inline-block;
+    }
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+    .black { color: black; font-weight: bold; }
+    .blue { color: #007BFF; font-weight: bold; }
+
+    #hitsDisplay {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+
+    .hit-horizontal {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .hit-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 1em;
+      padding: 6px 8px;
+      border: 2px solid #007BFF;
+      border-radius: 8px;
+      min-width: 45px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Number Tracker</h2>
+  <input type="tel" id="numberInput" placeholder="Enter number" />
+  <button onclick="addNumber()">Add</button>
+  <button onclick="undo()">Undo</button>
+  <button onclick="resetAll()">Reset</button>
+
+  <div>
+    <h3>Last 20 Numbers:</h3>
+    <p id="numberList">None</p>
+  </div>
+
+  <div id="hitsDisplay">
+    <h3>Top 14 Hot Numbers (Hits = 5):</h3>
+    <div class="hit-horizontal" id="hitBoxes"></div>
+  </div>
+
+  <script>
+    const allowedNumbers = new Set(["0", "00", ...Array.from({ length: 36 }, (_, i) => (i + 1).toString())]);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    let fullList = [];
+    let frequency = {};
+    let historyStack = [];
+
+    function getColorClass(n) {
+      if (n === "0" || n === "00") return "green";
+      if (redNumbers.has(n)) return "red";
+      if (blackNumbers.has(n)) return "black";
+      return "";
+    }
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const num = input.value.trim();
+
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid number. Please enter 0-36 or '00'.");
+        input.value = "";
+        return;
+      }
+
+      historyStack.push({
+        fullList: [...fullList],
+        frequency: { ...frequency }
+      });
+
+      fullList.push(num);
+      frequency[num] = (frequency[num] || 0) + 1;
+
+      if (fullList.length > 100) {
+        const removed = fullList.shift();
+        frequency[removed]--;
+        if (frequency[removed] <= 0) delete frequency[removed];
+      }
+
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function undo() {
+      if (historyStack.length > 0) {
+        const previous = historyStack.pop();
+        fullList = [...previous.fullList];
+        frequency = { ...previous.frequency };
+        updateDisplay();
+      } else {
+        alert("Nothing to undo.");
+      }
+    }
+
+    function resetAll() {
+      fullList = [];
+      frequency = {};
+      historyStack = [];
+      updateDisplay();
+      document.getElementById("numberInput").value = "";
+    }
+
+    function updateDisplay() {
+      const listElement = document.getElementById("numberList");
+      const displayList = fullList.slice(-20).reverse();
+
+      listElement.innerHTML = displayList.length > 0
+        ? displayList.map(n => `<span class="${getColorClass(n)}">${n}</span>`).join(", ")
+        : "None";
+
+      const hitBoxes = document.getElementById("hitBoxes");
+      hitBoxes.innerHTML = "";
+
+      Object.entries(frequency)
+        .filter(([_, count]) => count >= 5)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 14)
+        .forEach(([num, count]) => {
+          const colorClass = getColorClass(num);
+          hitBoxes.innerHTML += `
+            <div class="hit-box">
+              <div class="${colorClass}">${num}</div>
+              <div class="blue">x${count}</div>
+            </div>
+          `;
+        });
+    }
+
+    document.getElementById("numberInput").addEventListener("keyup", function (event) {
+      if (event.key === "Enter") {
+        addNumber();
+      }
+    });
+  </script>
+
+</body>
+</html>

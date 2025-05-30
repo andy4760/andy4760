@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track All 38 Numbers</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #fff;
+      --text: #000;
+      --accent: #f8f8f8;
+    }
+    body.dark {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --accent: #1e1e1e;
+    }
+    body {
+      font-family: sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      text-align: center;
+      padding: 1rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    input, button {
+      font-size: 1.2rem;
+      padding: 0.4rem 0.6rem;
+      margin: 0.3rem;
+    }
+    #numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      margin: 1rem 0;
+      font-size: 1.4rem;
+    }
+    .entry-box {
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      padding: 0.3rem 0.5rem;
+      position: relative;
+    }
+    .green { color: green; }
+    .red { color: red; }
+    .black { color: black; }
+    .hit-count {
+      color: purple;
+      font-size: 0.7rem;
+      position: absolute;
+      top: -1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .miss-count {
+      color: blue;
+      font-size: 0.7rem;
+      position: absolute;
+      bottom: -1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* ENHANCED STYLING FOR SPECIAL PLAY NUMBERS */
+    #specialPlayList .entry-box {
+      font-size: 1.6rem;
+    }
+
+    #specialPlayList .hit-count,
+    #specialPlayList .miss-count {
+      font-size: 0.9rem;
+    }
+
+    /* NEW STYLES FOR SPECIAL PLAY GROUP */
+    .special-play {
+      border: 2px solid gold;
+      font-weight: bold;
+    }
+    .special-play-success {
+      background-color: rgba(0, 255, 0, 0.2);
+      border-color: green;
+    }
+    .special-play-fail {
+      background-color: rgba(255, 0, 0, 0.2);
+      border-color: red;
+    }
+    .evaluation-complete {
+      animation: none !important;
+    }
+    .pulsate {
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h2>Special Play</h2>
+  <div id="specialPlayList" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;"></div>
+
+  <h2>Play Now</h2>
+  <div id="playNowList" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;"></div>
+
+  <h2>Track All 38 Numbers</h2>
+  <div id="controls">
+    <input type="text" id="input" placeholder="Enter number (0–36, 00)" inputmode="numeric" />
+    <button onclick="addNumber()">Enter</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="reset()">Reset</button>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <div id="entryCount">Entries: 0</div>
+  </div>
+
+  <div id="numbers"></div>
+
+  <div id="numpad">
+    <button onclick="appendToInput('1')">1</button>
+    <button onclick="appendToInput('2')">2</button>
+    <button onclick="appendToInput('3')">3</button>
+    <button onclick="appendToInput('4')">4</button>
+    <button onclick="appendToInput('5')">5</button>
+    <button onclick="appendToInput('6')">6</button>
+    <button onclick="appendToInput('7')">7</button>
+    <button onclick="appendToInput('8')">8</button>
+    <button onclick="appendToInput('9')">9</button>
+    <button onclick="appendToInput('0')">0</button>
+    <button onclick="appendToInput('00')">00</button>
+    <button onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    const entries = [];
+    const undoStack = [];
+    const allTargets = Array.from({ length: 37 }, (_, i) => i.toString()).concat("00");
+    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+
+    const trackingData = {};
+    allTargets.forEach(num => {
+      trackingData[num] = {
+        tracking: false,
+        watchList: [],
+        misses: 0,
+        hits: 0,
+        specialMisses: 0,
+        specialPlayStartIndex: undefined,
+        evaluationComplete: false,
+        evaluationSuccess: false
+      };
+    });
+
+    const playNowNumbers = {};
+    const specialPlayNumbers = [];
+
+    function getColorClass(num) {
+      if (num === "0" || num === "00") return "green";
+      if (redNumbers.includes(Number(num))) return "red";
+      if (blackNumbers.includes(Number(num))) return "black";
+      return "";
+    }
+
+    function updateDisplay() {
+      document.getElementById("numbers").innerHTML = entries.slice(-20).reverse().map(num =>
+        `<span class="entry-box ${getColorClass(num)}">${num}</span>`
+      ).join("");
+      document.getElementById("entryCount").textContent = `Entries: ${entries.length}`;
+
+      // Update Special Play display
+      const specialPlayContainer = document.getElementById("specialPlayList");
+      specialPlayContainer.innerHTML = "";
+      specialPlayNumbers.forEach(num => {
+        const data = trackingData[num];
+        const span = document.createElement("span");
+        
+        // Base classes
+        span.className = `entry-box ${getColorClass(num)} special-play`;
+        
+        // Evaluation status
+        if (data.evaluationComplete) {
+          span.classList.add("evaluation-complete");
+          span.classList.add(data.evaluationSuccess ? "special-play-success" : "special-play-fail");
+          span.innerHTML = `
+            <span class="hit-count">${data.hits}</span>
+            ${num}
+            <span class="miss-count">${data.specialMisses}</span>
+          `;
+        } else {
+          const spinsLeft = 21 - (entries.length - data.specialPlayStartIndex);
+          span.classList.add("pulsate");
+          span.innerHTML = `
+            <span class="hit-count">${data.hits}</span>
+            ${num}
+            <span class="miss-count">${data.specialMisses}</span>
+            <span style="font-size:0.7rem">(${spinsLeft} left)</span>
+          `;
+        }
+        
+        specialPlayContainer.appendChild(span);
+      });
+
+      // Update Play Now display
+      const playNowContainer = document.getElementById("playNowList");
+      playNowContainer.innerHTML = "";
+      Object.keys(playNowNumbers).forEach(num => {
+        const spinsLeft = 21 - (entries.length - playNowNumbers[num].startIndex);
+        if (spinsLeft > 0) {
+          const span = document.createElement("span");
+          span.className = `entry-box ${getColorClass(num)}`;
+          span.textContent = `${num} (${spinsLeft} left)`;
+          playNowContainer.appendChild(span);
+        }
+      });
+    }
+
+    function appendToInput(val) {
+      document.getElementById("input").value += val;
+    }
+
+    function addNumber() {
+      let val = document.getElementById("input").value.trim();
+      if (!allTargets.includes(val)) return;
+
+      // Save current state for undo
+      undoStack.push(JSON.parse(JSON.stringify({ 
+        entries: [...entries], 
+        trackingData: JSON.parse(JSON.stringify(trackingData)), 
+        playNowNumbers: {...playNowNumbers}, 
+        specialPlayNumbers: [...specialPlayNumbers] 
+      })));
+
+      // Add new number
+      entries.push(val);
+
+      // Process tracking for all numbers
+      allTargets.forEach(target => {
+        const data = trackingData[target];
+
+        // Check for Play Now activation (3 misses)
+        if (data.misses >= 3 && val === target && !(target in playNowNumbers) && !specialPlayNumbers.includes(target)) {
+          playNowNumbers[target] = { startIndex: entries.length - 1 };
+          alert(`PLAY ${target} for the next 21 entries!`);
+        }
+
+        // Tracking logic
+        if (!data.tracking && val === target) {
+          data.tracking = true;
+          data.watchList = [];
+        } else if (data.tracking) {
+          data.watchList.push(val);
+          if (val === target) {
+            if (playNowNumbers[target]) {
+              delete playNowNumbers[target];
+              if (!specialPlayNumbers.includes(target)) {
+                specialPlayNumbers.push(target);
+                data.specialPlayStartIndex = entries.length - 1;
+                data.evaluationSuccess = false; // Reset for new evaluation
+                data.evaluationComplete = false;
+                alert(`SPECIAL PLAY ${target} for the next 21 entries!`);
+              }
+            }
+            data.hits++;
+            data.misses = 0;
+            data.specialMisses = 0;
+            data.watchList = [];
+          } else if (data.watchList.length >= 20) {
+            if (!data.watchList.includes(target)) data.misses++;
+            data.tracking = false;
+            data.watchList = [];
+          }
+        }
+
+        // Special Play miss counter
+        if (specialPlayNumbers.includes(target) && val !== target) {
+          data.specialMisses++;
+        }
+      });
+
+      // Check for expired Play Now numbers
+      Object.keys(playNowNumbers).forEach(num => {
+        if (entries.length - playNowNumbers[num].startIndex >= 21) {
+          delete playNowNumbers[num];
+        }
+      });
+
+      // Evaluate Special Play numbers
+      specialPlayNumbers.forEach(target => {
+        const data = trackingData[target];
+        if (data.specialPlayStartIndex !== undefined) {
+          // Mark success immediately if number hits
+          if (val === target) {
+            data.evaluationSuccess = true;
+          }
+          
+          // Final evaluation after 21 spins
+          const spinsSinceSpecial = entries.length - data.specialPlayStartIndex;
+          if (spinsSinceSpecial >= 21 && !data.evaluationComplete) {
+            data.evaluationComplete = true;
+            // Final check in case hit was recorded after window complete
+            if (!data.evaluationSuccess) {
+              const evaluationWindow = entries.slice(
+                data.specialPlayStartIndex,
+                data.specialPlayStartIndex + 21
+              );
+              data.evaluationSuccess = evaluationWindow.includes(target);
+            }
+          }
+        }
+      });
+
+      document.getElementById("input").value = "";
+      updateDisplay();
+    }
+
+    function undo() {
+      if (undoStack.length === 0) return;
+      const prev = undoStack.pop();
+      entries.length = 0;
+      entries.push(...prev.entries);
+      allTargets.forEach(num => {
+        trackingData[num] = JSON.parse(JSON.stringify(prev.trackingData[num]));
+      });
+      Object.keys(playNowNumbers).forEach(k => delete playNowNumbers[k]);
+      Object.assign(playNowNumbers, JSON.parse(JSON.stringify(prev.playNowNumbers)));
+      specialPlayNumbers.length = 0;
+      specialPlayNumbers.push(...prev.specialPlayNumbers);
+      updateDisplay();
+    }
+
+    function reset() {
+      if (confirm("Are you sure you want to reset all tracking data?")) {
+        entries.length = 0;
+        undoStack.length = 0;
+        allTargets.forEach(num => {
+          trackingData[num] = { 
+            tracking: false, 
+            watchList: [], 
+            misses: 0, 
+            hits: 0, 
+            specialMisses: 0,
+            specialPlayStartIndex: undefined,
+            evaluationComplete: false,
+            evaluationSuccess: false
+          };
+        });
+        Object.keys(playNowNumbers).forEach(k => delete playNowNumbers[k]);
+        specialPlayNumbers.length = 0;
+        updateDisplay();
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if (e.key === "Enter") addNumber();
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>

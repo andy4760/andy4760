@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Roulette Tracker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .display {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 2px solid #000;
+      background: #fff;
+      font-size: 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 40px;
+    }
+
+    .display span {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .keypad-container {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      width: 80px;
+      height: 420px;
+      border: 2px solid #000;
+    }
+
+    .cell {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      position: relative;
+      cursor: pointer;
+      border-bottom: 1px solid #000;
+      color: white;
+    }
+
+    .cell:last-child {
+      border-bottom: none;
+    }
+
+    .green { background: green; }
+    .red { background: red; }
+    .black { background: black; }
+
+    .label-hit {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.75rem;
+      color: gold;
+    }
+
+    .label-miss {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 0.75rem;
+      color: blue;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.4rem 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Last 20 Numbers</h2>
+<div class="display" id="displayArea"></div>
+
+<div class="keypad-container" id="keypad"></div>
+
+<button onclick="undo()">↩️ Undo</button>
+
+<script>
+  const layout = {
+    top:   ['3','6','9','12','15','18','21','24','27','30','33','36'],
+    middle:['2','5','8','11','14','17','20','23','26','29','32','35'],
+    bottom:['1','4','7','10','13','16','19','22','25','28','31','34']
+  };
+
+  const colors = {
+    '1': 'red','2': 'black','3': 'red','4': 'black','5': 'red','6': 'black','7': 'red','8': 'black','9': 'red',
+    '10': 'black','11': 'black','12': 'red','13': 'black','14': 'red','15': 'black','16': 'red','17': 'black',
+    '18': 'red','19': 'red','20': 'black','21': 'red','22': 'black','23': 'red','24': 'black','25': 'red',
+    '26': 'black','27': 'red','28': 'black','29': 'black','30': 'red','31': 'black','32': 'red','33': 'black',
+    '34': 'red','35': 'black','36': 'red','0': 'green','00': 'green'
+  };
+
+  const stats = {};
+  Object.keys(colors).forEach(n => stats[n] = { hits: 0, misses: 0 });
+
+  const history = [];
+
+  function createKeypad() {
+    const container = document.getElementById('keypad');
+    container.innerHTML = '';
+
+    // Create 0/00 column
+    const zeroCol = document.createElement('div');
+    zeroCol.className = 'column';
+    ['00', '0'].forEach(n => {
+      zeroCol.appendChild(createCell(n));
+    });
+    container.appendChild(zeroCol);
+
+    // Create number columns
+    for (let i = 0; i < 12; i++) {
+      const col = document.createElement('div');
+      col.className = 'column';
+
+      ['top','middle','bottom'].forEach(row => {
+        const num = layout[row][i];
+        col.appendChild(createCell(num));
+      });
+
+      container.appendChild(col);
+    }
+  }
+
+  function createCell(num) {
+    const div = document.createElement('div');
+    div.className = `cell ${colors[num]}`;
+    div.textContent = num;
+
+    const hit = document.createElement('div');
+    hit.className = 'label-hit';
+    hit.textContent = stats[num].hits;
+    div.appendChild(hit);
+
+    const miss = document.createElement('div');
+    miss.className = 'label-miss';
+    miss.textContent = stats[num].misses;
+    div.appendChild(miss);
+
+    div.onclick = () => handleClick(num);
+    return div;
+  }
+
+  function handleClick(num) {
+    // Update stats
+    Object.keys(stats).forEach(n => {
+      if (n === num) {
+        stats[n].hits++;
+        stats[n].misses = 0;
+      } else {
+        stats[n].misses++;
+      }
+    });
+
+    history.push(num);
+    refreshDisplay();
+    createKeypad();
+  }
+
+  function undo() {
+    if (history.length === 0) return;
+    const last = history.pop();
+
+    // Reverse the hit and miss changes
+    Object.keys(stats).forEach(n => {
+      if (n === last) {
+        stats[n].hits = Math.max(0, stats[n].hits - 1);
+        // Can't recover previous miss count, reset to 0
+      } else {
+        stats[n].misses = Math.max(0, stats[n].misses - 1);
+      }
+    });
+
+    refreshDisplay();
+    createKeypad();
+  }
+
+  function refreshDisplay() {
+    const display = document.getElementById('displayArea');
+    display.innerHTML = '';
+
+    const last20 = history.slice(-20);
+    last20.forEach(n => {
+      const span = document.createElement('span');
+      span.textContent = n;
+      span.className = colors[n];
+      display.appendChild(span);
+    });
+  }
+
+  // Initial build
+  createKeypad();
+</script>
+
+</body>
+</html>

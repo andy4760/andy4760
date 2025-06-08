@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track All 38 Numbers</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #fff;
+      --text: #000;
+      --accent: #f8f8f8;
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --accent: #1e1e1e;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      text-align: center;
+      padding: 1rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    input, button {
+      font-size: 1.2rem;
+      padding: 0.4rem 0.6rem;
+      margin: 0.3rem;
+    }
+
+    #numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      margin: 1rem 0;
+      font-size: 1.4rem;
+    }
+
+    .entry-box {
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      padding: 0.3rem 0.5rem;
+    }
+
+    .green { color: green; }
+    .red { color: red; }
+    .black { color: black; }
+
+    #missGroups {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .miss-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 160px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.5rem;
+    }
+
+    .miss-title {
+      font-weight: bold;
+      text-decoration: underline;
+      margin-bottom: 0.3rem;
+    }
+
+    .miss-columns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .miss-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .miss-column span {
+      padding: 0.3rem 0.6rem;
+      margin: 0.2rem 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    #numpad {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: var(--accent);
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-top: 1px solid #ccc;
+    }
+
+    #numpad button {
+      font-size: 1.4rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #ffffff;
+      min-width: 60px;
+    }
+
+    #controls {
+      margin-bottom: 1rem;
+    }
+
+    #entryCount {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    canvas {
+      max-width: 100%;
+      margin-top: 2rem;
+    }
+
+    .alert-message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4CAF50;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 300px;
+      max-width: 90%;
+      animation: slideIn 0.5s;
+    }
+
+    .alert-message button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-left: 15px;
+      padding: 0 8px;
+      line-height: 1;
+    }
+
+    .alert-message button:hover {
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+    }
+
+    @keyframes slideIn {
+      from { top: -50px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h2>Track All 38 Numbers</h2>
+  <div id="controls">
+    <input type="text" id="input" placeholder="Enter number (0–36, 00)" inputmode="numeric" />
+    <button onclick="addNumber()">Enter</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="reset()">Reset</button>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <div id="entryCount">Entries: 0</div>
+  </div>
+
+  <div id="numbers"></div>
+
+  <div id="missGroups">
+    <div id="miss3" class="miss-group"><div class="miss-title">Misses 3 ONLY</div></div>
+    <div id="miss4" class="miss-group"><div class="miss-title">Misses 4 ONLY</div></div>
+    <div id="miss5" class="miss-group"><div class="miss-title">Misses 5 ONLY</div></div>
+    <div id="miss6" class="miss-group"><div class="miss-title">Misses 6 ONLY</div></div>
+    <div id="miss7plus" class="miss-group"><div class="miss-title">Misses 7+</div></div>
+  </div>
+
+  <canvas id="hotChart" height="100"></canvas>
+
+  <div id="numpad">
+    <button onclick="appendToInput('1')">1</button>
+    <button onclick="appendToInput('2')">2</button>
+    <button onclick="appendToInput('3')">3</button>
+    <button onclick="appendToInput('4')">4</button>
+    <button onclick="appendToInput('5')">5</button>
+    <button onclick="appendToInput('6')">6</button>
+    <button onclick="appendToInput('7')">7</button>
+    <button onclick="appendToInput('8')">8</button>
+    <button onclick="appendToInput('9')">9</button>
+    <button onclick="appendToInput('0')">0</button>
+    <button onclick="appendToInput('00')">00</button>
+    <button onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    const entries = [];
+    const undoStack = [];
+    const displayCount = 20;
+    const allTargets = Array.from({ length: 37 }, (_, i) => i.toString()).concat("00");
+    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+    const trackingData = {};
+    allTargets.forEach(num => {
+      trackingData[num] = {
+        tracking: false,
+        watchList: [],
+        misses: 0,
+        hits: 0
+      };
+    });
+
+    function showAlert(message) {
+      const existingAlert = document.querySelector('.alert-message');
+      if (existingAlert) existingAlert.remove();
+
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert-message';
+
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      alertDiv.appendChild(messageSpan);
+
+      const closeButton = document.createElement('button');
+      closeButton.innerHTML = '&times;';
+      closeButton.onclick = () => alertDiv.remove();
+      alertDiv.appendChild(closeButton);
+
+      document.body.appendChild(alertDiv);
+    }
+
+    function getColorClass(num) {
+      if (num === "0" || num === "00") return "green";
+      if (redNumbers.includes(Number(num))) return "red";
+      if (blackNumbers.includes(Number(num))) return "black";
+      return "";
+    }
+
+    function updateDisplay() {
+      document.getElementById("numbers").innerHTML = entries.slice(-displayCount).reverse().map(num =>
+        `<span class="entry-box ${getColorClass(num)}">${num}</span>`
+      ).join("");
+      document.getElementById("entryCount").textContent = `Entries: ${entries.length}`;
+
+      const missSections = {
+        3: document.getElementById("miss3"),
+        4: document.getElementById("miss4"),
+        5: document.getElementById("miss5"),
+        6: document.getElementById("miss6"),
+        7: document.getElementById("miss7plus"),
+      };
+
+      Object.entries(missSections).forEach(([missCount, section]) => {
+        section.innerHTML = `<div class="miss-title">Misses ${missCount === "7" ? "7+" : missCount} ONLY</div>`;
+        const redGroup = [], blackGroup = [], greenGroup = [];
+
+        allTargets.forEach(num => {
+          const m = trackingData[num].misses;
+          if ((missCount === "7" && m >= 7) || m === Number(missCount)) {
+            if (num === "0" || num === "00") greenGroup.push(num);
+            else if (redNumbers.includes(Number(num))) redGroup.push(num);
+            else blackGroup.push(num);
+          }
+        });
+
+        const columnDiv = document.createElement("div");
+        columnDiv.className = "miss-columns";
+
+        const makeColumn = (nums, className) => {
+          const col = document.createElement("div");
+          col.className = "miss-column";
+          nums.forEach(n => {
+            const span = document.createElement("span");
+            span.className = className;
+            span.textContent = n;
+            col.appendChild(span);
+          });
+          return col;
+        };
+
+        if (redGroup.length) columnDiv.appendChild(makeColumn(redGroup, "red"));
+        if (blackGroup.length) columnDiv.appendChild(makeColumn(blackGroup, "black"));
+        if (greenGroup.length) columnDiv.appendChild(makeColumn(greenGroup, "green"));
+        section.appendChild(columnDiv);
+      });
+
+      const ctx = document.getElementById('hotChart').getContext('2d');
+      const sorted = Object.entries(trackingData).sort((a, b) => b[1].hits - a[1].hits);
+      const labels = sorted.map(([num]) => num);
+      const data = sorted.map(([, val]) => val.hits);
+
+      if (window.hotChart) window.hotChart.destroy();
+      window.hotChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Hit Count',
+            data,
+            backgroundColor: '#4caf50'
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function appendToInput(val) {
+      document.getElementById("input").value += val;
+    }
+
+    function addNumber() {
+      let val = document.getElementById("input").value.trim();
+      if (val === "") return;
+      if (val === "00" || (!isNaN(val) && Number(val) >= 0 && Number(val) <= 36)) {
+        undoStack.push(JSON.parse(JSON.stringify({ entries, trackingData })));
+
+        entries.push(val);
+
+        allTargets.forEach(target => {
+          const data = trackingData[target];
+          if (!data.tracking && val === target) {
+            data.tracking = true;
+            data.watchList = [];
+          } else if (data.tracking) {
+            data.watchList.push(val);
+            if (val === target) {
+              if (data.misses >= 3) {
+                showAlert(`PLAY ${target} NOW – it just hit after ${data.misses} misses!`);
+              }
+              data.misses = 0;
+              data.watchList = [];
+              data.hits++;
+            } else if (data.watchList.length >= 20) {
+              if (!data.watchList.includes(target)) {
+                data.misses++;
+              }
+              data.tracking = false;
+              data.watchList = [];
+            }
+          }
+        });
+
+        document.getElementById("input").value = "";
+        updateDisplay();
+      }
+    }
+
+    function undo() {
+      if (undoStack.length === 0) return;
+      const prevState = undoStack.pop();
+      entries.length = 0;
+      entries.push(...prevState.entries);
+      allTargets.forEach(num => {
+        trackingData[num] = JSON.parse(JSON.stringify(prevState.trackingData[num]));
+      });
+      updateDisplay();
+    }
+
+    function reset() {
+      entries.length = 0;
+      undoStack.length = 0;
+      allTargets.forEach(num => {
+        trackingData[num].tracking = false;
+        trackingData[num].watchList = [];
+        trackingData[num].misses = 0;
+        trackingData[num].hits = 0;
+      });
+      updateDisplay();
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+    }
+
+    document.getElementById("input").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") addNumber();
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>

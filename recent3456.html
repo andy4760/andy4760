@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roulette Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f9f9f9;
+      padding-bottom: 220px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 5px;
+      margin: 1rem 0;
+      justify-content: center;
+    }
+    .spin-box {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    .red { background-color: #e53935; color: white; }
+    .black { background-color: #212121; color: white; }
+    .green { background-color: #43a047; color: white; }
+    .controls, .stats {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      background: white;
+      min-width: 160px;
+    }
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #eee;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      z-index: 100;
+    }
+    .numpad button {
+      font-size: 18px;
+      padding: 15px;
+      border: none;
+      border-radius: 6px;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .numpad .enter { background: #4caf50; color: white; }
+    .numpad .backspace { background: #f44336; color: white; }
+    #entryCount {
+      text-align: center;
+      font-size: 14px;
+      margin-top: -10px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+      width: 120px;
+      text-align: center;
+    }
+    button {
+      padding: 8px 14px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Roulette Tracker</h1>
+  <div id="recentSpins"></div>
+  <div id="entryCount">Total entries: 0</div>
+
+  <div class="controls">
+    <input id="numberInput" placeholder="0-36 or 00" />
+    <button onclick="addNumber()">Enter</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="resetAll()" id="resetButton">Reset</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-box">
+      <strong>Track 3</strong><br>
+      Misses: <span id="miss3">0</span><br>
+      Hits: <span id="hit3">0</span>
+    </div>
+    <div class="stat-box">
+      <strong>Track 4</strong><br>
+      Misses: <span id="miss4">0</span><br>
+      Hits: <span id="hit4">0</span>
+    </div>
+    <div class="stat-box">
+      <strong>Track 5</strong><br>
+      Misses: <span id="miss5">0</span><br>
+      Hits: <span id="hit5">0</span>
+    </div>
+    <div class="stat-box">
+      <strong>Track 6</strong><br>
+      Misses: <span id="miss6">0</span><br>
+      Hits: <span id="hit6">0</span>
+    </div>
+  </div>
+
+  <div class="numpad">
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+    <button class="backspace" onclick="backspace()">Back</button>
+  </div>
+
+  <script>
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({3:{m:0,h:0},4:{m:0,h:0},5:{m:0,h:0},6:{m:0,h:0}}));
+
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      history.slice(-20).reverse().forEach(n => {
+        const div = document.createElement("div");
+        div.className = `spin-box ${getColor(n)}`;
+        div.textContent = n;
+        container.appendChild(div);
+      });
+      document.getElementById("entryCount").textContent = `Total entries: ${history.length}`;
+      [3,4,5,6].forEach(k => {
+        document.getElementById(`miss${k}`).textContent = stats[k].m;
+        document.getElementById(`hit${k}`).textContent = stats[k].h;
+      });
+    }
+
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+      localStorage.setItem("stats", JSON.stringify(stats));
+    }
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      let val = input.value.trim();
+      if (![...Array(37).keys()].map(String).concat("00").includes(val)) {
+        alert("Enter a valid roulette number (0-36 or 00)");
+        input.value = "";
+        return;
+      }
+      history.push(val);
+      [3,4,5,6].forEach(k => {
+        const recent = history.slice(-k-1,-1);
+        if (recent.includes(val)) {
+          stats[k].h++;
+          stats[k].m = 0;
+        } else {
+          stats[k].m++;
+        }
+        if ((k===3 && stats[k].m===60) || (k===4 && stats[k].m===50) || (k===5 && stats[k].m===40) || (k===6 && stats[k].m===30)) {
+          alert(`Track ${k} missed ${stats[k].m} times!`);
+        }
+      });
+      input.value = "";
+      save();
+      updateDisplay();
+    }
+
+    function undo() {
+      if (history.length === 0) return;
+      history.pop();
+      stats = {3:{m:0,h:0},4:{m:0,h:0},5:{m:0,h:0},6:{m:0,h:0}};
+      history.forEach((val, i) => {
+        [3,4,5,6].forEach(k => {
+          const prev = history.slice(Math.max(0,i-k), i);
+          if (prev.includes(val)) {
+            stats[k].h++;
+            stats[k].m = 0;
+          } else {
+            stats[k].m++;
+          }
+        });
+      });
+      save();
+      updateDisplay();
+    }
+
+    function resetAll() {
+      if (confirm("Reset all data?")) {
+        console.log("Reset confirmed");
+        history = [];
+        stats = {3:{m:0,h:0},4:{m:0,h:0},5:{m:0,h:0},6:{m:0,h:0}};
+        localStorage.removeItem("history");
+        localStorage.removeItem("stats");
+        updateDisplay();
+        setTimeout(() => alert("All data has been reset."), 100);
+      }
+    }
+
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      input.value += n;
+    }
+
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    document.getElementById("numberInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") addNumber();
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>

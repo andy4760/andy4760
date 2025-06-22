@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Roulette Number Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 100%;
+            margin: 0;
+            padding: 10px;
+            -webkit-text-size-adjust: none;
+            touch-action: manipulation;
+            padding-bottom: 70px; /* Space for numpad */
+        }
+        .input-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 5px 0 10px 0;
+            z-index: 100;
+        }
+        #spinInput {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 8px;
+            font-size: 15px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            /* Prevent keyboard popup */
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .fake-input {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 8px;
+            font-size: 15px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        .button-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        button {
+            padding: 8px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+            min-width: 0;
+            -webkit-appearance: none;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .recent-spins {
+            display: flex;
+            overflow-x: auto;
+            gap: 5px;
+            margin: 12px 0;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .spin-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .red {
+            background-color: #ff4444;
+        }
+        .black {
+            background-color: #333333;
+        }
+        .green {
+            background-color: #00aa44;
+        }
+        .best-combos-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 12px 0;
+        }
+        .best-combos {
+            display: flex;
+            gap: 10px;
+            padding-bottom: 10px;
+            width: max-content;
+            margin: 0 auto;
+        }
+        .combo-group {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            min-width: 140px;
+        }
+        .combo-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 15px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .combo-numbers {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .combo-number {
+            padding: 6px 10px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            min-width: 30px;
+            text-align: center;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+        .hit-count {
+            color: black;
+            font-weight: bold;
+        }
+        .miss-count {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        .undo-btn {
+            background-color: #f44336;
+        }
+        .add-btn {
+            background-color: #2196F3;
+        }
+        .instructions {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .section-title {
+            font-size: 16px;
+            margin: 12px 0 6px 0;
+            color: #333;
+            text-align: center;
+        }
+        .numpad {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            border-top: 1px solid #ddd;
+            z-index: 100;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .numpad button {
+            width: 9%;
+            min-width: 40px;
+            height: 40px;
+            font-size: 16px;
+            padding: 0;
+            flex: 0 0 auto;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .numpad button.enter-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .numpad button.backspace-btn {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size:20px; margin-bottom:12px; text-align:center;">Roulette Number Analyzer</h1>
+    
+    <div class="input-container">
+        <div class="instructions">Enter spins (comma/space separated):</div>
+        <textarea id="spinInput" placeholder="Ex: 9,25,18,26,21,35"></textarea>
+        <div class="fake-input" id="fakeInput">Tap numbers below to enter spins</div>
+        <div class="button-row">
+            <button onclick="addSpins()" class="add-btn">Add (?)</button>
+            <button onclick="undoLastSpin()" class="undo-btn">Undo</button>
+            <button onclick="generateRandomSpins()">Random</button>
+            <button onclick="clearSpins()">Clear</button>
+        </div>
+    </div>
+    
+    <div class="section-title">Recent Numbers:</div>
+    <div id="recentSpins" class="recent-spins"></div>
+    
+    <div class="section-title">Optimal Combinations:</div>
+    <div class="best-combos-container">
+        <div id="bestCombos" class="best-combos"></div>
+    </div>
+    
+    <div id="results"></div>
+    
+    <div class="numpad">
+        <button class="backspace-btn" onclick="backspace()">?</button>
+        <button onclick="addNumber('1')">1</button>
+        <button onclick="addNumber('2')">2</button>
+        <button onclick="addNumber('3')">3</button>
+        <button onclick="addNumber('4')">4</button>
+        <button onclick="addNumber('5')">5</button>
+        <button onclick="addNumber('6')">6</button>
+        <button onclick="addNumber('7')">7</button>
+        <button onclick="addNumber('8')">8</button>
+        <button onclick="addNumber('9')">9</button>
+        <button onclick="addNumber('0')">0</button>
+        <button class="enter-btn" onclick="addSpins()">?</button>
+    </div>
+    
+    <script>
+        // Roulette number colors
+        const numberColors = {
+            '0': 'green',
+            '00': 'green',
+            '1': 'red', '3': 'red', '5': 'red', '7': 'red', '9': 'red',
+            '12': 'red', '14': 'red', '16': 'red', '18': 'red', '19': 'red',
+            '21': 'red', '23': 'red', '25': 'red', '27': 'red', '30': 'red',
+            '32': 'red', '34': 'red', '36': 'red',
+            // All others are black
+        };
+
+        let allSpins = [];
+        let frequencyData = {};
+        let spinHistory = [];
+        let comboStats = {
+            3: { hits: 0, misses: 0, lastHit: false },
+            4: { hits: 0, misses: 0, lastHit: false },
+            5: { hits: 0, misses: 0, lastHit: false },
+            6: { hits: 0, misses: 0, lastHit: false }
+        };
+        let currentBestCombos = {
+            3: [],
+            4: [],
+            5: [],
+            6: []
+        };
+        let inputValue = '';
+        
+        // Numpad functions
+        function addNumber(num) {
+            inputValue += num;
+            updateFakeInput();
+        }
+        
+        function backspace() {
+            inputValue = inputValue.slice(0, -1);
+            updateFakeInput();
+        }
+        
+        function updateFakeInput() {
+            document.getElementById('fakeInput').textContent = 
+                inputValue || 'Tap numbers below to enter spins';
+            document.getElementById('spinInput').value = inputValue;
+        }
+        
+        function addSpins() {
+            const input = inputValue.trim();
+            if (!input) return;
+            
+            // Parse input (handle both comma and space separated)
+            let newSpins = [];
+            if (input.includes(',')) {
+                newSpins = input.split(',').map(item => item.trim());
+            } else {
+                newSpins = input.split(/\s+/).filter(item => item);
+            }
+            
+            // Convert to strings and handle '00'
+            newSpins = newSpins.map(item => {
+                if (item.toUpperCase() === '00') return '00';
+                const num = parseInt(item);
+                return isNaN(num) ? null : num.toString();
+            }).filter(item => item !== null);
+            
+            if (newSpins.length === 0) return;
+            
+            // Record this action for undo
+            spinHistory.push({
+                action: 'add',
+                spins: [...newSpins],
+                prevStats: JSON.parse(JSON.stringify(comboStats)),
+                prevCombos: JSON.parse(JSON.stringify(currentBestCombos))
+            });
+            
+            // Add to all spins and update frequency
+            allSpins = [...allSpins, ...newSpins];
+            updateFrequencyData(newSpins);
+            
+            // Clear input
+            inputValue = '';
+            updateFakeInput();
+            
+            // Update displays and analyze
+            updateDisplays();
+            analyzeSpins();
+        }
+        
+        function generateRandomSpins() {
+            const randomSpins = [];
+            for (let i = 0; i < 20; i++) {
+                // Generate random number between 0-36 or '00'
+                const num = Math.random() < 0.03 ? '00' : Math.floor(Math.random() * 37);
+                randomSpins.push(num.toString());
+            }
+            inputValue = randomSpins.join(',');
+            updateFakeInput();
+        }
+        
+        function clearSpins() {
+            inputValue = '';
+            updateFakeInput();
+            allSpins = [];
+            frequencyData = {};
+            spinHistory = [];
+            resetComboStats();
+            updateDisplays();
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function resetComboStats() {
+            comboStats = {
+                3: { hits: 0, misses: 0, lastHit: false },
+                4: { hits: 0, misses: 0, lastHit: false },
+                5: { hits: 0, misses: 0, lastHit: false },
+                6: { hits: 0, misses: 0, lastHit: false }
+            };
+            currentBestCombos = {
+                3: [],
+                4: [],
+                5: [],
+                6: []
+            };
+        }
+        
+        function undoLastSpin() {
+            if (spinHistory.length > 0) {
+                const lastAction = spinHistory.pop();
+                if (lastAction.action === 'add') {
+                    // Remove the last added spins
+                    allSpins = allSpins.slice(0, -lastAction.spins.length);
+                    // Restore previous state
+                    comboStats = lastAction.prevStats;
+                    currentBestCombos = lastAction.prevCombos;
+                    // Rebuild frequency data
+                    rebuildFrequencyData();
+                    updateDisplays();
+                    analyzeSpins(true); // Pass true to indicate undo
+                }
+            }
+        }
+
+        function analyzeSpins(isUndo = false) {
+            if (allSpins.length === 0) {
+                document.getElementById('results').innerHTML = '<p>No spins to analyze</p>';
+                return;
+            }
+            
+            // Get top candidates (more than we need to allow better combinations)
+            const candidates = getTopNumbers(20);
+            
+            // Find best combinations for 3-6 numbers
+            const bestCombos = {
+                3: findBestCombo(candidates, 3),
+                4: findBestCombo(candidates, 4),
+                5: findBestCombo(candidates, 5),
+                6: findBestCombo(candidates, 6)
+            };
+            
+            // Update current best combos
+            for (let size = 3; size <= 6; size++) {
+                currentBestCombos[size] = bestCombos[size].numbers;
+            }
+            
+            // Track hits/misses if not undo operation
+            if (!isUndo && allSpins.length > 1) {
+                updateComboStats(allSpins[allSpins.length - 1]);
+            }
+            
+            // Display all optimal combinations
+            displayBestCombos(bestCombos);
+            
+            // Show analysis summary
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h3>Analysis Summary</h3>
+                <p><strong>Total spins:</strong> ${allSpins.length}</p>
+                <p><strong>Most frequent:</strong> ${formatNumberWithColor(candidates[0])} (${frequencyData[candidates[0]]})</p>
+            `;
+        }
+        
+        function updateComboStats(newNumber) {
+            for (let size = 3; size <= 6; size++) {
+                const combo = currentBestCombos[size];
+                const hit = combo.includes(newNumber);
+                
+                if (hit) {
+                    comboStats[size].hits++;
+                    comboStats[size].misses = 0;
+                    comboStats[size].lastHit = true;
+                } else {
+                    if (comboStats[size].lastHit) {
+                        comboStats[size].misses = 1;
+                        comboStats[size].lastHit = false;
+                    } else {
+                        comboStats[size].misses++;
+                    }
+                }
+            }
+        }
+        
+        function findBestCombo(candidates, size) {
+            let bestCombo = candidates.slice(0, size);
+            let minGap = calculateMaxGap(allSpins, bestCombo);
+            
+            // Check several possible combinations from top candidates
+            const combosToCheck = [
+                candidates.slice(0, size),
+                candidates.slice(1, size+1),
+                candidates.slice(2, size+2),
+                candidates.slice(3, size+3),
+                candidates.slice(0, size-1).concat(candidates[size+1])
+            ];
+            
+            combosToCheck.forEach(combo => {
+                if (combo.length === size) {
+                    const gap = calculateMaxGap(allSpins, combo);
+                    if (gap < minGap) {
+                        minGap = gap;
+                        bestCombo = combo;
+                    }
+                }
+            });
+            
+            return {
+                numbers: bestCombo,
+                maxGap: minGap
+            };
+        }
+        
+        function displayBestCombos(combos) {
+            const container = document.getElementById('bestCombos');
+            container.innerHTML = '';
+            
+            for (let size = 3; size <= 6; size++) {
+                const combo = combos[size];
+                const group = document.createElement('div');
+                group.className = 'combo-group';
+                
+                const title = document.createElement('div');
+                title.className = 'combo-title';
+                title.textContent = `Best ${size} Numbers`;
+                
+                const numbers = document.createElement('div');
+                numbers.className = 'combo-numbers';
+                
+                combo.numbers.forEach(num => {
+                    const numEl = document.createElement('div');
+                    numEl.className = `combo-number ${getColorClass(num)}`;
+                    numEl.textContent = num;
+                    numbers.appendChild(numEl);
+                });
+                
+                const stats = document.createElement('div');
+                stats.className = 'stats-row';
+                stats.innerHTML = `
+                    <span class="hit-count">Hits: ${comboStats[size].hits}</span>
+                    <span class="miss-count">Misses: ${comboStats[size].misses}</span>
+                `;
+                
+                const gapDisplay = document.createElement('div');
+                gapDisplay.className = 'stats-row';
+                gapDisplay.innerHTML = `<span>Max gap: ${combo.maxGap}</span>`;
+                
+                group.appendChild(title);
+                group.appendChild(numbers);
+                group.appendChild(stats);
+                group.appendChild(gapDisplay);
+                container.appendChild(group);
+            }
+        }
+        
+        function updateDisplays() {
+            updateRecentSpins();
+        }
+        
+        function rebuildFrequencyData() {
+            frequencyData = {};
+            allSpins.forEach(num => {
+                frequencyData[num] = (frequencyData[num] || 0) + 1;
+            });
+        }
+        
+        function updateFrequencyData(newSpins) {
+            newSpins.forEach(num => {
+                frequencyData[num] = (frequencyData[num] || 0) + 1;
+            });
+        }
+        
+        function updateRecentSpins() {
+            const recentSpinsDiv = document.getElementById('recentSpins');
+            recentSpinsDiv.innerHTML = '';
+            
+            const last20 = allSpins.slice(-20).reverse();
+            
+            last20.forEach(num => {
+                const spinEl = document.createElement('div');
+                spinEl.className = `spin-number ${getColorClass(num)}`;
+                spinEl.textContent = num;
+                recentSpinsDiv.appendChild(spinEl);
+            });
+            
+            if (last20.length === 0) {
+                recentSpinsDiv.innerHTML = '<div style="padding:8px; color:#666;">No spins yet</div>';
+            }
+        }
+        
+        function getTopNumbers(count) {
+            return Object.keys(frequencyData)
+                .sort((a, b) => frequencyData[b] - frequencyData[a])
+                .slice(0, count);
+        }
+        
+        function getColorClass(num) {
+            return numberColors[num] || 'black';
+        }
+        
+        function formatNumberWithColor(num) {
+            const colorClass = getColorClass(num);
+            return `<span class="${colorClass}" style="color:white; padding:2px 6px; border-radius:10px; display:inline-block; text-align:center;">${num}</span>`;
+        }
+        
+        function calculateMaxGap(spins, combo) {
+            let lastPos = -1;
+            let maxGap = 0;
+            
+            for (let i = 0; i < spins.length; i++) {
+                if (combo.includes(spins[i])) {
+                    const gap = i - lastPos - 1;
+                    if (gap > maxGap) {
+                        maxGap = gap;
+                    }
+                    lastPos = i;
+                }
+            }
+            
+            // Check gap after last occurrence
+            const finalGap = spins.length - lastPos - 1;
+            if (finalGap > maxGap) {
+                maxGap = finalGap;
+            }
+            
+            return maxGap;
+        }
+        
+        // Initialize with empty state
+        resetComboStats();
+        updateDisplays();
+    </script>
+</body>
+</html>

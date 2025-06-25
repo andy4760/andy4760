@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Number Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(25, 25, 45, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        header {
+            background: rgba(20, 20, 40, 0.9);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
+        .recent-spins-section {
+            padding: 15px;
+            background: rgba(30, 30, 50, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            color: #ffcc00;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .recent-spins-container {
+            background: rgba(20, 20, 40, 0.6);
+            border-radius: 10px;
+            padding: 10px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+        
+        .recent-spins-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .recent-spins-container::-webkit-scrollbar-thumb {
+            background: #ffcc00;
+            border-radius: 3px;
+        }
+        
+        .recent-spins {
+            display: flex;
+            gap: 6px;
+            min-width: min-content;
+            padding: 5px;
+        }
+        
+        .spin-number {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .red {
+            background: linear-gradient(135deg, #e53935, #c62828);
+        }
+        
+        .black {
+            background: linear-gradient(135deg, #2c2c54, #1a1a2e);
+        }
+        
+        .green {
+            background: linear-gradient(135deg, #00b894, #00866e);
+        }
+        
+        .combos-section {
+            padding: 15px;
+            background: rgba(35, 35, 60, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .combos-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .combo-group {
+            background: rgba(40, 40, 70, 0.9);
+            border-radius: 10px;
+            padding: 12px;
+            min-width: 160px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .combo-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            font-size: 16px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .combo-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .combo-number {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 12px;
+            padding: 6px 0;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        .hit-count {
+            color: #00e676;
+            font-weight: bold;
+        }
+        
+        .miss-count {
+            color: #ff5252;
+            font-weight: bold;
+        }
+        
+        .gap-count {
+            color: #448aff;
+            font-weight: bold;
+        }
+        
+        .controls-section {
+            padding: 15px;
+            background: rgba(30, 30, 50, 0.8);
+        }
+        
+        .input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .fake-input {
+            width: 100%;
+            height: 45px;
+            padding: 10px 15px;
+            background: rgba(20, 20, 40, 0.7);
+            border: 2px solid rgba(255, 204, 0, 0.5);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
+        }
+        
+        #spinInput {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .current-number {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            color: #ffcc00;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        
+        .numpad-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .numpad-btn {
+            width: 55px;
+            height: 55px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(35, 35, 65, 0.9);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .numpad-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .numpad-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .backspace-btn {
+            background: linear-gradient(135deg, #ff5252, #d32f2f) !important;
+            font-size: 20px !important;
+            width: 100px !important;
+        }
+        
+        .enter-btn {
+            background: linear-gradient(135deg, #00c853, #009624) !important;
+            font-size: 16px !important;
+            width: 90px !important;
+        }
+        
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            max-width: 180px;
+            text-align: center;
+        }
+        
+        .undo-btn {
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            color: white;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #aa00ff, #7b1fa2);
+            color: white;
+        }
+        
+        .total-spins {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        
+        .empty-spin {
+            background: rgba(60, 60, 90, 0.5) !important;
+            color: rgba(255,255,255,0.3) !important;
+        }
+        
+        .instructions {
+            padding: 15px;
+            background: rgba(30, 30, 50, 0.6);
+            border-radius: 10px;
+            margin: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .instructions h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .validation-message {
+            text-align: center;
+            color: #ff5252;
+            font-size: 14px;
+            min-height: 20px;
+            margin-top: 5px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .validation-message.show {
+            opacity: 1;
+        }
+        
+        .double-zero-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #ffcc00;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        
+        /* Confirmation Dialog Styles */
+        .confirmation-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .confirmation-dialog.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .dialog-content {
+            background: rgba(30, 30, 50, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .dialog-title {
+            color: #ffcc00;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .dialog-message {
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .dialog-btn {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(135deg, #448aff, #2962ff);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .recent-spins {
+                gap: 4px;
+            }
+            
+            .spin-number {
+                min-width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .combo-group {
+                min-width: 140px;
+                padding: 10px;
+            }
+            
+            .combo-number {
+                width: 26px;
+                height: 26px;
+                font-size: 12px;
+            }
+            
+            .numpad-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .backspace-btn {
+                width: 85px !important;
+                font-size: 18px !important;
+            }
+            
+            .enter-btn {
+                width: 80px !important;
+                font-size: 14px !important;
+            }
+            
+            .action-btn {
+                padding: 8px 15px;
+                font-size: 13px;
+                max-width: 150px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .recent-spins {
+                gap: 3px;
+            }
+            
+            .spin-number {
+                min-width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            
+            .combo-group {
+                min-width: 120px;
+                padding: 8px;
+            }
+            
+            .combo-title {
+                font-size: 14px;
+            }
+            
+            .combo-number {
+                width: 24px;
+                height: 24px;
+                font-size: 11px;
+            }
+            
+            .stats-row {
+                font-size: 11px;
+            }
+            
+            .numpad-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            
+            .backspace-btn {
+                width: 75px !important;
+                font-size: 16px !important;
+            }
+            
+            .enter-btn {
+                width: 70px !important;
+                font-size: 12px !important;
+            }
+            
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+                max-width: 120px;
+            }
+            
+            .fake-input {
+                font-size: 14px;
+                height: 40px;
+            }
+            
+            .current-number {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Roulette Number Analyzer</h1>
+        </header>
+        
+        <!-- Instructions Section -->
+        <div class="instructions">
+            <h3>How to Use</h3>
+            <ul>
+                <li>Enter numbers using the numpad below</li>
+                <li>Press 0 twice to enter 00</li>
+                <li>Click "Enter" to add your spins</li>
+                <li>Analyze performance of number combinations</li>
+                <li>Track hits, misses, and gaps for each combo</li>
+            </ul>
+        </div>
+        
+        <!-- Recent 20 Numbers Section -->
+        <div class="recent-spins-section">
+            <div class="section-title">
+                <span>🔄</span> Last 20 Spins (Newest to Oldest)
+            </div>
+            <div class="recent-spins-container">
+                <div id="recentSpins" class="recent-spins"></div>
+            </div>
+            <div id="totalSpins" class="total-spins">Total Spins: 0</div>
+        </div>
+        
+        <!-- Best Combos Section -->
+        <div class="combos-section">
+            <!-- Best 3,4,5,6 in one row -->
+            <div class="combos-row">
+                <div class="combo-group" id="best3">
+                    <div class="combo-title">Best 3 Numbers</div>
+                    <div class="combo-numbers"></div>
+                    <div class="stats-row">
+                        <span class="hit-count">Hits: 0</span>
+                        <span class="miss-count">Misses: 0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="gap-count">Max Gap: 0</span>
+                    </div>
+                </div>
+                
+                <div class="combo-group" id="best4">
+                    <div class="combo-title">Best 4 Numbers</div>
+                    <div class="combo-numbers"></div>
+                    <div class="stats-row">
+                        <span class="hit-count">Hits: 0</span>
+                        <span class="miss-count">Misses: 0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="gap-count">Max Gap: 0</span>
+                    </div>
+                </div>
+                
+                <div class="combo-group" id="best5">
+                    <div class="combo-title">Best 5 Numbers</div>
+                    <div class="combo-numbers"></div>
+                    <div class="stats-row">
+                        <span class="hit-count">Hits: 0</span>
+                        <span class="miss-count">Misses: 0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="gap-count">Max Gap: 0</span>
+                    </div>
+                </div>
+                
+                <div class="combo-group" id="best6">
+                    <div class="combo-title">Best 6 Numbers</div>
+                    <div class="combo-numbers"></div>
+                    <div class="stats-row">
+                        <span class="hit-count">Hits: 0</span>
+                        <span class="miss-count">Misses: 0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="gap-count">Max Gap: 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Best 9 in a separate row -->
+            <div class="combo-group" id="best9" style="max-width: 600px; margin: 0 auto;">
+                <div class="combo-title">Best 9 Numbers</div>
+                <div class="combo-numbers"></div>
+                <div class="stats-row">
+                    <span class="hit-count">Hits: 0</span>
+                    <span class="miss-count">Misses: 0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="gap-count">Max Gap: 0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls and Numpad Section -->
+        <div class="controls-section">
+            <div class="input-container">
+                <textarea id="spinInput" placeholder="Enter numbers separated by commas"></textarea>
+                <div class="fake-input" id="fakeInput">Use the numpad below to enter spins</div>
+            </div>
+            
+            <div class="current-number">
+                Current Number: <span id="currentNumberDisplay">-</span>
+            </div>
+            
+            <div id="validationMessage" class="validation-message"></div>
+            
+            <!-- Numpad -->
+            <div class="numpad-row">
+                <button class="numpad-btn backspace-btn" onclick="backspace()">⌫ Back</button>
+                <button class="numpad-btn" onclick="addDigit('1')">1</button>
+                <button class="numpad-btn" onclick="addDigit('2')">2</button>
+                <button class="numpad-btn" onclick="addDigit('3')">3</button>
+                <button class="numpad-btn" onclick="addDigit('4')">4</button>
+                <button class="numpad-btn" onclick="addDigit('5')">5</button>
+                <button class="numpad-btn" onclick="addDigit('6')">6</button>
+                <button class="numpad-btn" onclick="addDigit('7')">7</button>
+                <button class="numpad-btn" onclick="addDigit('8')">8</button>
+                <button class="numpad-btn" onclick="addDigit('9')">9</button>
+                <button class="numpad-btn" onclick="addDigit('0')">0</button>
+                <button class="numpad-btn enter-btn" onclick="addSpins()">Enter</button>
+            </div>
+            
+            <div class="double-zero-hint">Tip: Press 0 twice to enter 00</div>
+            
+            <div class="action-row">
+                <button class="action-btn undo-btn" onclick="undoLastSpin()">Undo Last</button>
+                <button class="action-btn clear-btn" onclick="showClearConfirmation()">Clear All</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Dialog -->
+    <div id="clearConfirmation" class="confirmation-dialog">
+        <div class="dialog-content">
+            <div class="dialog-title">⚠️ Confirm Clear All</div>
+            <div class="dialog-message">
+                Are you sure you want to clear all spins?<br>
+                This action cannot be undone.
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel-btn" onclick="hideClearConfirmation()">Cancel</button>
+                <button class="dialog-btn confirm-btn" onclick="clearSpins()">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Valid roulette numbers (0, 00, and 1-36)
+        const validNumbers = new Set(['0', '00', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+            '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', 
+            '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36']);
+        
+        const numberColors = {
+            '0': 'green',
+            '00': 'green',
+            '1': 'red', '3': 'red', '5': 'red', '7': 'red', '9': 'red',
+            '12': 'red', '14': 'red', '16': 'red', '18': 'red', '19': 'red',
+            '21': 'red', '23': 'red', '25': 'red', '27': 'red', '30': 'red',
+            '32': 'red', '34': 'red', '36': 'red',
+            '2': 'black', '4': 'black', '6': 'black', '8': 'black', '10': 'black',
+            '11': 'black', '13': 'black', '15': 'black', '17': 'black', '20': 'black',
+            '22': 'black', '24': 'black', '26': 'black', '28': 'black', '29': 'black',
+            '31': 'black', '33': 'black', '35': 'black'
+        };
+
+        let allSpins = [];
+        let frequencyData = {};
+        let spinHistory = [];
+        let comboStats = {
+            3: { hits: 0, misses: 0, lastHit: false },
+            4: { hits: 0, misses: 0, lastHit: false },
+            5: { hits: 0, misses: 0, lastHit: false },
+            6: { hits: 0, misses: 0, lastHit: false },
+            9: { hits: 0, misses: 0, lastHit: false }
+        };
+        let currentBestCombos = {
+            3: { numbers: [], maxGap: 0 },
+            4: { numbers: [], maxGap: 0 },
+            5: { numbers: [], maxGap: 0 },
+            6: { numbers: [], maxGap: 0 },
+            9: { numbers: [], maxGap: 0 }
+        };
+        
+        // Variables for input handling
+        let currentNumber = '';
+        let inputNumbers = [];
+        
+        // Function to validate roulette numbers
+        function isValidNumber(num) {
+            return validNumbers.has(num);
+        }
+        
+        // Function to show validation message
+        function showValidationMessage(message) {
+            const msgElement = document.getElementById('validationMessage');
+            msgElement.textContent = message;
+            msgElement.classList.add('show');
+            
+            // Clear message after 3 seconds
+            setTimeout(() => {
+                msgElement.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Clear confirmation functions
+        function showClearConfirmation() {
+            if (allSpins.length === 0) {
+                showValidationMessage("There are no spins to clear");
+                return;
+            }
+            document.getElementById('clearConfirmation').classList.add('active');
+        }
+        
+        function hideClearConfirmation() {
+            document.getElementById('clearConfirmation').classList.remove('active');
+        }
+        
+        function addDigit(digit) {
+            // Special handling for double zero
+            if (digit === '0' && currentNumber === '0') {
+                currentNumber = '00';
+                updateCurrentNumberDisplay();
+                return;
+            }
+            
+            // Handle regular digits
+            if (digit === '0') {
+                if (currentNumber === '') {
+                    currentNumber = '0';
+                } else if (currentNumber.length < 2) {
+                    currentNumber += '0';
+                } else {
+                    addCurrentNumber();
+                    currentNumber = '0';
+                }
+            } 
+            // Handle other digits
+            else {
+                if (currentNumber === '0') {
+                    currentNumber = digit;
+                } else if (currentNumber.length < 2) {
+                    currentNumber += digit;
+                } else {
+                    addCurrentNumber();
+                    currentNumber = digit;
+                }
+            }
+            
+            updateCurrentNumberDisplay();
+        }
+        
+        function addCurrentNumber() {
+            if (currentNumber) {
+                // Validate the current number
+                if (isValidNumber(currentNumber)) {
+                    inputNumbers.push(currentNumber);
+                    currentNumber = '';
+                    updateFakeInput();
+                    updateCurrentNumberDisplay();
+                } else {
+                    showValidationMessage(`"${currentNumber}" is not a valid roulette number. Please enter 0, 00, or 1-36.`);
+                    currentNumber = '';
+                    updateCurrentNumberDisplay();
+                }
+            }
+        }
+        
+        function backspace() {
+            if (currentNumber.length > 0) {
+                currentNumber = currentNumber.slice(0, -1);
+                updateCurrentNumberDisplay();
+            } else if (inputNumbers.length > 0) {
+                inputNumbers.pop();
+                updateFakeInput();
+            }
+        }
+        
+        function updateCurrentNumberDisplay() {
+            document.getElementById('currentNumberDisplay').textContent = 
+                currentNumber || '-';
+        }
+        
+        function updateFakeInput() {
+            const fakeInput = document.getElementById('fakeInput');
+            fakeInput.textContent = inputNumbers.join(', ') || 'Use the numpad below to enter spins';
+            document.getElementById('spinInput').value = inputNumbers.join(',');
+        }
+        
+        function addSpins() {
+            // Add any current number being built
+            if (currentNumber) {
+                addCurrentNumber();
+            }
+            
+            if (inputNumbers.length === 0) {
+                showValidationMessage('Please enter at least one valid roulette number (0, 00, or 1-36)');
+                return;
+            }
+            
+            // Validate all input numbers
+            const invalidNumbers = inputNumbers.filter(num => !isValidNumber(num));
+            if (invalidNumbers.length > 0) {
+                showValidationMessage(`Invalid numbers detected: ${invalidNumbers.join(', ')}`);
+                return;
+            }
+            
+            // Save state for undo functionality
+            spinHistory.push({
+                action: 'add',
+                spins: [...inputNumbers],
+                prevStats: JSON.parse(JSON.stringify(comboStats)),
+                prevCombos: JSON.parse(JSON.stringify(currentBestCombos))
+            });
+            
+            allSpins = [...allSpins, ...inputNumbers];
+            updateFrequencyData(inputNumbers);
+            
+            // Reset input
+            inputNumbers = [];
+            updateFakeInput();
+            updateCurrentNumberDisplay();
+            
+            updateDisplays();
+            analyzeSpins(false, currentBestCombos);
+        }
+        
+        function clearSpins() {
+            hideClearConfirmation();
+            currentNumber = '';
+            inputNumbers = [];
+            updateFakeInput();
+            updateCurrentNumberDisplay();
+            allSpins = [];
+            frequencyData = {};
+            spinHistory = [];
+            resetComboStats();
+            updateDisplays();
+            showValidationMessage("All spins have been cleared");
+        }
+        
+        function resetComboStats() {
+            comboStats = {
+                3: { hits: 0, misses: 0, lastHit: false },
+                4: { hits: 0, misses: 0, lastHit: false },
+                5: { hits: 0, misses: 0, lastHit: false },
+                6: { hits: 0, misses: 0, lastHit: false },
+                9: { hits: 0, misses: 0, lastHit: false }
+            };
+            currentBestCombos = {
+                3: { numbers: [], maxGap: 0 },
+                4: { numbers: [], maxGap: 0 },
+                5: { numbers: [], maxGap: 0 },
+                6: { numbers: [], maxGap: 0 },
+                9: { numbers: [], maxGap: 0 }
+            };
+        }
+        
+        function undoLastSpin() {
+            if (spinHistory.length > 0) {
+                const lastAction = spinHistory.pop();
+                if (lastAction.action === 'add') {
+                    allSpins = allSpins.slice(0, -lastAction.spins.length);
+                    comboStats = lastAction.prevStats;
+                    currentBestCombos = lastAction.prevCombos;
+                    rebuildFrequencyData();
+                    updateDisplays();
+                    displayBestCombos(currentBestCombos);
+                    showValidationMessage("Last spin batch undone");
+                }
+            } else {
+                showValidationMessage("Nothing to undo");
+            }
+        }
+
+        function analyzeSpins(isUndo = false, previousBestCombos = null) {
+            if (allSpins.length === 0) {
+                document.getElementById('totalSpins').textContent = 'Total Spins: 0';
+                return;
+            }
+            
+            const newNumber = allSpins[allSpins.length - 1];
+            
+            if (!isUndo && allSpins.length > 1) {
+                const combosToCheck = previousBestCombos || currentBestCombos;
+                updateComboStats(newNumber, combosToCheck);
+            }
+            
+            const candidates = Object.keys(frequencyData)
+                .sort((a, b) => frequencyData[b] - frequencyData[a])
+                .slice(0, 20);
+            
+            const bestCombos = {
+                3: findBestCombo(candidates, 3),
+                4: findBestCombo(candidates, 4),
+                5: findBestCombo(candidates, 5),
+                6: findBestCombo(candidates, 6),
+                9: findBestCombo(candidates, 9)
+            };
+            
+            for (let size = 3; size <= 6; size++) {
+                currentBestCombos[size] = bestCombos[size];
+            }
+            currentBestCombos[9] = bestCombos[9];
+            
+            displayBestCombos(bestCombos);
+            
+            document.getElementById('totalSpins').textContent = 
+                `Total Spins: ${allSpins.length}`;
+        }
+        
+        function updateComboStats(newNumber, combosToUse = currentBestCombos) {
+            for (let size = 3; size <= 6; size++) {
+                const combo = combosToUse[size].numbers;
+                if (combo.length === 0) continue;
+                
+                const hit = combo.includes(newNumber);
+                
+                if (hit) {
+                    comboStats[size].hits++;
+                    comboStats[size].misses = 0;
+                    comboStats[size].lastHit = true;
+                } else {
+                    if (comboStats[size].lastHit) {
+                        comboStats[size].misses = 1;
+                        comboStats[size].lastHit = false;
+                    } else {
+                        comboStats[size].misses++;
+                    }
+                }
+            }
+            
+            // Also track stats for Best 9
+            const combo9 = combosToUse[9].numbers;
+            if (combo9.length > 0) {
+                const hit9 = combo9.includes(newNumber);
+                
+                if (hit9) {
+                    comboStats[9].hits++;
+                    comboStats[9].misses = 0;
+                    comboStats[9].lastHit = true;
+                } else {
+                    if (comboStats[9].lastHit) {
+                        comboStats[9].misses = 1;
+                        comboStats[9].lastHit = false;
+                    } else {
+                        comboStats[9].misses++;
+                    }
+                }
+            }
+        }
+        
+        function findBestCombo(candidates, size) {
+            if (candidates.length < size) {
+                return { numbers: candidates, maxGap: allSpins.length };
+            }
+            
+            let bestCombo = candidates.slice(0, size);
+            let minGap = calculateMaxGap(allSpins, bestCombo);
+            
+            // Check several candidate combinations
+            const combosToCheck = [
+                candidates.slice(0, size),
+                candidates.slice(1, size+1),
+                candidates.slice(2, size+2),
+                candidates.slice(3, size+3),
+                candidates.slice(0, size-1).concat(candidates[size+1])
+            ];
+            
+            combosToCheck.forEach(combo => {
+                if (combo.length === size) {
+                    const gap = calculateMaxGap(allSpins, combo);
+                    if (gap < minGap) {
+                        minGap = gap;
+                        bestCombo = combo;
+                    }
+                }
+            });
+            
+            return {
+                numbers: bestCombo,
+                maxGap: minGap
+            };
+        }
+        
+        function displayBestCombos(combos) {
+            // Update each combo group individually
+            for (let size of [3, 4, 5, 6, 9]) {
+                const combo = combos[size];
+                const group = document.getElementById(`best${size}`);
+                const numbersContainer = group.querySelector('.combo-numbers');
+                const statsRows = group.querySelectorAll('.stats-row');
+                
+                // Clear previous numbers
+                numbersContainer.innerHTML = '';
+                
+                // Add new numbers
+                combo.numbers.forEach(num => {
+                    const numEl = document.createElement('div');
+                    numEl.className = `combo-number ${getColorClass(num)}`;
+                    numEl.textContent = num;
+                    numbersContainer.appendChild(numEl);
+                });
+                
+                // Update stats
+                statsRows[0].innerHTML = `
+                    <span class="hit-count">Hits: ${comboStats[size].hits}</span>
+                    <span class="miss-count">Misses: ${comboStats[size].misses}</span>
+                `;
+                
+                statsRows[1].innerHTML = `
+                    <span class="gap-count">Max Gap: ${combo.maxGap}</span>
+                `;
+            }
+        }
+        
+        function updateDisplays() {
+            updateRecentSpins();
+            document.getElementById('totalSpins').textContent = 
+                `Total Spins: ${allSpins.length}`;
+        }
+        
+        function rebuildFrequencyData() {
+            frequencyData = {};
+            allSpins.forEach(num => {
+                frequencyData[num] = (frequencyData[num] || 0) + 1;
+            });
+        }
+        
+        function updateFrequencyData(newSpins) {
+            newSpins.forEach(num => {
+                frequencyData[num] = (frequencyData[num] || 0) + 1;
+            });
+        }
+        
+        function updateRecentSpins() {
+            const recentSpinsDiv = document.getElementById('recentSpins');
+            recentSpinsDiv.innerHTML = '';
+            
+            // Get the last 20 spins (or all if less than 20)
+            const last20 = allSpins.slice(-20);
+            
+            // Display newest first (left to right)
+            last20.reverse().forEach(num => {
+                const spinEl = document.createElement('div');
+                spinEl.className = `spin-number ${getColorClass(num)}`;
+                spinEl.textContent = num;
+                
+                // Add tooltip with frequency info
+                const frequency = frequencyData[num] || 0;
+                const percentage = ((frequency / allSpins.length) * 100).toFixed(1);
+                spinEl.title = `Appeared ${frequency} times (${percentage}%)`;
+                
+                recentSpinsDiv.appendChild(spinEl);
+            });
+            
+            // Fill empty spots if we have less than 20 spins
+            for (let i = last20.length; i < 20; i++) {
+                const emptyEl = document.createElement('div');
+                emptyEl.className = 'spin-number empty-spin';
+                emptyEl.textContent = '-';
+                recentSpinsDiv.appendChild(emptyEl);
+            }
+        }
+        
+        function getColorClass(num) {
+            return numberColors[num] || 'black';
+        }
+        
+        function calculateMaxGap(spins, combo) {
+            if (spins.length === 0 || combo.length === 0) {
+                return spins.length;
+            }
+            
+            let lastPos = -1;
+            let maxGap = 0;
+            let found = false;
+            
+            // Find the first occurrence to calculate initial gap
+            for (let i = 0; i < spins.length; i++) {
+                if (combo.includes(spins[i])) {
+                    found = true;
+                    maxGap = Math.max(maxGap, i); // Gap from start to first hit
+                    lastPos = i;
+                    break;
+                }
+            }
+            
+            // If no combo number was found, return the entire length
+            if (!found) {
+                return spins.length;
+            }
+            
+            // Check gaps between hits
+            for (let i = lastPos + 1; i < spins.length; i++) {
+                if (combo.includes(spins[i])) {
+                    const gap = i - lastPos - 1;
+                    if (gap > maxGap) {
+                        maxGap = gap;
+                    }
+                    lastPos = i;
+                }
+            }
+            
+            // Check gap after last hit
+            const finalGap = spins.length - lastPos - 1;
+            if (finalGap > maxGap) {
+                maxGap = finalGap;
+            }
+            
+            return maxGap;
+        }
+        
+        // Initialize the app
+        resetComboStats();
+        updateDisplays();
+        
+        // Add a sample set of spins on first load
+        setTimeout(() => {
+            if (allSpins.length === 0) {
+                inputNumbers = ['9', '25', '18', '26', '21', '35', '14', '31', '19', '8', '12', '29', '0', '7', '28', '32', '5', '17', '23', '11'];
+                addSpins();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

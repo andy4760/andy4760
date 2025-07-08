@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Roulette Tracker Pro</title>
+  <style>
+    /* Makes ALL miss numbers blue in Track 3,4,5,6,9 */
+    .stat-box span[id^="miss"] {
+      color: #42a5f5; /* Blue color */
+      font-weight: bold;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      padding-bottom: 250px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.95rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1.5rem 0;
+      justify-content: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 8px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 4px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .controls, .stats {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .stat-section {
+      width: 100%;
+      margin-top: 20px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 1.4rem;
+      margin: 20px 0 15px;
+      color: #ff8a65;
+      position: relative;
+      padding-bottom: 8px;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #ff4b2b, transparent);
+    }
+    .stat-box {
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(30, 30, 46, 0.7);
+      min-width: 160px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(255, 75, 43, 0.3);
+      border-color: #ff4b2b;
+    }
+    .alert-indicator {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 10px;
+      height: 10px;
+      background-color: #ff4b2b;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .alert-indicator.active {
+      opacity: 1;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .stat-box h3 {
+      margin: 0 0 10px;
+      text-align: center;
+      color: #ff8a65;
+      font-size: 1.1rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+    }
+    
+    /* NEW HORIZONTAL LAYOUT FOR INDIVIDUAL NUMBERS */
+    .horizontal-layout {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .number-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 30px;
+      padding: 5px;
+    }
+    .number-display {
+      font-weight: bold;
+      color: #ffccbc;
+      font-size: 1.1rem;
+      margin-bottom: 3px;
+    }
+    .miss-count {
+      font-weight: bold;
+      color: #42a5f5;
+      font-size: 1.05rem;
+    }
+    
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 55px;
+      padding: 14px 0;
+      font-size: 1.1rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 1rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 12px;
+      font-size: 1.1rem;
+      width: 140px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.9rem;
+      color: #ffab91;
+    }
+    .alert-indicators {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      background: rgba(255, 75, 43, 0.2);
+      padding: 5px 10px;
+      border-radius: 15px;
+    }
+    @media (max-width: 768px) {
+      .stat-box {
+        min-width: 140px;
+      }
+      .numpad {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 10px;
+      }
+      .numpad button {
+        padding: 12px 5px;
+        font-size: 1rem;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      .controls button {
+        width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker Pro</h1>
+      <div class="tagline">Track spins, patterns, and individual number misses</div>
+    </header>
+    
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color legend-red"></div>
+        <span>Red Numbers</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-black"></div>
+        <span>Black Numbers</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-green"></div>
+        <span>Green Numbers</span>
+      </div>
+    </div>
+    
+    <div class="alert-indicators">
+      <div class="alert-item">
+        <div class="alert-indicator"></div>
+        <span>Box alert active</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+
+    <div class="stat-section">
+      <div class="section-title">Pattern Tracking</div>
+      <div class="stats">
+        <div class="stat-box">
+          <h3>Track 3</h3>
+          Misses: <span id="miss3">0</span><br>
+          Hits: <span id="hit3">0</span>
+        </div>
+        <div class="stat-box">
+          <h3>Track 4</h3>
+          Misses: <span id="miss4">0</span><br>
+          Hits: <span id="hit4">0</span>
+        </div>
+        <div class="stat-box">
+          <h3>Track 5</h3>
+          Misses: <span id="miss5">0</span><br>
+          Hits: <span id="hit5">0</span>
+        </div>
+        <div class="stat-box">
+          <h3>Track 6</h3>
+          Misses: <span id="miss6">0</span><br>
+          Hits: <span id="hit6">0</span>
+        </div>
+        <div class="stat-box">
+          <h3>Track 9</h3>
+          Misses: <span id="miss9">0</span><br>
+          Hits: <span id="hit9">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-section">
+      <div class="section-title">Individual Number Tracking</div>
+      <div class="stats">
+        <!-- Box 1 -->
+        <div class="stat-box">
+          <div class="alert-indicator" id="alertBox1"></div>
+          <h3>Box 1: </h3>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display">15</div>
+              <div class="miss-count"><span id="box1-15">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">24</div>
+              <div class="miss-count"><span id="box1-24">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">32</div>
+              <div class="miss-count"><span id="box1-32">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">5</div>
+              <div class="miss-count"><span id="box1-5">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">6</div>
+              <div class="miss-count"><span id="box1-6">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">11</div>
+              <div class="miss-count"><span id="box1-11">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">3</div>
+              <div class="miss-count"><span id="box1-3">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">22</div>
+              <div class="miss-count"><span id="box1-22">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">29</div>
+              <div class="miss-count"><span id="box1-29">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">35</div>
+              <div class="miss-count"><span id="box1-35">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">2</div>
+              <div class="miss-count"><span id="box1-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">27</div>
+              <div class="miss-count"><span id="box1-27">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">25</div>
+              <div class="miss-count"><span id="box1-25">0</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Box 2 -->
+        <div class="stat-box">
+          <div class="alert-indicator" id="alertBox2"></div>
+          <h3>Box 2: 9 numbers</h3>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display">0</div>
+              <div class="miss-count"><span id="box2-0">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">1</div>
+              <div class="miss-count"><span id="box2-1">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">4</div>
+              <div class="miss-count"><span id="box2-4">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">7</div>
+              <div class="miss-count"><span id="box2-7">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">9</div>
+              <div class="miss-count"><span id="box2-9">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">16</div>
+              <div class="miss-count"><span id="box2-16">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">20</div>
+              <div class="miss-count"><span id="box2-20">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">10</div>
+              <div class="miss-count"><span id="box2-10">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">18</div>
+              <div class="miss-count"><span id="box2-18">0</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Box 3 -->
+        <div class="stat-box">
+          <div class="alert-indicator" id="alertBox3"></div>
+          <h3>Box 3:   12  numbers    </h3>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display">00</div>
+              <div class="miss-count"><span id="box3-00">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">17</div>
+              <div class="miss-count"><span id="box3-17">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">30</div>
+              <div class="miss-count"><span id="box3-30">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">31</div>
+              <div class="miss-count"><span id="box3-31">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">12</div>
+              <div class="miss-count"><span id="box3-12">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">25</div>
+              <div class="miss-count"><span id="box3-25">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">14</div>
+              <div class="miss-count"><span id="box3-14">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">23</div>
+              <div class="miss-count"><span id="box3-23">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">28</div>
+              <div class="miss-count"><span id="box3-28">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">2</div>
+              <div class="miss-count"><span id="box3-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">10</div>
+              <div class="miss-count"><span id="box3-10">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">27</div>
+              <div class="miss-count"><span id="box3-27">0</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Box 4 -->
+        <div class="stat-box">
+          <div class="alert-indicator" id="alertBox4"></div>
+          <h3>Box 4: 9 numbers</h3>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display">8</div>
+              <div class="miss-count"><span id="box4-8">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">19</div>
+              <div class="miss-count"><span id="box4-19">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">26</div>
+              <div class="miss-count"><span id="box4-26">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">34</div>
+              <div class="miss-count"><span id="box4-34">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">13</div>
+              <div class="miss-count"><span id="box4-13">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">28</div>
+              <div class="miss-count"><span id="box4-28">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">21</div>
+              <div class="miss-count"><span id="box4-21">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">33</div>
+              <div class="miss-count"><span id="box4-33">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display">36</div>
+              <div class="miss-count"><span id="box4-36">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="numpad">
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+    <button class="backspace" onclick="backspace()">⌫</button>
+  </div>
+
+  <script>
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Box alert thresholds
+    const boxThresholds = {
+      box1: 20,  // Box 1 alert at 20 misses
+      box2: 20,  // Box 2 alert at 20 misses
+      box3: 20,  // Box 3 alert at 20 misses
+      box4: 30   // Box 4 alert at 20 misses
+    };
+
+    // Track if alert has been shown for each box
+    let alertTriggered = {
+      box1: false,
+      box2: false,
+      box3: false,
+      box4: false
+    };
+
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({
+      3: { m:0, h:0 },
+      4: { m:0, h:0 },
+      5: { m:0, h:0 },
+      6: { m:0, h:0 },
+      9: { m:0, h:0 },
+      // Boxes with new numbers
+      box1: { '15':0, '24':0, '32':0, '5':0, '6':0, '11':0, '3':0, '22':0, '29':0, '35':0, '2':0, '27':0, '25':0 },
+      box2: { '0':0, '1':0, '4':0, '7':0, '9':0, '16':0, '20':0, '10':0, '18':0 },
+      box3: { '00':0, '17':0, '30':0, '31':0, '12':0, '25':0, '14':0, '23':0, '28':0, '2':0, '10':0, '27':0 },
+      box4: { '8':0, '19':0, '26':0, '34':0, '13':0, '28':0, '21':0, '33':0, '36':0 }
+    }));
+
+    if (typeof stats === 'string') {
+      stats = JSON.parse(stats);
+    }
+
+    // Initialize new boxes if they don't exist
+    if (!stats.box1) {
+      stats.box1 = { '15':0, '24':0, '32':0, '5':0, '6':0, '11':0, '3':0, '22':0, '29':0, '35':0, '2':0, '27':0, '25':0 };
+    }
+    if (!stats.box2) {
+      stats.box2 = { '0':0, '1':0, '4':0, '7':0, '9':0, '16':0, '20':0, '10':0, '18':0 };
+    }
+    if (!stats.box3) {
+      stats.box3 = { '00':0, '17':0, '30':0, '31':0, '12':0, '25':0, '14':0, '23':0, '28':0, '2':0, '10':0, '27':0 };
+    }
+    if (!stats.box4) {
+      stats.box4 = { '8':0, '19':0, '26':0, '34':0, '13':0, '28':0, '21':0, '33':0, '36':0 };
+    }
+    if (!stats[9]) {
+      stats[9] = { m:0, h:0 };
+    }
+
+    // Initialize alert states based on current stats
+    function initAlertStates() {
+      // Box 1
+      alertTriggered.box1 = Object.values(stats.box1).every(count => count >= boxThresholds.box1);
+      
+      // Box 2
+      alertTriggered.box2 = Object.values(stats.box2).every(count => count >= boxThresholds.box2);
+      
+      // Box 3
+      alertTriggered.box3 = Object.values(stats.box3).every(count => count >= boxThresholds.box3);
+      
+      // Box 4
+      alertTriggered.box4 = Object.values(stats.box4).every(count => count >= boxThresholds.box4);
+    }
+
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      history.slice(-20).reverse().forEach(n => {
+        const div = document.createElement("div");
+        div.className = `spin-box ${getColor(n)}`;
+        div.textContent = n;
+        container.appendChild(div);
+      });
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+      
+      // Update pattern stats
+      [3,4,5,6,9].forEach(k => {
+        document.getElementById(`miss${k}`).textContent = stats[k].m;
+        document.getElementById(`hit${k}`).textContent = stats[k].h;
+      });
+      
+      // Update individual number misses
+      // Box 1
+      document.getElementById("box1-15").textContent = stats.box1['15'];
+      document.getElementById("box1-24").textContent = stats.box1['24'];
+      document.getElementById("box1-32").textContent = stats.box1['32'];
+      document.getElementById("box1-5").textContent = stats.box1['5'];
+      document.getElementById("box1-6").textContent = stats.box1['6'];
+      document.getElementById("box1-11").textContent = stats.box1['11'];
+      document.getElementById("box1-3").textContent = stats.box1['3'];
+      document.getElementById("box1-22").textContent = stats.box1['22'];
+      document.getElementById("box1-29").textContent = stats.box1['29'];
+      document.getElementById("box1-35").textContent = stats.box1['35'];
+      document.getElementById("box1-2").textContent = stats.box1['2'];
+      document.getElementById("box1-27").textContent = stats.box1['27'];
+      document.getElementById("box1-25").textContent = stats.box1['25'];
+      
+      // Box 2
+      document.getElementById("box2-0").textContent = stats.box2['0'];
+      document.getElementById("box2-1").textContent = stats.box2['1'];
+      document.getElementById("box2-4").textContent = stats.box2['4'];
+      document.getElementById("box2-7").textContent = stats.box2['7'];
+      document.getElementById("box2-9").textContent = stats.box2['9'];
+      document.getElementById("box2-16").textContent = stats.box2['16'];
+      document.getElementById("box2-20").textContent = stats.box2['20'];
+      document.getElementById("box2-10").textContent = stats.box2['10'];
+      document.getElementById("box2-18").textContent = stats.box2['18'];
+      
+      // Box 3
+      document.getElementById("box3-00").textContent = stats.box3['00'];
+      document.getElementById("box3-17").textContent = stats.box3['17'];
+      document.getElementById("box3-30").textContent = stats.box3['30'];
+      document.getElementById("box3-31").textContent = stats.box3['31'];
+      document.getElementById("box3-12").textContent = stats.box3['12'];
+      document.getElementById("box3-25").textContent = stats.box3['25'];
+      document.getElementById("box3-14").textContent = stats.box3['14'];
+      document.getElementById("box3-23").textContent = stats.box3['23'];
+      document.getElementById("box3-28").textContent = stats.box3['28'];
+      document.getElementById("box3-2").textContent = stats.box3['2'];
+      document.getElementById("box3-10").textContent = stats.box3['10'];
+      document.getElementById("box3-27").textContent = stats.box3['27'];
+      
+      // Box 4
+      document.getElementById("box4-8").textContent = stats.box4['8'];
+      document.getElementById("box4-19").textContent = stats.box4['19'];
+      document.getElementById("box4-26").textContent = stats.box4['26'];
+      document.getElementById("box4-34").textContent = stats.box4['34'];
+      document.getElementById("box4-13").textContent = stats.box4['13'];
+      document.getElementById("box4-28").textContent = stats.box4['28'];
+      document.getElementById("box4-21").textContent = stats.box4['21'];
+      document.getElementById("box4-33").textContent = stats.box4['33'];
+      document.getElementById("box4-36").textContent = stats.box4['36'];
+      
+      // Update alert indicators
+      updateAlertIndicators();
+    }
+    
+    function updateAlertIndicators() {
+      // Box 1 alert indicator
+      const box1Alert = Object.values(stats.box1).every(count => count >= boxThresholds.box1);
+      document.getElementById('alertBox1').classList.toggle('active', box1Alert);
+      
+      // Box 2 alert indicator
+      const box2Alert = Object.values(stats.box2).every(count => count >= boxThresholds.box2);
+      document.getElementById('alertBox2').classList.toggle('active', box2Alert);
+      
+      // Box 3 alert indicator
+      const box3Alert = Object.values(stats.box3).every(count => count >= boxThresholds.box3);
+      document.getElementById('alertBox3').classList.toggle('active', box3Alert);
+      
+      // Box 4 alert indicator
+      const box4Alert = Object.values(stats.box4).every(count => count >= boxThresholds.box4);
+      document.getElementById('alertBox4').classList.toggle('active', box4Alert);
+    }
+
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+      localStorage.setItem("stats", JSON.stringify(stats));
+    }
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString(); // Normalize to string
+      }
+      
+      // Add to history
+      history.push(val);
+      
+      // Update pattern stats with unique number tracking
+      [3,4,5,6,9].forEach(k => {
+        // Get last k unique numbers (excluding current spin)
+        const uniqueNumbers = [];
+        const seen = new Set();
+        
+        // Go through history backwards (newest first, excluding current spin)
+        for (let i = history.length - 2; i >= 0; i--) {
+          const num = history[i];
+          if (!seen.has(num)) {
+            seen.add(num);
+            uniqueNumbers.unshift(num); // Add to beginning to maintain order
+            if (uniqueNumbers.length >= k) break;
+          }
+        }
+        
+        if (uniqueNumbers.includes(val)) {
+          // Number hit within its track group
+          stats[k].h++;
+          stats[k].m = 0;
+        } else {
+          // Number missed within its track group
+          stats[k].m++;
+          
+          // Alert if miss threshold reached
+          const alertThresholds = {3: 60, 4: 50, 5: 40, 6: 30, 9: 20};
+          if (stats[k].m === alertThresholds[k]) {
+            alert(`Track ${k} missed ${stats[k].m} times! Current number: ${val}`);
+          }
+        }
+      });
+      
+      // Update individual number tracking
+      // Box 1: 15,24,32,5,6,11,3,22,29,35,2,27,25
+      const box1Numbers = ['15','24','32','5','6','11','3','22','29','35','2','27','25'];
+      let box1Hit = false;
+      box1Numbers.forEach(num => {
+        if (val === num) {
+          stats.box1[num] = 0;
+          box1Hit = true;
+        } else {
+          stats.box1[num]++;
+        }
+      });
+      if (box1Hit) alertTriggered.box1 = false;
+      
+      // Box 2: 0,1,4,7,9,16,20,10,18
+      const box2Numbers = ['0','1','4','7','9','16','20','10','18'];
+      let box2Hit = false;
+      box2Numbers.forEach(num => {
+        if (val === num) {
+          stats.box2[num] = 0;
+          box2Hit = true;
+        } else {
+          stats.box2[num]++;
+        }
+      });
+      if (box2Hit) alertTriggered.box2 = false;
+      
+      // Box 3: 00,17,30,31,12,25,14,23,28,2,10,27
+      const box3Numbers = ['00','17','30','31','12','25','14','23','28','2','10','27'];
+      let box3Hit = false;
+      box3Numbers.forEach(num => {
+        if (val === num) {
+          stats.box3[num] = 0;
+          box3Hit = true;
+        } else {
+          stats.box3[num]++;
+        }
+      });
+      if (box3Hit) alertTriggered.box3 = false;
+      
+      // Box 4: 8,19,26,34,13,28,21,33,36,
+      const box4Numbers = ['8','19','26','34','13','28','21','33','36'];
+      let box4Hit = false;
+      box4Numbers.forEach(num => {
+        if (val === num) {
+          stats.box4[num] = 0;
+          box4Hit = true;
+        } else {
+          stats.box4[num]++;
+        }
+      });
+      if (box4Hit) alertTriggered.box4 = false;
+      
+      // Check for box alerts
+      checkBoxAlerts(val);
+      
+      // Reset input and save
+      input.value = "";
+      save();
+      updateDisplay();
+      status.textContent = `Added spin: ${val}`;
+    }
+    
+    function checkBoxAlerts(currentNumber) {
+      // Box 1: Alert when ALL numbers reach 20 misses
+      const box1AllAtThreshold = Object.values(stats.box1).every(count => count >= boxThresholds.box1);
+      if (box1AllAtThreshold && !alertTriggered.box1) {
+        alert(`BOX 1 ALERT: All numbers have reached ${boxThresholds.box1} misses! Current spin: ${currentNumber}`);
+        alertTriggered.box1 = true;
+      }
+      
+      // Box 2: Alert when ALL numbers reach 20 misses
+      const box2AllAtThreshold = Object.values(stats.box2).every(count => count >= boxThresholds.box2);
+      if (box2AllAtThreshold && !alertTriggered.box2) {
+        alert(`BOX 2 ALERT: All numbers have reached ${boxThresholds.box2} misses! Current spin: ${currentNumber}`);
+        alertTriggered.box2 = true;
+      }
+      
+      // Box 3: Alert when ALL numbers reach 20 misses
+      const box3AllAtThreshold = Object.values(stats.box3).every(count => count >= boxThresholds.box3);
+      if (box3AllAtThreshold && !alertTriggered.box3) {
+        alert(`BOX 3 ALERT: All numbers have reached ${boxThresholds.box3} misses! Current spin: ${currentNumber}`);
+        alertTriggered.box3 = true;
+      }
+      
+      // Box 4: Alert when ALL numbers reach 20 misses
+      const box4AllAtThreshold = Object.values(stats.box4).every(count => count >= boxThresholds.box4);
+      if (box4AllAtThreshold && !alertTriggered.box4) {
+        alert(`BOX 4 ALERT: All numbers have reached ${boxThresholds.box4} misses! Current spin: ${currentNumber}`);
+        alertTriggered.box4 = true;
+      }
+    }
+
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      const lastVal = history.pop();
+      
+      // Reset stats to recalculate
+      stats = {
+        3: { m:0, h:0 },
+        4: { m:0, h:0 },
+        5: { m:0, h:0 },
+        6: { m:0, h:0 },
+        9: { m:0, h:0 },
+        box1: { '15':0, '24':0, '32':0, '5':0, '6':0, '11':0, '3':0, '22':0, '29':0, '35':0, '2':0, '27':0, '25':0 },
+        box2: { '0':0, '1':0, '4':0, '7':0, '9':0, '16':0, '20':0, '10':0, '18':0 },
+        box3: { '00':0, '17':0, '30':0, '31':0, '12':0, '25':0, '14':0, '23':0, '28':0, '2':0, '10':0, '27':0 },
+        box4: { '8':0, '19':0, '26':0, '34':0, '13':0, '28':0, '21':0, '33':0, '36':0 }
+      };
+      
+      // Reset alert triggers
+      alertTriggered = {
+        box1: false,
+        box2: false,
+        box3: false,
+        box4: false
+      };
+      
+      // Recalculate all stats based on remaining history
+      history.forEach((val, i) => {
+        // For pattern stats
+        [3,4,5,6,9].forEach(k => {
+          // Get last k unique numbers before this spin
+          const uniqueNumbers = [];
+          const seen = new Set();
+          
+          for (let j = i - 1; j >= 0; j--) {
+            const num = history[j];
+            if (!seen.has(num)) {
+              seen.add(num);
+              uniqueNumbers.unshift(num);
+              if (uniqueNumbers.length >= k) break;
+            }
+          }
+          
+          if (uniqueNumbers.includes(val)) {
+            stats[k].h++;
+            stats[k].m = 0;
+          } else {
+            stats[k].m++;
+          }
+        });
+        
+        // For individual number tracking
+        // Box 1
+        const box1Numbers = ['15','24','32','5','6','11','3','22','29','35','2','27','25'];
+        box1Numbers.forEach(num => {
+          if (val === num) {
+            stats.box1[num] = 0;
+          } else {
+            stats.box1[num]++;
+          }
+        });
+        
+        // Box 2
+        const box2Numbers = ['0','1','4','7','9','16','20','10','18'];
+        box2Numbers.forEach(num => {
+          if (val === num) {
+            stats.box2[num] = 0;
+          } else {
+            stats.box2[num]++;
+          }
+        });
+        
+        // Box 3
+        const box3Numbers = ['00','17','30','31','12','25','14','23','28','2','10','27'];
+        box3Numbers.forEach(num => {
+          if (val === num) {
+            stats.box3[num] = 0;
+          } else {
+            stats.box3[num]++;
+          }
+        });
+        
+        // Box 4
+        const box4Numbers = ['8','19','26','34','13','28','21','33','36'];
+        box4Numbers.forEach(num => {
+          if (val === num) {
+            stats.box4[num] = 0;
+          } else {
+            stats.box4[num]++;
+          }
+        });
+      });
+      
+      // Reinitialize alert states
+      initAlertStates();
+      
+      save();
+      updateDisplay();
+      status.textContent = `Undo: ${lastVal} removed`;
+    }
+
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        stats = {
+          3: { m:0, h:0 },
+          4: { m:0, h:0 },
+          5: { m:0, h:0 },
+          6: { m:0, h:0 },
+          9: { m:0, h:0 },
+          box1: { '15':0, '24':0, '32':0, '5':0, '6':0, '11':0, '3':0, '22':0, '29':0, '35':0, '2':0, '27':0, '25':0 },
+          box2: { '0':0, '1':0, '4':0, '7':0, '9':0, '16':0, '20':0, '10':0, '18':0 },
+          box3: { '00':0, '17':0, '30':0, '31':0, '12':0, '25':0, '14':0, '23':0, '28':0, '2':0, '10':0, '27':0 },
+          box4: { '8':0, '19':0, '26':0, '34':0, '13':0, '28':0, '21':0, '33':0, '36':0 }
+        };
+        
+        // Reset alert triggers
+        alertTriggered = {
+          box1: false,
+          box2: false,
+          box3: false,
+          box4: false
+        };
+        
+        localStorage.removeItem("history");
+        localStorage.removeItem("stats");
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      // Initialize alert states
+      initAlertStates();
+      
+      updateDisplay();
+    });
+  </script>
+</body>
+</html>

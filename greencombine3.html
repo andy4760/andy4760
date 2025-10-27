@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Roulette Tracker Pro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+      width: 1052px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    /* Pattern display styles */
+    .pattern-tracks-container {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 15px;
+      background: rgba(20, 20, 35, 0.8);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+    }
+    .pattern-tracks-container::-webkit-scrollbar {
+      width: 10px;
+    }
+    .pattern-tracks-container::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+    .pattern-tracks-container::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 4px;
+    }
+    .pattern-display {
+      padding: 15px;
+      background: rgba(30, 30, 46, 0.7);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-bottom: 15px;
+    }
+    .pattern-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #ff8a65;
+    }
+    .pattern-sequence {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 50px;
+      overflow-x: auto;
+      padding: 5px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+    }
+    .pattern-sequence::-webkit-scrollbar {
+      height: 8px;
+    }
+    .pattern-sequence::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+    .pattern-sequence::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 4px;
+    }
+    .pattern-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+    .pattern-miss {
+      background: linear-gradient(145deg, #42a5f5, #1976d2);
+      color: white;
+    }
+    .pattern-hit {
+      background: linear-gradient(145deg, #ffd700, #ffa000);
+      color: #333;
+    }
+    .pattern-label {
+      font-weight: bold;
+      margin-right: 5px;
+      color: #ff8a65;
+      flex-shrink: 0;
+    }
+    
+    .number-sets {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 1rem 0;
+    }
+    .number-set {
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(30, 30, 46, 0.7);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .horizontal-layout {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .number-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 40px;
+    }
+    .number-display {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 3px;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .number-display.red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+      color: white;
+    }
+    .number-display.black {
+      background: linear-gradient(145deg, #212121, #000000);
+      color: white;
+    }
+    .number-display.green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+      color: white;
+    }
+    .miss-count {
+      font-weight: bold;
+      color: #42a5f5;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+    .miss-count.gold {
+      color: #FFD700 !important;
+      font-weight: bold;
+      text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+    }
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    .spacer {
+      width: 30px;
+      height: 1px;
+    }
+    
+    /* New styles for better scrolling and layout */
+    .scrollable-container {
+      max-height: calc(100vh - 250px);
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    
+    .scrollable-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scrollable-container::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+    
+    .scrollable-container::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 4px;
+    }
+    
+    /* Pattern stats styles */
+    .pattern-stats {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .pattern-stat-box {
+      border: 1px solid #444;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.7);
+      min-width: 120px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .pattern-stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(255, 75, 43, 0.3);
+      border-color: #ff4b2b;
+    }
+    .pattern-stat-box h3 {
+      margin: 0 0 5px;
+      text-align: center;
+      color: #ff8a65;
+      font-size: 1rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    
+    @media (max-width: 1100px) {
+      #recentSpins {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .number-column {
+        min-width: 35px;
+      }
+      
+      .spacer {
+        width: 20px;
+      }
+      
+      .scrollable-container {
+        max-height: calc(100vh - 230px);
+      }
+      
+      .pattern-stats {
+        gap: 5px;
+      }
+      
+      .pattern-stat-box {
+        min-width: 100px;
+        padding: 8px;
+      }
+      
+      /* Mobile adjustments for recent spins */
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker Pro</h1>
+      <div class="tagline">Track spins, patterns, and individual number misses</div>
+    </header>
+    
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color legend-red"></div>
+        <span>Red</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-black"></div>
+        <span>Black</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-green"></div>
+        <span>Green</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #FFD700;"></div>
+        <span>Gold (20+ misses in set)</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+    
+    <!-- Pattern Stats Section -->
+    <div class="pattern-stats">
+      <div class="pattern-stat-box">
+        <h3>Track 6</h3>
+        Misses: <span id="miss6" class="miss-count">0</span><br>
+        Hits: <span id="hit6">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 9</h3>
+        Misses: <span id="miss9" class="miss-count">0</span><br>
+        Hits: <span id="hit9">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 12</h3>
+        Misses: <span id="miss12" class="miss-count">0</span><br>
+        Hits: <span id="hit12">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 15</h3>
+        Misses: <span id="miss15" class="miss-count">0</span><br>
+        Hits: <span id="hit15">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 18</h3>
+        Misses: <span id="miss18" class="miss-count">0</span><br>
+        Hits: <span id="hit18">0</span>
+      </div>
+    </div>
+    
+    <!-- Pattern Tracks Container (Top Scrollable Box) -->
+    <div class="pattern-tracks-container">
+      <!-- Track 6 Pattern Display Section -->
+      <div class="pattern-display">
+        <div class="pattern-title">Track 6 Pattern Sequence</div>
+        <div class="pattern-sequence" id="patternSequence6">
+          <span class="pattern-label">Track 6:</span>
+          <!-- Pattern items will be added here dynamically -->
+        </div>
+      </div>
+      
+      <!-- Track 9 Pattern Display Section -->
+      <div class="pattern-display">
+        <div class="pattern-title">Track 9 Pattern Sequence</div>
+        <div class="pattern-sequence" id="patternSequence9">
+          <span class="pattern-label">Track 9:</span>
+          <!-- Pattern items will be added here dynamically -->
+        </div>
+      </div>
+      
+      <!-- Track 12 Pattern Display Section -->
+      <div class="pattern-display">
+        <div class="pattern-title">Track 12 Pattern Sequence</div>
+        <div class="pattern-sequence" id="patternSequence12">
+          <span class="pattern-label">Track 12:</span>
+          <!-- Pattern items will be added here dynamically -->
+        </div>
+      </div>
+      
+      <!-- Track 15 Pattern Display Section -->
+      <div class="pattern-display">
+        <div class="pattern-title">Track 15 Pattern Sequence</div>
+        <div class="pattern-sequence" id="patternSequence15">
+          <span class="pattern-label">Track 15:</span>
+          <!-- Pattern items will be added here dynamically -->
+        </div>
+      </div>
+      
+      <!-- Track 18 Pattern Display Section -->
+      <div class="pattern-display">
+        <div class="pattern-title">Track 18 Pattern Sequence</div>
+        <div class="pattern-sequence" id="patternSequence18">
+          <span class="pattern-label">Track 18:</span>
+          <!-- Pattern items will be added here dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Wrap the content in a scrollable container -->
+    <div class="scrollable-container">
+      <div class="number-sets">
+        <!-- Top 19 Numbers -->
+        <div class="number-set">
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display red">3</div>
+              <div class="miss-count"><span id="top-3">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">13</div>
+              <div class="miss-count"><span id="top-13">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">23</div>
+              <div class="miss-count"><span id="top-23">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">33</div>
+              <div class="miss-count"><span id="top-33">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">4</div>
+              <div class="miss-count"><span id="top-4">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">14</div>
+              <div class="miss-count"><span id="top-14">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">24</div>
+              <div class="miss-count"><span id="top-24">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">34</div>
+              <div class="miss-count"><span id="top-34">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">5</div>
+              <div class="miss-count"><span id="top-5">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">15</div>
+              <div class="miss-count"><span id="top-15">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">25</div>
+              <div class="miss-count"><span id="top-25">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">35</div>
+              <div class="miss-count"><span id="top-35">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">6</div>
+              <div class="miss-count"><span id="top-6">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">16</div>
+              <div class="miss-count"><span id="top-16">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">26</div>
+              <div class="miss-count"><span id="top-26">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">36</div>
+              <div class="miss-count"><span id="top-36">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">7</div>
+              <div class="miss-count"><span id="top-7">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">17</div>
+              <div class="miss-count"><span id="top-17">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">27</div>
+              <div class="miss-count"><span id="top-27">0</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bottom 19 Numbers -->
+        <div class="number-set">
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display green">0</div>
+              <div class="miss-count"><span id="bottom-0">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display green">00</div>
+              <div class="miss-count"><span id="bottom-00">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">10</div>
+              <div class="miss-count"><span id="bottom-10">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">20</div>
+              <div class="miss-count"><span id="bottom-20">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">30</div>
+              <div class="miss-count"><span id="bottom-30">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">1</div>
+              <div class="miss-count"><span id="bottom-1">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">11</div>
+              <div class="miss-count"><span id="bottom-11">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">21</div>
+              <div class="miss-count"><span id="bottom-21">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">31</div>
+              <div class="miss-count"><span id="bottom-31">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">2</div>
+              <div class="miss-count"><span id="bottom-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">12</div>
+              <div class="miss-count"><span id="bottom-12">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">22</div>
+              <div class="miss-count"><span id="bottom-22">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">32</div>
+              <div class="miss-count"><span id="bottom-32">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">8</div>
+              <div class="miss-count"><span id="bottom-8">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">18</div>
+              <div class="miss-count"><span id="bottom-18">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">28</div>
+              <div class="miss-count"><span id="bottom-28">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">9</div>
+              <div class="miss-count"><span id="bottom-9">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">19</div>
+              <div class="miss-count"><span id="bottom-19">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">29</div>
+              <div class="miss-count"><span id="bottom-29">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New 20 Numbers Set -->
+      <div class="number-set">
+        <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">20 Numbers Set</div>
+        <div class="horizontal-layout">
+          <div class="number-column">
+            <div class="number-display black">13</div>
+            <div class="miss-count"><span id="set20-13">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">18</div>
+            <div class="miss-count"><span id="set20-18">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">8</div>
+            <div class="miss-count"><span id="set20-8">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">19</div>
+            <div class="miss-count"><span id="set20-19">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">26</div>
+            <div class="miss-count"><span id="set20-26">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">34</div>
+            <div class="miss-count"><span id="set20-34">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+            <div class="number-display green">00</div>
+            <div class="miss-count"><span id="set20-00">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">17</div>
+            <div class="miss-count"><span id="set20-17">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">30</div>
+            <div class="miss-count"><span id="set20-30">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">31</div>
+            <div class="miss-count"><span id="set20-31">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">23</div>
+            <div class="miss-count"><span id="set20-23">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">28</div>
+            <div class="miss-count"><span id="set20-28">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">10</div>
+            <div class="miss-count"><span id="set20-10">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+            <div class="number-display red">7</div>
+            <div class="miss-count"><span id="set20-7">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">9</div>
+            <div class="miss-count"><span id="set20-9">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">16</div>
+            <div class="miss-count"><span id="set20-16">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">20</div>
+            <div class="miss-count"><span id="set20-20">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display green">0</div>
+            <div class="miss-count"><span id="set20-0">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">1</div>
+            <div class="miss-count"><span id="set20-1">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">4</div>
+            <div class="miss-count"><span id="set20-4">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New 18 Numbers Set -->
+      <div class="number-set">
+        <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">18 Numbers Set</div>
+        <div class="horizontal-layout">
+          <div class="number-column">
+            <div class="number-display red">21</div>
+            <div class="miss-count"><span id="set18-21">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">33</div>
+            <div class="miss-count"><span id="set18-33">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">36</div>
+            <div class="miss-count"><span id="set18-36">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">15</div>
+            <div class="miss-count"><span id="set18-15">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">24</div>
+            <div class="miss-count"><span id="set18-24">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">32</div>
+            <div class="miss-count"><span id="set18-32">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+            <div class="number-display red">5</div>
+            <div class="miss-count"><span id="set18-5">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">6</div>
+            <div class="miss-count"><span id="set18-6">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">11</div>
+            <div class="miss-count"><span id="set18-11">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">3</div>
+            <div class="miss-count"><span id="set18-3">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">22</div>
+            <div class="miss-count"><span id="set18-22">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">29</div>
+            <div class="miss-count"><span id="set18-29">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">35</div>
+            <div class="miss-count"><span id="set18-35">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display black">2</div>
+            <div class="miss-count"><span id="set18-2">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">27</div>
+            <div class="miss-count"><span id="set18-27">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+            <div class="number-display red">25</div>
+            <div class="miss-count"><span id="set18-25">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">12</div>
+            <div class="miss-count"><span id="set18-12">0</span></div>
+          </div>
+          <div class="number-column">
+            <div class="number-display red">14</div>
+            <div class="miss-count"><span id="set18-14">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- End of scrollable container -->
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">⌫</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Define number sets with the new numbers
+    const topNumbers = ['3','13','23','33','4','14','24','34','5','15','25','35','6','16','26','36','7','17','27'];
+    const bottomNumbers = ['0','00','10','20','30','1','11','21','31','2','12','22','32','8','18','28','9','19','29'];
+
+    // Define the new number sets
+    const set20Numbers = ['13','18','8','19','26','34','00','17','30','31','23','28','10','7','9','16','20','0','1','4'];
+    const set18Numbers = ['21','33','36','15','24','32','5','6','11','3','22','29','35','2','27','25','12','14'];
+
+    // Define number sets for the gold color feature
+    const numberSets = {
+      set0: ['0', '00', '10', '20', '30'],
+      set1: ['1', '11', '21', '31'],
+      set2: ['2', '12', '22', '32'],
+      set3: ['3', '13', '23', '33'],
+      set4: ['4', '14', '24', '34'],
+      set5: ['5', '15', '25', '35'],
+      set6: ['6', '16', '26', '36'],
+      set7: ['7', '17', '27'],
+      set8: ['8', '18', '28'],
+      set9: ['9', '19', '29']
+    };
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({
+      // Top numbers
+      top: Object.fromEntries(topNumbers.map(num => [num, 0])),
+      // Bottom numbers
+      bottom: Object.fromEntries(bottomNumbers.map(num => [num, 0])),
+      // New number sets
+      set20: Object.fromEntries(set20Numbers.map(num => [num, 0])),
+      set18: Object.fromEntries(set18Numbers.map(num => [num, 0]))
+    }));
+
+    // Pattern tracking variables
+    let patternStats = JSON.parse(localStorage.getItem("patternStats") || JSON.stringify({
+      6: { m:0, h:0 },
+      9: { m:0, h:0 },
+      12: { m:0, h:0 },
+      15: { m:0, h:0 },
+      18: { m:0, h:0 }
+    }));
+    
+    let patternHistory = JSON.parse(localStorage.getItem("patternHistory") || JSON.stringify({
+      track6: [],
+      track9: [],
+      track12: [],
+      track15: [],
+      track18: []
+    }));
+
+    // If stats is a string (old format), parse it
+    if (typeof stats === 'string') {
+      stats = JSON.parse(stats);
+    }
+    
+    if (typeof patternStats === 'string') {
+      patternStats = JSON.parse(patternStats);
+    }
+
+    // Initialize stats if they don't exist
+    if (!stats.top) {
+      stats.top = Object.fromEntries(topNumbers.map(num => [num, 0]));
+    }
+    if (!stats.bottom) {
+      stats.bottom = Object.fromEntries(bottomNumbers.map(num => [num, 0]));
+    }
+    // Initialize new sets if they don't exist
+    if (!stats.set20) {
+      stats.set20 = Object.fromEntries(set20Numbers.map(num => [num, 0]));
+    }
+    if (!stats.set18) {
+      stats.set18 = Object.fromEntries(set18Numbers.map(num => [num, 0]));
+    }
+    
+    // Initialize pattern stats if they don't exist
+    if (!patternStats[6]) {
+      patternStats[6] = { m:0, h:0 };
+    }
+    if (!patternStats[9]) {
+      patternStats[9] = { m:0, h:0 };
+    }
+    if (!patternStats[12]) {
+      patternStats[12] = { m:0, h:0 };
+    }
+    if (!patternStats[15]) {
+      patternStats[15] = { m:0, h:0 };
+    }
+    if (!patternStats[18]) {
+      patternStats[18] = { m:0, h:0 };
+    }
+
+    // Get color for a number
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    // Function to check if all numbers in a set have miss counts >= 20
+    function checkSetForGold(setNumbers) {
+      return setNumbers.every(num => {
+        // Check if number exists in top or bottom stats and has miss count >= 20
+        if (stats.top.hasOwnProperty(num)) {
+          return stats.top[num] >= 20;
+        } else if (stats.bottom.hasOwnProperty(num)) {
+          return stats.bottom[num] >= 20;
+        }
+        return false;
+      });
+    }
+
+    // Function to update gold color for number sets
+    function updateGoldColors() {
+      console.log("Updating gold colors...");
+      
+      // First, reset ALL miss count colors to blue
+      document.querySelectorAll('.miss-count').forEach(element => {
+        element.style.color = '#42a5f5'; // Blue color
+        element.classList.remove('gold');
+      });
+
+      // Now check each set individually
+      for (const [setName, setNumbers] of Object.entries(numberSets)) {
+        const allNumbersHave20Plus = checkSetForGold(setNumbers);
+        console.log(`Set ${setName} (${setNumbers.join(',')}): allNumbersHave20Plus = ${allNumbersHave20Plus}`);
+        
+        if (allNumbersHave20Plus) {
+          // Apply gold to all numbers in this set
+          setNumbers.forEach(num => {
+            const topElement = document.getElementById(`top-${num}`);
+            const bottomElement = document.getElementById(`bottom-${num}`);
+            
+            if (topElement) {
+              console.log(`Setting top-${num} to gold`);
+              topElement.style.color = '#FFD700';
+              topElement.classList.add('gold');
+            }
+            if (bottomElement) {
+              console.log(`Setting bottom-${num} to gold`);
+              bottomElement.style.color = '#FFD700';
+              bottomElement.classList.add('gold');
+            }
+          });
+        } else {
+          // Ensure all numbers in this set are blue (this should already be true from the reset above)
+          setNumbers.forEach(num => {
+            const topElement = document.getElementById(`top-${num}`);
+            const bottomElement = document.getElementById(`bottom-${num}`);
+            
+            if (topElement) {
+              topElement.style.color = '#42a5f5';
+              topElement.classList.remove('gold');
+            }
+            if (bottomElement) {
+              bottomElement.style.color = '#42a5f5';
+              bottomElement.classList.remove('gold');
+            }
+          });
+        }
+      }
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      
+      // Always show exactly 20 boxes
+      for (let i = 0; i < 20; i++) {
+        const div = document.createElement("div");
+        
+        // Get the spin number (newest first)
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          div.className = `spin-box ${getColor(n)}`;
+          div.textContent = n;
+        } else {
+          // Empty box for missing spins
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        container.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+      
+      // Update top numbers
+      topNumbers.forEach(num => {
+        document.getElementById(`top-${num}`).textContent = stats.top[num];
+      });
+      
+      // Update bottom numbers
+      bottomNumbers.forEach(num => {
+        document.getElementById(`bottom-${num}`).textContent = stats.bottom[num];
+      });
+
+      // Update new number sets
+      set20Numbers.forEach(num => {
+        document.getElementById(`set20-${num}`).textContent = stats.set20[num];
+      });
+      
+      set18Numbers.forEach(num => {
+        document.getElementById(`set18-${num}`).textContent = stats.set18[num];
+      });
+
+      // Update gold colors for number sets
+      updateGoldColors();
+      
+      // Update pattern stats
+      document.getElementById(`miss6`).textContent = patternStats[6].m;
+      document.getElementById(`hit6`).textContent = patternStats[6].h;
+      document.getElementById(`miss9`).textContent = patternStats[9].m;
+      document.getElementById(`hit9`).textContent = patternStats[9].h;
+      document.getElementById(`miss12`).textContent = patternStats[12].m;
+      document.getElementById(`hit12`).textContent = patternStats[12].h;
+      document.getElementById(`miss15`).textContent = patternStats[15].m;
+      document.getElementById(`hit15`).textContent = patternStats[15].h;
+      document.getElementById(`miss18`).textContent = patternStats[18].m;
+      document.getElementById(`hit18`).textContent = patternStats[18].h;
+      
+      // Update pattern sequence displays
+      updatePatternDisplay('6');
+      updatePatternDisplay('9');
+      updatePatternDisplay('12');
+      updatePatternDisplay('15');
+      updatePatternDisplay('18');
+    }
+    
+    function updatePatternDisplay(track) {
+      const patternSequence = document.getElementById(`patternSequence${track}`);
+      
+      // Clear existing pattern items (keep the label)
+      const label = patternSequence.querySelector('.pattern-label');
+      patternSequence.innerHTML = '';
+      if (label) {
+        patternSequence.appendChild(label);
+      } else {
+        const newLabel = document.createElement('span');
+        newLabel.className = 'pattern-label';
+        newLabel.textContent = `Track ${track}:`;
+        patternSequence.appendChild(newLabel);
+      }
+      
+      // Add pattern items
+      patternHistory[`track${track}`].forEach(item => {
+        const patternItem = document.createElement('span');
+        patternItem.className = `pattern-item ${item.type === 'miss' ? 'pattern-miss' : 'pattern-hit'}`;
+        patternItem.textContent = item.value;
+        patternSequence.appendChild(patternItem);
+      });
+      
+      // Auto-scroll to the end (right side) to show the newest entries
+      scrollPatternToEnd(track);
+    }
+    
+    // New function to auto-scroll pattern sequence to the end
+    function scrollPatternToEnd(track) {
+      const patternSequence = document.getElementById(`patternSequence${track}`);
+      patternSequence.scrollLeft = patternSequence.scrollWidth;
+    }
+
+    // Save data to localStorage
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+      localStorage.setItem("stats", JSON.stringify(stats));
+      localStorage.setItem("patternStats", JSON.stringify(patternStats));
+      localStorage.setItem("patternHistory", JSON.stringify(patternHistory));
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString(); // Normalize to string
+      }
+      
+      // Add to history
+      history.push(val);
+      
+      // Update top numbers
+      topNumbers.forEach(num => {
+        if (val === num) {
+          stats.top[num] = 0;
+        } else {
+          stats.top[num]++;
+        }
+      });
+      
+      // Update bottom numbers
+      bottomNumbers.forEach(num => {
+        if (val === num) {
+          stats.bottom[num] = 0;
+        } else {
+          stats.bottom[num]++;
+        }
+      });
+
+      // Update new number sets
+      set20Numbers.forEach(num => {
+        if (val === num) {
+          stats.set20[num] = 0;
+        } else {
+          stats.set20[num]++;
+        }
+      });
+      
+      set18Numbers.forEach(num => {
+        if (val === num) {
+          stats.set18[num] = 0;
+        } else {
+          stats.set18[num]++;
+        }
+      });
+      
+      // Update pattern stats for all tracks
+      updateTrackStats(6, val);
+      updateTrackStats(9, val);
+      updateTrackStats(12, val);
+      updateTrackStats(15, val);
+      updateTrackStats(18, val);
+      
+      // Reset input and save
+      input.value = "";
+      save();
+      updateDisplay();
+      status.textContent = `Added spin: ${val}`;
+    }
+
+    function updateTrackStats(track, val) {
+      // Get last N unique numbers (excluding current spin)
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      // Go through history backwards (newest first, excluding current spin)
+      for (let i = history.length - 2; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          uniqueNumbers.unshift(num); // Add to beginning to maintain order
+          if (uniqueNumbers.length >= track) break;
+        }
+      }
+      
+      if (uniqueNumbers.includes(val)) {
+        // Number hit within its track group
+        patternStats[track].h++;
+        patternStats[track].m = 0;
+        patternHistory[`track${track}`].push({ type: 'hit', value: 'HIT' });
+      } else {
+        // Number missed within its track group
+        patternStats[track].m++;
+        
+        // Add miss to pattern history only if it's the first miss or a hit just occurred
+        if (patternHistory[`track${track}`].length === 0 || patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].type === 'hit') {
+          patternHistory[`track${track}`].push({ type: 'miss', value: patternStats[track].m });
+        } else {
+          // Update the last miss with the current miss count
+          patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].value = patternStats[track].m;
+        }
+        
+        // Alert if miss threshold reached
+        if (patternStats[track].m === 30) {
+          alert(`Track ${track} missed ${patternStats[track].m} times! Current number: ${val}`);
+        }
+      }
+    }
+
+    // Undo the last action - FIXED VERSION
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      const lastVal = history.pop();
+      
+      // Reset all stats to recalculate from scratch
+      resetAllStats();
+      
+      // Recalculate all stats based on remaining history
+      history.forEach((val, i) => {
+        // Update top numbers
+        topNumbers.forEach(num => {
+          if (val === num) {
+            stats.top[num] = 0;
+          } else {
+            stats.top[num]++;
+          }
+        });
+        
+        // Update bottom numbers
+        bottomNumbers.forEach(num => {
+          if (val === num) {
+            stats.bottom[num] = 0;
+          } else {
+            stats.bottom[num]++;
+          }
+        });
+
+        // Update new number sets
+        set20Numbers.forEach(num => {
+          if (val === num) {
+            stats.set20[num] = 0;
+          } else {
+            stats.set20[num]++;
+          }
+        });
+        
+        set18Numbers.forEach(num => {
+          if (val === num) {
+            stats.set18[num] = 0;
+          } else {
+            stats.set18[num]++;
+          }
+        });
+        
+        // Update pattern stats for all tracks
+        recalculateTrackStats(6, val, i);
+        recalculateTrackStats(9, val, i);
+        recalculateTrackStats(12, val, i);
+        recalculateTrackStats(15, val, i);
+        recalculateTrackStats(18, val, i);
+      });
+      
+      save();
+      updateDisplay();
+      status.textContent = `Undo: ${lastVal} removed`;
+    }
+
+    // Reset all stats to zero
+    function resetAllStats() {
+      stats = {
+        // Top numbers
+        top: Object.fromEntries(topNumbers.map(num => [num, 0])),
+        // Bottom numbers
+        bottom: Object.fromEntries(bottomNumbers.map(num => [num, 0])),
+        // New number sets
+        set20: Object.fromEntries(set20Numbers.map(num => [num, 0])),
+        set18: Object.fromEntries(set18Numbers.map(num => [num, 0]))
+      };
+      
+      patternStats = {
+        6: { m:0, h:0 },
+        9: { m:0, h:0 },
+        12: { m:0, h:0 },
+        15: { m:0, h:0 },
+        18: { m:0, h:0 }
+      };
+      
+      patternHistory = {
+        track6: [],
+        track9: [],
+        track12: [],
+        track15: [],
+        track18: []
+      };
+    }
+
+    // Recalculate track stats for undo functionality
+    function recalculateTrackStats(track, val, index) {
+      // Get last N unique numbers (excluding current spin)
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      // Go through history backwards (newest first, excluding current spin)
+      for (let i = index - 1; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          uniqueNumbers.unshift(num); // Add to beginning to maintain order
+          if (uniqueNumbers.length >= track) break;
+        }
+      }
+      
+      if (uniqueNumbers.includes(val)) {
+        // Number hit within its track group
+        patternStats[track].h++;
+        patternStats[track].m = 0;
+        patternHistory[`track${track}`].push({ type: 'hit', value: 'HIT' });
+      } else {
+        // Number missed within its track group
+        patternStats[track].m++;
+        
+        // Add miss to pattern history only if it's the first miss or a hit just occurred
+        if (patternHistory[`track${track}`].length === 0 || patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].type === 'hit') {
+          patternHistory[`track${track}`].push({ type: 'miss', value: patternStats[track].m });
+        } else {
+          // Update the last miss with the current miss count
+          patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].value = patternStats[track].m;
+        }
+      }
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        resetAllStats();
+        
+        localStorage.removeItem("history");
+        localStorage.removeItem("stats");
+        localStorage.removeItem("patternStats");
+        localStorage.removeItem("patternHistory");
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      updateDisplay();
+    });
+  </script>
+</body>
+</html>

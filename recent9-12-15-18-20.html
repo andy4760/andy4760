@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enhanced Number Tracker with Multiple Logic</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    
+    .input-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    input, button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    
+    input {
+      width: 150px;
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    #resetBtn {
+      background-color: #e74c3c;
+    }
+    
+    #resetBtn:hover {
+      background-color: #c0392b;
+    }
+    
+    #numberList {
+      font-size: 1.6em;
+      margin: 20px 0;
+      min-height: 60px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      line-height: 1.4;
+    }
+    
+    .green { color: #27ae60; font-weight: bold; }
+    .red { color: #e74c3c; font-weight: bold; }
+    .black { color: #2c3e50; font-weight: bold; }
+
+    .logic-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .logic-box {
+      text-align: center;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      flex: 1;
+      min-width: 220px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logic-box h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      font-size: 1.1em;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+    
+    .stat {
+      padding: 8px;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+    
+    .hit {
+      background-color: rgba(39, 174, 96, 0.1);
+      color: #27ae60;
+    }
+    
+    .miss {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+    
+    .instructions {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      text-align: left;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+    }
+    
+    .instructions ul {
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .logic-section {
+        flex-direction: column;
+      }
+      
+      .logic-box {
+        min-width: 100%;
+      }
+      
+      #numberList {
+        font-size: 1.3em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enhanced Number Tracker with Multiple Logic</h1>
+    
+    <div class="input-section">
+      <h2>Add Numbers</h2>
+      <input type="tel" id="numberInput" placeholder="Enter number (0-36, 00)" />
+      <button onclick="addNumber()">Add Number</button>
+      <button onclick="undo()">Undo</button>
+      <button id="resetBtn" onclick="resetAll()">Reset All</button>
+    </div>
+
+    <div>
+      <h3>Last 20 Numbers</h3>
+      <p id="numberList">None</p>
+      <p><small>Recent 9 numbers | Recent 12 numbers | Recent 15 numbers | Recent 18 numbers</small></p>
+    </div>
+
+    <div class="logic-section">
+      <div class="logic-box">
+        <h3>Recent 9 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits9">Hits: 0</div>
+          <div class="stat miss" id="misses9">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in the most recent 9 numbers</small></p>
+      </div>
+      
+      <div class="logic-box">
+        <h3>Recent 12 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits12">Hits: 0</div>
+          <div class="stat miss" id="misses12">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in the most recent 12 numbers</small></p>
+      </div>
+      
+      <div class="logic-box">
+        <h3>Recent 15 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits15">Hits: 0</div>
+          <div class="stat miss" id="misses15">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in the most recent 15 numbers</small></p>
+      </div>
+      
+      <div class="logic-box">
+        <h3>Recent 18 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits18">Hits: 0</div>
+          <div class="stat miss" id="misses18">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in the most recent 18 numbers</small></p>
+      </div>
+      
+      <div class="logic-box">
+        <h3>All 20 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits20">Hits: 0</div>
+          <div class="stat miss" id="misses20">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in all 20 tracked numbers</small></p>
+      </div>
+    </div>
+    
+    <div class="instructions">
+      <h3>How It Works</h3>
+      <ul>
+        <li>Enter numbers from 0-36 or "00" to track them</li>
+        <li>The tracker maintains the last 20 numbers entered</li>
+        <li><strong>Recent 9 Logic:</strong> Checks if the entered number is in the most recent 9 numbers</li>
+        <li><strong>Recent 12 Logic:</strong> Checks if the entered number is in the most recent 12 numbers</li>
+        <li><strong>Recent 15 Logic:</strong> Checks if the entered number is in the most recent 15 numbers</li>
+        <li><strong>Recent 18 Logic:</strong> Checks if the entered number is in the most recent 18 numbers</li>
+        <li><strong>All 20 Logic:</strong> Checks if the entered number is in any of the 20 tracked numbers</li>
+        <li>Use Undo to revert the last action, or Reset to clear all data</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Define valid numbers and color mappings
+    const allowedNumbers = new Set(["0", "00", ...Array.from({ length: 36 }, (_, i) => (i + 1).toString())]);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    // Initialize tracking data
+    let trackingList = [];  // Last 20 numbers
+    let historyStack = [];
+
+    // Initialize counters for each logic
+    let historyHits9 = 0, historyMisses9 = 0;
+    let historyHits12 = 0, historyMisses12 = 0;
+    let historyHits15 = 0, historyMisses15 = 0;
+    let historyHits18 = 0, historyMisses18 = 0;
+    let historyHits20 = 0, historyMisses20 = 0;
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const num = input.value.trim();
+
+      // Validate input
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid number. Please enter a number between 0-36 or '00'.");
+        input.value = "";
+        input.focus();
+        return;
+      }
+
+      // Save current state for undo functionality
+      historyStack.push({
+        trackingList: [...trackingList],
+        historyHits9,
+        historyMisses9,
+        historyHits12,
+        historyMisses12,
+        historyHits15,
+        historyMisses15,
+        historyHits18,
+        historyMisses18,
+        historyHits20,
+        historyMisses20
+      });
+
+      // Calculate hits and misses BEFORE updating the tracking list
+      calculateLogicCounters(num);
+
+      // Update tracking list (add to front, remove duplicates, limit to 20)
+      // Remove any existing instance of this number to avoid duplicates
+      trackingList = trackingList.filter(n => n !== num);
+      trackingList.unshift(num);
+      if (trackingList.length > 20) trackingList.pop();
+
+      // Update display
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function calculateLogicCounters(num) {
+      // Get subsets for different logics from the CURRENT state (before adding new number)
+      const recent9 = trackingList.slice(0, 9);
+      const recent12 = trackingList.slice(0, 12);
+      const recent15 = trackingList.slice(0, 15);
+      const recent18 = trackingList.slice(0, 18);
+      
+      // Recent 9 Logic - Check if number exists in recent 9 BEFORE adding it
+      if (recent9.includes(num)) {
+        historyHits9++;
+        historyMisses9 = 0;
+      } else {
+        historyMisses9++;
+        historyHits9 = 0;
+      }
+
+      // Recent 12 Logic - Check if number exists in recent 12 BEFORE adding it
+      if (recent12.includes(num)) {
+        historyHits12++;
+        historyMisses12 = 0;
+      } else {
+        historyMisses12++;
+        historyHits12 = 0;
+      }
+
+      // Recent 15 Logic - Check if number exists in recent 15 BEFORE adding it
+      if (recent15.includes(num)) {
+        historyHits15++;
+        historyMisses15 = 0;
+      } else {
+        historyMisses15++;
+        historyHits15 = 0;
+      }
+
+      // Recent 18 Logic - Check if number exists in recent 18 BEFORE adding it
+      if (recent18.includes(num)) {
+        historyHits18++;
+        historyMisses18 = 0;
+      } else {
+        historyMisses18++;
+        historyHits18 = 0;
+      }
+
+      // All 20 Logic - Check if number exists in all 20 BEFORE adding it
+      if (trackingList.includes(num)) {
+        historyHits20++;
+        historyMisses20 = 0;
+      } else {
+        historyMisses20++;
+        historyHits20 = 0;
+      }
+    }
+
+    function undo() {
+      if (historyStack.length > 0) {
+        const prev = historyStack.pop();
+        trackingList = [...prev.trackingList];
+        historyHits9 = prev.historyHits9;
+        historyMisses9 = prev.historyMisses9;
+        historyHits12 = prev.historyHits12;
+        historyMisses12 = prev.historyMisses12;
+        historyHits15 = prev.historyHits15;
+        historyMisses15 = prev.historyMisses15;
+        historyHits18 = prev.historyHits18;
+        historyMisses18 = prev.historyMisses18;
+        historyHits20 = prev.historyHits20;
+        historyMisses20 = prev.historyMisses20;
+        updateDisplay();
+      } else {
+        alert("Nothing to undo.");
+      }
+    }
+
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data?")) {
+        trackingList = [];
+        historyStack = [];
+        historyHits9 = historyMisses9 = 0;
+        historyHits12 = historyMisses12 = 0;
+        historyHits15 = historyMisses15 = 0;
+        historyHits18 = historyMisses18 = 0;
+        historyHits20 = historyMisses20 = 0;
+        updateDisplay();
+        document.getElementById("numberInput").value = "";
+      }
+    }
+
+    function updateDisplay() {
+      const listEl = document.getElementById("numberList");
+
+      if (trackingList.length === 0) {
+        listEl.innerHTML = "None";
+      } else {
+        const recent9 = trackingList.slice(0, 9).map(n => colorize(n));
+        const recent12to15 = trackingList.slice(9, 15).map(n => colorize(n));
+        const recent15to18 = trackingList.slice(15, 18).map(n => colorize(n));
+        const recent18to20 = trackingList.slice(18, 20).map(n => colorize(n));
+        
+        listEl.innerHTML = 
+          recent9.join(", ") + " &nbsp;&nbsp;|&nbsp;&nbsp; " + 
+          recent12to15.join(", ") + " &nbsp;&nbsp;|&nbsp;&nbsp; " + 
+          recent15to18.join(", ") + " &nbsp;&nbsp;|&nbsp;&nbsp; " + 
+          recent18to20.join(", ");
+      }
+
+      // Update counters display
+      document.getElementById("misses9").textContent = `Misses: ${historyMisses9}`;
+      document.getElementById("hits9").textContent = `Hits: ${historyHits9}`;
+      document.getElementById("misses12").textContent = `Misses: ${historyMisses12}`;
+      document.getElementById("hits12").textContent = `Hits: ${historyHits12}`;
+      document.getElementById("misses15").textContent = `Misses: ${historyMisses15}`;
+      document.getElementById("hits15").textContent = `Hits: ${historyHits15}`;
+      document.getElementById("misses18").textContent = `Misses: ${historyMisses18}`;
+      document.getElementById("hits18").textContent = `Hits: ${historyHits18}`;
+      document.getElementById("misses20").textContent = `Misses: ${historyMisses20}`;
+      document.getElementById("hits20").textContent = `Hits: ${historyHits20}`;
+    }
+
+    function colorize(n) {
+      if (n === "0" || n === "00") return `<span class="green">${n}</span>`;
+      if (redNumbers.has(n)) return `<span class="red">${n}</span>`;
+      if (blackNumbers.has(n)) return `<span class="black">${n}</span>`;
+      return n;
+    }
+
+    // Add event listener for Enter key
+    document.getElementById("numberInput").addEventListener("keyup", function (e) {
+      if (e.key === "Enter") addNumber();
+    });
+
+    // Focus on input when page loads
+    document.getElementById("numberInput").focus();
+  </script>
+</body>
+</html>

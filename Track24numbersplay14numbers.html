@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enhanced Number Tracker with Multiple Logic</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    
+    .entries-section {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .entries-horizontal {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      margin-top: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      justify-content: center;
+    }
+    
+    .entry-box {
+      padding: 8px 12px;
+      border-radius: 5px;
+      background-color: white;
+      border: 1px solid #ddd;
+      font-weight: bold;
+      min-width: 45px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .input-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    input, button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    
+    input {
+      width: 150px;
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    #resetBtn {
+      background-color: #e74c3c;
+    }
+    
+    #resetBtn:hover {
+      background-color: #c0392b;
+    }
+    
+    #numberList {
+      font-size: 1.5em;
+      margin: 20px 0;
+      min-height: 60px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      line-height: 1.4;
+    }
+    
+    #missingNumbers {
+      font-size: 1.3em;
+      margin: 20px 0;
+      min-height: 60px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      line-height: 1.4;
+    }
+    
+    .green { color: #27ae60; font-weight: bold; }
+    .red { color: #e74c3c; font-weight: bold; }
+    .black { color: #2c3e50; font-weight: bold; }
+
+    .logic-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .logic-box {
+      text-align: center;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      flex: 1;
+      min-width: 250px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logic-box h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+    
+    .stat {
+      padding: 8px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    
+    .hit {
+      background-color: rgba(39, 174, 96, 0.1);
+      color: #27ae60;
+    }
+    
+    .miss {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+    
+    .instructions {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      text-align: left;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+    }
+    
+    .instructions ul {
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .entries-horizontal {
+        justify-content: flex-start;
+      }
+      
+      .logic-section {
+        flex-direction: column;
+      }
+      
+      .logic-box {
+        min-width: 100%;
+      }
+      
+      #numberList, #missingNumbers {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enhanced Number Tracker with Multiple Logic</h1>
+    
+    <!-- New 20 Entries Section -->
+    <div class="entries-section">
+      <h3>20 Entries (Newest to Oldest)</h3>
+      <div class="entries-horizontal" id="entriesHorizontal">
+        <!-- Entries will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <div class="input-section">
+      <h2>Add Numbers</h2>
+      <input type="tel" id="numberInput" placeholder="Enter number (0-36, 00)" />
+      <button onclick="addNumber()">Add Number</button>
+      <button onclick="undo()">Undo</button>
+      <button id="resetBtn" onclick="resetAll()">Reset All</button>
+    </div>
+
+    <div>
+      <h3>Last 24 Numbers</h3>
+      <p id="numberList">None</p>
+      <p><small>Recent 12 numbers | Recent 18 numbers | All 24 numbers</small></p>
+    </div>
+
+    <div>
+      <h3>14 Numbers Not in Last 24</h3>
+      <p id="missingNumbers">All numbers available (tracking list is empty)</p>
+    </div>
+
+    <div class="logic-section">
+      <div class="logic-box">
+        <h3>Recent 12 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits12">Hits: 0</div>
+          <div class="stat miss" id="misses12">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in the most recent 12 numbers</small></p>
+      </div>
+      
+      <div class="logic-box">
+        <h3>Recent 18 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits18">Hits: 0</div>
+          <div class="stat miss" id="misses18">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in the most recent 18 numbers</small></p>
+      </div>
+      
+      <div class="logic-box">
+        <h3>All 24 Numbers Logic</h3>
+        <div class="stats">
+          <div class="stat hit" id="hits24">Hits: 0</div>
+          <div class="stat miss" id="misses24">Misses: 0</div>
+        </div>
+        <p><small>Checks if the number is in all 24 tracked numbers</small></p>
+      </div>
+    </div>
+    
+    <div class="instructions">
+      <h3>How It Works</h3>
+      <ul>
+        <li>Enter numbers from 0-36 or "00" to track them</li>
+        <li>The tracker maintains the last 24 numbers entered</li>
+        <li><strong>20 Entries:</strong> Shows the most recent 20 numbers in entry order (newest to oldest)</li>
+        <li><strong>Recent 12 Logic:</strong> Checks if the entered number is in the most recent 12 numbers</li>
+        <li><strong>Recent 18 Logic:</strong> Checks if the entered number is in the most recent 18 numbers</li>
+        <li><strong>All 24 Logic:</strong> Checks if the entered number is in any of the 24 tracked numbers</li>
+        <li><strong>Missing Numbers:</strong> Shows 14 numbers that haven't appeared in the last 24 numbers</li>
+        <li>Use Undo to revert the last action, or Reset to clear all data</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Define valid numbers and color mappings
+    const allNumbers = ["0", "00", ...Array.from({ length: 36 }, (_, i) => (i + 1).toString())];
+    const allowedNumbers = new Set(allNumbers);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    // Initialize tracking data
+    let trackingList = [];  // Last 24 numbers (most recent first)
+    let entryOrderList = []; // Last 20 numbers in entry order (newest to oldest)
+    let historyStack = [];
+
+    // Initialize counters for each logic
+    let historyHits12 = 0, historyMisses12 = 0;
+    let historyHits18 = 0, historyMisses18 = 0;
+    let historyHits24 = 0, historyMisses24 = 0;
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const num = input.value.trim();
+
+      // Validate input
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid number. Please enter a number between 0-36 or '00'.");
+        input.value = "";
+        input.focus();
+        return;
+      }
+
+      // Save current state for undo functionality
+      historyStack.push({
+        trackingList: [...trackingList],
+        entryOrderList: [...entryOrderList],
+        historyHits12,
+        historyMisses12,
+        historyHits18,
+        historyMisses18,
+        historyHits24,
+        historyMisses24
+      });
+
+      // Calculate hits and misses BEFORE updating the tracking list
+      calculateLogicCounters(num);
+
+      // Update tracking list (add to front, remove duplicates, limit to 24)
+      // Remove any existing instance of this number to avoid duplicates
+      trackingList = trackingList.filter(n => n !== num);
+      trackingList.unshift(num);
+      if (trackingList.length > 24) trackingList.pop();
+
+      // Update entry order list (add to front, but don't remove duplicates, limit to 20)
+      // This maintains newest to oldest order
+      entryOrderList.unshift(num);
+      if (entryOrderList.length > 20) entryOrderList.pop();
+
+      // Update display
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function calculateLogicCounters(num) {
+      // Get subsets for different logics from the CURRENT state (before adding new number)
+      const recent12 = trackingList.slice(0, 12);
+      const recent18 = trackingList.slice(0, 18);
+      
+      // Recent 12 Logic - Check if number exists in recent 12 BEFORE adding it
+      if (recent12.includes(num)) {
+        historyHits12++;
+        historyMisses12 = 0;
+      } else {
+        historyMisses12++;
+        historyHits12 = 0;
+      }
+
+      // Recent 18 Logic - Check if number exists in recent 18 BEFORE adding it
+      if (recent18.includes(num)) {
+        historyHits18++;
+        historyMisses18 = 0;
+      } else {
+        historyMisses18++;
+        historyHits18 = 0;
+      }
+
+      // All 24 Logic - Check if number exists in all 24 BEFORE adding it
+      if (trackingList.includes(num)) {
+        historyHits24++;
+        historyMisses24 = 0;
+      } else {
+        historyMisses24++;
+        historyHits24 = 0;
+      }
+    }
+
+    function getMissingNumbers() {
+      // Get numbers that are not in the tracking list
+      const missingNumbers = allNumbers.filter(num => !trackingList.includes(num));
+      
+      // If we have more than 14 missing numbers, take the first 14
+      // If we have less than 14, show all available missing numbers
+      return missingNumbers.slice(0, 14);
+    }
+
+    function updateEntriesHorizontal() {
+      const entriesContainer = document.getElementById("entriesHorizontal");
+      entriesContainer.innerHTML = '';
+      
+      // Create 20 boxes using the entry order list (newest to oldest)
+      for (let i = 0; i < 20; i++) {
+        const entryBox = document.createElement("div");
+        entryBox.className = "entry-box";
+        
+        if (i < entryOrderList.length) {
+          entryBox.innerHTML = colorize(entryOrderList[i]);
+        } else {
+          entryBox.textContent = "-";
+          entryBox.style.color = "#999";
+          entryBox.style.fontWeight = "normal";
+        }
+        
+        entriesContainer.appendChild(entryBox);
+      }
+    }
+
+    function undo() {
+      if (historyStack.length > 0) {
+        const prev = historyStack.pop();
+        trackingList = [...prev.trackingList];
+        entryOrderList = [...prev.entryOrderList];
+        historyHits12 = prev.historyHits12;
+        historyMisses12 = prev.historyMisses12;
+        historyHits18 = prev.historyHits18;
+        historyMisses18 = prev.historyMisses18;
+        historyHits24 = prev.historyHits24;
+        historyMisses24 = prev.historyMisses24;
+        updateDisplay();
+      } else {
+        alert("Nothing to undo.");
+      }
+    }
+
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data?")) {
+        trackingList = [];
+        entryOrderList = [];
+        historyStack = [];
+        historyHits12 = historyMisses12 = 0;
+        historyHits18 = historyMisses18 = 0;
+        historyHits24 = historyMisses24 = 0;
+        updateDisplay();
+        document.getElementById("numberInput").value = "";
+      }
+    }
+
+    function updateDisplay() {
+      const listEl = document.getElementById("numberList");
+      const missingEl = document.getElementById("missingNumbers");
+
+      // Update tracking list display
+      if (trackingList.length === 0) {
+        listEl.innerHTML = "None";
+      } else {
+        const recent12 = trackingList.slice(0, 12).map(n => colorize(n));
+        const recent18to24 = trackingList.slice(12, 24).map(n => colorize(n));
+        
+        listEl.innerHTML = 
+          recent12.join(", ") + " &nbsp;&nbsp;|&nbsp;&nbsp; " + 
+          recent18to24.join(", ");
+      }
+
+      // Update missing numbers display
+      const missingNumbers = getMissingNumbers();
+      if (missingNumbers.length === 0) {
+        missingEl.innerHTML = "All numbers have appeared in the last 24 numbers";
+      } else if (trackingList.length === 0) {
+        missingEl.innerHTML = "All numbers available (tracking list is empty)";
+      } else {
+        const coloredMissing = missingNumbers.map(n => colorize(n));
+        missingEl.innerHTML = coloredMissing.join(", ");
+        
+        // Show count if we have less than 14 missing numbers
+        if (missingNumbers.length < 14) {
+          missingEl.innerHTML += ` <small>(only ${missingNumbers.length} numbers missing)</small>`;
+        }
+      }
+
+      // Update entries horizontal display
+      updateEntriesHorizontal();
+
+      // Update counters display
+      document.getElementById("misses12").textContent = `Misses: ${historyMisses12}`;
+      document.getElementById("hits12").textContent = `Hits: ${historyHits12}`;
+      document.getElementById("misses18").textContent = `Misses: ${historyMisses18}`;
+      document.getElementById("hits18").textContent = `Hits: ${historyHits18}`;
+      document.getElementById("misses24").textContent = `Misses: ${historyMisses24}`;
+      document.getElementById("hits24").textContent = `Hits: ${historyHits24}`;
+    }
+
+    function colorize(n) {
+      if (n === "0" || n === "00") return `<span class="green">${n}</span>`;
+      if (redNumbers.has(n)) return `<span class="red">${n}</span>`;
+      if (blackNumbers.has(n)) return `<span class="black">${n}</span>`;
+      return n;
+    }
+
+    // Add event listener for Enter key
+    document.getElementById("numberInput").addEventListener("keyup", function (e) {
+      if (e.key === "Enter") addNumber();
+    });
+
+    // Focus on input when page loads
+    document.getElementById("numberInput").focus();
+    
+    // Initialize entries horizontal on page load
+    updateEntriesHorizontal();
+  </script>
+</body>
+</html>

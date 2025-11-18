@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>27 Number Green Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 40px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 140px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .list-container {
+      margin-top: 20px;
+    }
+    #numberList, #sortedList, #recentNumbers {
+      font-size: 1.8em;
+      margin-top: 10px;
+      word-wrap: break-word;
+    }
+    .green {
+      color: green;
+      font-weight: bold;
+    }
+    .red {
+      color: red;
+      font-weight: bold;
+    }
+    .black {
+      color: black;
+      font-weight: bold;
+    }
+    .blue {
+      color: blue;
+      font-weight: bold;
+    }
+    .info {
+      margin-top: 15px;
+      font-size: 1.2em;
+    }
+    .controls {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Recent 20 Numbers Display -->
+  <div id="recentNumbersContainer">
+    <h3>Last 20 Numbers:</h3>
+    <div id="recentNumbers">None</div>
+  </div>
+
+  <h2>27 Number Green Tracker</h2>
+  <div class="controls">
+    <input type="text" id="numberInput" placeholder="Enter number" />
+    <button onclick="addNumber()">Add</button>
+    <button onclick="undo()">Undo</button>
+    <button onclick="fullReset()">Reset All</button>
+    <span id="totalCount" class="info">Total: 0</span>
+  </div>
+
+  <div class="list-container">
+    <h3>Last 27 Numbers:</h3>
+    <div id="numberList">None</div>
+    <div class="info" id="hitMissInfo">Hits: 0 | Misses: 0</div>
+    <h3>Ordered View:</h3>
+    <div id="sortedList">None</div>
+  </div>
+
+  <script>
+    const allowedNumbers = new Set(["0", "00", ...Array.from({ length: 36 }, (_, i) => (i + 1).toString())]);
+    const redNumbers = new Set(["1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"]);
+    const blackNumbers = new Set(["2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"]);
+
+    let trackingList = [];
+    let recentNumbers = []; // New array for the 20 most recent numbers
+    let historyStack = [];
+    let totalEntries = 0;
+    let hitCount = 0;
+    let missCount = 0;
+
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const num = input.value.trim();
+
+      if (!allowedNumbers.has(num)) {
+        alert("Invalid number. Enter 0–36 or 00.");
+        input.value = "";
+        return;
+      }
+
+      // Save state for undo
+      historyStack.push({
+        list: [...trackingList],
+        recent: [...recentNumbers],
+        total: totalEntries,
+        hit: hitCount,
+        miss: missCount
+      });
+
+      // Check for hit
+      const index = trackingList.indexOf(num);
+      const isHit = index !== -1;
+
+      if (isHit) {
+        trackingList.splice(index, 1); // Remove old instance
+        hitCount++;
+        missCount = 0;
+      } else {
+        missCount++;
+        hitCount = 0;
+      }
+
+      trackingList.unshift(num); // Add to front
+      if (trackingList.length > 27) {
+        trackingList.pop(); // Keep max 27
+      }
+
+      // Update recent numbers (keep only last 20)
+      recentNumbers.unshift(num);
+      if (recentNumbers.length > 20) {
+        recentNumbers.pop();
+      }
+
+      totalEntries++;
+      updateDisplay();
+      input.value = "";
+      input.focus();
+    }
+
+    function undo() {
+      if (historyStack.length > 0) {
+        const prev = historyStack.pop();
+        trackingList = [...prev.list];
+        recentNumbers = [...prev.recent];
+        totalEntries = prev.total;
+        hitCount = prev.hit;
+        missCount = prev.miss;
+        updateDisplay();
+      } else {
+        alert("Nothing to undo.");
+      }
+    }
+
+    function fullReset() {
+      if (confirm("Reset everything?")) {
+        trackingList = [];
+        recentNumbers = [];
+        totalEntries = 0;
+        hitCount = 0;
+        missCount = 0;
+        historyStack = [];
+        updateDisplay();
+      }
+    }
+
+    function getColorSpan(n) {
+      return n === "0" || n === "00" ? `<span class="green">${n}</span>` :
+             redNumbers.has(n) ? `<span class="red">${n}</span>` :
+             blackNumbers.has(n) ? `<span class="black">${n}</span>` :
+             n;
+    }
+
+    function updateDisplay() {
+      // Display recent 20 numbers
+      const recentElement = document.getElementById("recentNumbers");
+      recentElement.innerHTML = recentNumbers.length
+        ? recentNumbers.map(getColorSpan).join(" ")
+        : "None";
+
+      // Display normal list (left = newest)
+      const listElement = document.getElementById("numberList");
+      listElement.innerHTML = trackingList.length
+        ? trackingList.map(getColorSpan).join(" ")
+        : "None";
+
+      // Display sorted view
+      const sortedElement = document.getElementById("sortedList");
+      const sorted = [...trackingList];
+
+      sorted.sort((a, b) => {
+        if (a === "0") return -2;
+        if (a === "00") return -1;
+        if (b === "0") return 2;
+        if (b === "00") return 1;
+        return parseInt(a) - parseInt(b);
+      });
+
+      sortedElement.innerHTML = sorted.length
+        ? sorted.map(getColorSpan).join(" ")
+        : "None";
+
+      document.getElementById("totalCount").textContent = `Total: ${totalEntries}`;
+      
+      // Update hit/miss info with blue color for miss count
+      const hitMissElement = document.getElementById("hitMissInfo");
+      hitMissElement.innerHTML = `Hits: ${hitCount} | Misses: <span class="blue">${missCount}</span>`;
+    }
+
+    document.getElementById("numberInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        addNumber();
+      }
+    });
+  </script>
+
+</body>
+</html>

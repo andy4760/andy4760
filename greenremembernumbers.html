@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Roulette Tracker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+      width: 1052px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    
+    /* New styles for sequence analysis */
+    .analysis-section {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+    }
+    .analysis-title {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #ffab91;
+      font-size: 1.2rem;
+    }
+    .sequence-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .sequence-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .sequence-count {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+    .sequence-box {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .no-data {
+      text-align: center;
+      color: #aaa;
+      font-style: italic;
+      margin: 1rem 0;
+    }
+    .analysis-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .analysis-controls button {
+      background: linear-gradient(145deg, #673ab7, #512da8);
+    }
+    .analysis-controls button:hover {
+      background: linear-gradient(145deg, #7e57c2, #5e35b1);
+    }
+    .last-number {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      color: #ffab91;
+    }
+    
+    /* Miss counter styles */
+    .miss-counter {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 1rem 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      font-size: 1.1rem;
+    }
+    .miss-count {
+      font-weight: bold;
+      color: #ff9800;
+      font-size: 1.3rem;
+    }
+    .hit-alert {
+      animation: hitPulse 1s ease;
+      color: #4caf50;
+      font-weight: bold;
+    }
+    @keyframes hitPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    @media (max-width: 1100px) {
+      #recentSpins {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+      
+      .sequence-box {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker</h1>
+      <div class="tagline">Track your recent spins and analyze number sequences</div>
+    </header>
+    
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="miss-counter">
+      <span>Total Misses:</span>
+      <span id="missCount" class="miss-count">0</span>
+    </div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color legend-red"></div>
+        <span>Red</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-black"></div>
+        <span>Black</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-green"></div>
+        <span>Green</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+    
+    <!-- New section for sequence analysis -->
+    <div class="analysis-section">
+      <div class="analysis-title">Number Sequence Analysis</div>
+      <div class="last-number" id="lastNumber">Last number entered: None</div>
+      <div class="analysis-controls">
+        <button onclick="showAllSequences()">Show All Sequences</button>
+        <button onclick="showMostCommon()">Show Most Common</button>
+      </div>
+      <div id="sequenceResults" class="sequence-results">
+        <div class="no-data">Enter numbers to see sequence analysis</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">⌫</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let sequences = JSON.parse(localStorage.getItem("sequences") || "{}");
+    let analysisMode = "last";
+    let totalMisses = parseInt(localStorage.getItem("totalMisses") || "0");
+    let lastPredictedNumbers = [];
+    let missHistory = JSON.parse(localStorage.getItem("missHistory") || "[]");
+
+    // Get color for a number
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      
+      // Always show exactly 20 boxes
+      for (let i = 0; i < 20; i++) {
+        const div = document.createElement("div");
+        
+        // Get the spin number (newest first)
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          div.className = `spin-box ${getColor(n)}`;
+          div.textContent = n;
+        } else {
+          // Empty box for missing spins
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        container.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+      
+      // Update last number display
+      const lastNumber = history.length > 0 ? history[history.length - 1] : "None";
+      document.getElementById("lastNumber").textContent = `Last number entered: ${lastNumber}`;
+      
+      // Update miss counter
+      document.getElementById("missCount").textContent = totalMisses;
+      
+      // Automatically update analysis to show sequences for the last number
+      showLastSequence();
+    }
+
+    // Save data to localStorage
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+      localStorage.setItem("sequences", JSON.stringify(sequences));
+      localStorage.setItem("totalMisses", totalMisses.toString());
+      localStorage.setItem("missHistory", JSON.stringify(missHistory));
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString();
+      }
+      
+      let currentMisses = 0;
+      
+      // Check if this is a hit or miss
+      if (history.length > 0 && lastPredictedNumbers.length > 0) {
+        const lastNumber = history[history.length - 1];
+        const predictedNumbers = Object.keys(sequences[lastNumber] || {});
+        
+        if (predictedNumbers.includes(val)) {
+          // HIT - reset miss counter and show alert
+          currentMisses = 0;
+          totalMisses = 0;
+          status.textContent = `HIT! Number ${val} was predicted. Miss counter reset to 0.`;
+          status.classList.add("hit-alert");
+          setTimeout(() => {
+            status.classList.remove("hit-alert");
+          }, 2000);
+        } else {
+          // MISS - add to miss counter
+          currentMisses = predictedNumbers.length;
+          totalMisses += currentMisses;
+          status.textContent = `MISS! Number ${val} was not in predictions. Added ${currentMisses} misses.`;
+        }
+      }
+      
+      // Store miss data for this spin
+      missHistory.push({
+        number: val,
+        missesAdded: currentMisses,
+        totalAfter: totalMisses
+      });
+      
+      // Add to history
+      history.push(val);
+      
+      // Update sequences if we have at least one previous number
+      if (history.length > 1) {
+        const previousNumber = history[history.length - 2];
+        if (!sequences[previousNumber]) {
+          sequences[previousNumber] = {};
+        }
+        
+        if (!sequences[previousNumber][val]) {
+          sequences[previousNumber][val] = 0;
+        }
+        
+        sequences[previousNumber][val]++;
+      }
+      
+      // Reset input and save
+      input.value = "";
+      save();
+      updateDisplay();
+    }
+
+    // Undo the last action - COMPLETELY REWRITTEN
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      // Remove the last number from history
+      const lastVal = history.pop();
+      
+      // Remove the last miss history entry
+      const lastMissEntry = missHistory.pop();
+      
+      // Update sequences if we have at least one previous number
+      if (history.length > 0) {
+        const previousNumber = history[history.length - 1];
+        if (sequences[previousNumber] && sequences[previousNumber][lastVal]) {
+          sequences[previousNumber][lastVal]--;
+          if (sequences[previousNumber][lastVal] === 0) {
+            delete sequences[previousNumber][lastVal];
+          }
+        }
+      }
+      
+      // Update total misses based on miss history
+      if (missHistory.length > 0) {
+        totalMisses = missHistory[missHistory.length - 1].totalAfter;
+      } else {
+        totalMisses = 0;
+      }
+      
+      save();
+      updateDisplay();
+      status.textContent = `Undo: ${lastVal} removed. Total misses: ${totalMisses}`;
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        sequences = {};
+        totalMisses = 0;
+        lastPredictedNumbers = [];
+        missHistory = [];
+        localStorage.removeItem("history");
+        localStorage.removeItem("sequences");
+        localStorage.removeItem("totalMisses");
+        localStorage.removeItem("missHistory");
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Show sequences for the last entered number
+    function showLastSequence() {
+      analysisMode = "last";
+      const resultsContainer = document.getElementById("sequenceResults");
+      
+      if (history.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-data">Enter numbers to see sequence analysis</div>';
+        return;
+      }
+      
+      const lastNumber = history[history.length - 1];
+      
+      // Check if we have data for this number
+      if (!sequences[lastNumber] || Object.keys(sequences[lastNumber]).length === 0) {
+        resultsContainer.innerHTML = `<div class="no-data">No data for numbers following ${lastNumber}</div>`;
+        lastPredictedNumbers = [];
+        return;
+      }
+      
+      // Display the results
+      resultsContainer.innerHTML = '';
+      
+      // Sort by frequency (highest first)
+      const sortedNumbers = Object.keys(sequences[lastNumber]).sort((a, b) => {
+        return sequences[lastNumber][b] - sequences[lastNumber][a];
+      });
+      
+      // Store predicted numbers for miss calculation
+      lastPredictedNumbers = sortedNumbers;
+      
+      sortedNumbers.forEach(number => {
+        const count = sequences[lastNumber][number];
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "sequence-item";
+        
+        const boxDiv = document.createElement("div");
+        boxDiv.className = `sequence-box ${getColor(number)}`;
+        boxDiv.textContent = number;
+        
+        const countDiv = document.createElement("div");
+        countDiv.className = "sequence-count";
+        countDiv.textContent = `${count} time${count > 1 ? 's' : ''}`;
+        
+        itemDiv.appendChild(boxDiv);
+        itemDiv.appendChild(countDiv);
+        resultsContainer.appendChild(itemDiv);
+      });
+    }
+
+    // Show all sequences
+    function showAllSequences() {
+      analysisMode = "all";
+      const resultsContainer = document.getElementById("sequenceResults");
+      
+      if (Object.keys(sequences).length === 0) {
+        resultsContainer.innerHTML = '<div class="no-data">No sequence data available</div>';
+        return;
+      }
+      
+      resultsContainer.innerHTML = '';
+      
+      // Sort numbers by how many sequences they have
+      const sortedNumbers = Object.keys(sequences).sort((a, b) => {
+        return Object.keys(sequences[b]).length - Object.keys(sequences[a]).length;
+      });
+      
+      sortedNumbers.forEach(number => {
+        const sequenceData = sequences[number];
+        const sequenceCount = Object.keys(sequenceData).length;
+        
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "sequence-item";
+        
+        const boxDiv = document.createElement("div");
+        boxDiv.className = `sequence-box ${getColor(number)}`;
+        boxDiv.textContent = number;
+        boxDiv.title = `${sequenceCount} following number${sequenceCount > 1 ? 's' : ''}`;
+        
+        const countDiv = document.createElement("div");
+        countDiv.className = "sequence-count";
+        countDiv.textContent = `${sequenceCount}`;
+        
+        itemDiv.appendChild(boxDiv);
+        itemDiv.appendChild(countDiv);
+        resultsContainer.appendChild(itemDiv);
+      });
+    }
+
+    // Show most common sequences
+    function showMostCommon() {
+      analysisMode = "common";
+      const resultsContainer = document.getElementById("sequenceResults");
+      
+      if (Object.keys(sequences).length === 0) {
+        resultsContainer.innerHTML = '<div class="no-data">No sequence data available</div>';
+        return;
+      }
+      
+      resultsContainer.innerHTML = '';
+      
+      // Collect all sequences with their frequencies
+      let allSequences = [];
+      
+      Object.keys(sequences).forEach(number => {
+        Object.keys(sequences[number]).forEach(followingNumber => {
+          allSequences.push({
+            from: number,
+            to: followingNumber,
+            count: sequences[number][followingNumber]
+          });
+        });
+      });
+      
+      // Sort by frequency (highest first)
+      allSequences.sort((a, b) => b.count - a.count);
+      
+      // Take top 10
+      const topSequences = allSequences.slice(0, 10);
+      
+      if (topSequences.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-data">No sequence data available</div>';
+        return;
+      }
+      
+      topSequences.forEach(seq => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "sequence-item";
+        
+        const fromBox = document.createElement("div");
+        fromBox.className = `sequence-box ${getColor(seq.from)}`;
+        fromBox.textContent = seq.from;
+        
+        const arrow = document.createElement("div");
+        arrow.textContent = "→";
+        arrow.style.color = "#ffab91";
+        arrow.style.margin = "0 5px";
+        
+        const toBox = document.createElement("div");
+        toBox.className = `sequence-box ${getColor(seq.to)}`;
+        toBox.textContent = seq.to;
+        
+        const countDiv = document.createElement("div");
+        countDiv.className = "sequence-count";
+        countDiv.textContent = `${seq.count} time${seq.count > 1 ? 's' : ''}`;
+        
+        const sequenceContainer = document.createElement("div");
+        sequenceContainer.style.display = "flex";
+        sequenceContainer.style.alignItems = "center";
+        sequenceContainer.appendChild(fromBox);
+        sequenceContainer.appendChild(arrow);
+        sequenceContainer.appendChild(toBox);
+        
+        itemDiv.appendChild(sequenceContainer);
+        itemDiv.appendChild(countDiv);
+        resultsContainer.appendChild(itemDiv);
+      });
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      updateDisplay();
+    });
+  </script>
+</body>
+</html>

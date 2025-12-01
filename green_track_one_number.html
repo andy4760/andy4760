@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roulette Tracker - Cold Numbers</title>
+  <style>
+    /* All CSS styles remain the same, plus new alert styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    
+    /* Cold Numbers Tracking Section */
+    .tracking-section {
+      margin-top: 2rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    .tracking-header {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #ffab91;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tracking-columns {
+      display: flex;
+      gap: 10px;
+      min-width: 1200px;
+    }
+    .tracking-column {
+      flex: 1;
+      min-width: 220px;
+      background: rgba(30, 30, 46, 0.8);
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid #444;
+    }
+    .column-header {
+      text-align: center;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ff4b2b;
+      font-weight: bold;
+      color: #fff;
+    }
+    .cold-number {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      border-left: 4px solid;
+      transition: all 0.3s ease;
+    }
+    .cold-number:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+    .cold-number.missed {
+      border-left-color: #ff4b2b;
+    }
+    .cold-number.hit {
+      border-left-color: #4caf50;
+      animation: pulse 0.5s ease;
+    }
+    .cold-number.waiting {
+      border-left-color: #ff9800;
+      background: rgba(255, 152, 0, 0.15);
+    }
+    .cold-number.stage-1 { background: rgba(255, 75, 43, 0.1); }
+    .cold-number.stage-2 { background: rgba(255, 152, 0, 0.1); }
+    .cold-number.stage-3 { background: rgba(255, 235, 59, 0.1); }
+    .cold-number.stage-4 { background: rgba(33, 150, 243, 0.1); }
+    .cold-number.stage-5 { background: rgba(156, 39, 176, 0.1); }
+    
+    .number-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .number-display {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .tracking-stats {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+    .misses-count {
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+    .spins-left {
+      color: #4ecdc4;
+      font-weight: bold;
+    }
+    .waiting-status {
+      color: #ff9800;
+      font-weight: bold;
+      font-style: italic;
+    }
+    
+    .empty-column {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px #ff9800; }
+      50% { box-shadow: 0 0 20px #ff9800; }
+      100% { box-shadow: 0 0 5px #ff9800; }
+    }
+    
+    @keyframes alertPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    
+    .stats-summary {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffab91;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    
+    .misses-list {
+      margin-top: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .misses-header {
+      color: #ffab91;
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    .misses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      gap: 5px;
+    }
+    .misses-item {
+      padding: 5px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    .misses-item.highlight {
+      background: rgba(255, 75, 43, 0.2);
+      border: 1px solid #ff4b2b;
+      font-weight: bold;
+    }
+    
+    /* Alert Banner */
+    .alert-banner {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      animation: alertPulse 2s infinite, glow 2s infinite;
+      max-width: 400px;
+      border: 2px solid #ffb74d;
+    }
+    .alert-content {
+      flex: 1;
+    }
+    .alert-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    .alert-message {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    .alert-number {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1.2rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid white;
+    }
+    .close-alert {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 5px;
+    }
+    
+    /* Play Alert Button */
+    .play-alert-button {
+      background: linear-gradient(145deg, #4caf50, #2e7d32);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
+      display: inline-block;
+      transition: all 0.2s ease;
+    }
+    .play-alert-button:hover {
+      background: linear-gradient(145deg, #66bb6a, #388e3c);
+      transform: translateY(-2px);
+    }
+    
+    @media (max-width: 1100px) {
+      #recentSpins {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+      
+      .tracking-columns {
+        flex-direction: column;
+        min-width: 100%;
+      }
+      
+      .tracking-header {
+        flex-direction: column;
+      }
+      
+      .alert-banner {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker - Cold Numbers</h1>
+      <div class="tagline">Track numbers with 100+ misses when they appear</div>
+    </header>
+    
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color legend-red"></div>
+        <span>Red</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-black"></div>
+        <span>Black</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-green"></div>
+        <span>Green</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+
+<!-- Cold Numbers Tracking -->
+    <div class="tracking-section">
+      <div class="tracking-header">
+        <span>Cold Numbers Tracking (100+ Misses when appeared)</span>
+        <span style="font-size: 0.9rem; color: #4ecdc4;">Tracking: 40 spins per stage | Max: 5 stages</span>
+      </div>
+      <div class="tracking-columns">
+        <!-- Stage 1 -->
+        <div class="tracking-column">
+          <div class="column-header">Stage 1<br><small>First 40 Spins</small></div>
+          <div id="stage1List"></div>
+        </div>
+        <!-- Stage 2 -->
+        <div class="tracking-column">
+          <div class="column-header">Stage 2<br><small>Second 40 Spins</small></div>
+          <div id="stage2List"></div>
+        </div>
+        <!-- Stage 3 -->
+        <div class="tracking-column">
+          <div class="column-header">Stage 3<br><small>Third 40 Spins</small></div>
+          <div id="stage3List"></div>
+        </div>
+        <!-- Stage 4 -->
+        <div class="tracking-column">
+          <div class="column-header">Stage 4<br><small>Fourth 40 Spins</small></div>
+          <div id="stage4List"></div>
+        </div>
+        <!-- Stage 5 -->
+        <div class="tracking-column">
+          <div class="column-header">Stage 5<br><small>Fifth 40 Spins</small></div>
+          <div id="stage5List"></div>
+        </div>
+      </div>
+    </div>
+     </div>
+    
+    <!-- Numbers with 100+ misses -->
+    <div class="misses-list">
+      <div class="misses-header">Numbers with 100+ Misses</div>
+      <div class="misses-grid" id="missesGrid"></div>
+    </div>
+    <!-- Stats Summary -->
+    <div class="stats-summary">
+      <div class="stat-item">
+        <div class="stat-value" id="totalColdNumbers">0</div>
+        <div class="stat-label">Active Numbers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="waitingCount">0</div>
+        <div class="stat-label">Waiting</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stage1Count">0</div>
+        <div class="stat-label">Stage 1</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stage2Count">0</div>
+        <div class="stat-label">Stage 2</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stage3Count">0</div>
+        <div class="stat-label">Stage 3</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stage4Count">0</div>
+        <div class="stat-label">Stage 4</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stage5Count">0</div>
+        <div class="stat-label">Stage 5</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalHits">0</div>
+        <div class="stat-label">Total Hits</div>
+      </div>
+   
+    
+    
+  </div>
+
+  <!-- Alert Banner (hidden by default) -->
+  <div id="alertBanner" class="alert-banner" style="display: none;">
+    <div class="alert-number" id="alertNumberDisplay">?</div>
+    <div class="alert-content">
+      <div class="alert-title" id="alertTitle">Play Alert!</div>
+      <div class="alert-message" id="alertMessage"></div>
+      <button class="play-alert-button" onclick="acknowledgeAlert()">Acknowledge</button>
+    </div>
+    <button class="close-alert" onclick="closeAlert()">×</button>
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">?</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // All possible roulette numbers
+    const allNumbers = ["0", "00"].concat(Array.from({length: 36}, (_, i) => (i + 1).toString()));
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let coldNumbers = JSON.parse(localStorage.getItem("coldNumbers") || "[]");
+    let trackingStats = JSON.parse(localStorage.getItem("trackingStats") || '{"totalHits": 0}');
+
+    // Get color for a number
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    // Calculate misses for all numbers
+    function calculateMisses(historyArray = history) {
+      const misses = {};
+      allNumbers.forEach(n => misses[n] = 0);
+      
+      if (historyArray.length === 0) return misses;
+      
+      // Go through history backwards to find most recent occurrence of each number
+      for (let i = historyArray.length - 1; i >= 0; i--) {
+        const num = historyArray[i];
+        if (misses[num] === 0 && historyArray.lastIndexOf(num) === i) {
+          // Found most recent occurrence
+          misses[num] = historyArray.length - 1 - i;
+        }
+      }
+      
+      // For numbers never appeared, misses equals total spins
+      allNumbers.forEach(n => {
+        if (historyArray.indexOf(n) === -1) {
+          misses[n] = historyArray.length;
+        }
+      });
+      
+      return misses;
+    }
+
+    // Update misses display
+    function updateMissesDisplay() {
+      const misses = calculateMisses();
+      const container = document.getElementById("missesGrid");
+      const numbersWith100Misses = allNumbers.filter(n => misses[n] >= 100);
+      
+      if (numbersWith100Misses.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 20px;">No numbers with 100+ misses yet</div>`;
+        return;
+      }
+      
+      container.innerHTML = numbersWith100Misses.map(n => {
+        const colorClass = getColor(n);
+        const isCurrentlyTracked = coldNumbers.some(cn => cn.number === n && cn.active);
+        return `
+          <div class="misses-item ${isCurrentlyTracked ? 'highlight' : ''}">
+            <div class="number-display ${colorClass}" style="width: 30px; height: 30px; margin: 0 auto;">${n}</div>
+            <div style="font-size: 0.7rem; color: #ff6b6b; margin-top: 2px;">${misses[n]} misses</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Show alert to user
+    function showAlert(number, stage, action) {
+      const alertBanner = document.getElementById('alertBanner');
+      const alertNumberDisplay = document.getElementById('alertNumberDisplay');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+      
+      // Set number display with color
+      alertNumberDisplay.textContent = number;
+      alertNumberDisplay.className = `alert-number ${getColor(number)}`;
+      
+      // Set message based on action
+      if (action === 'start_tracking') {
+        alertTitle.textContent = '?? NEW COLD NUMBER APPEARED!';
+        alertMessage.innerHTML = `Number <strong>${number}</strong> has appeared with 100+ misses.<br>Now tracking in <strong>Stage ${stage}</strong> for 40 spins.`;
+      } else if (action === 'stage_completed') {
+        alertTitle.textContent = '?? STAGE COMPLETED!';
+        alertMessage.innerHTML = `Number <strong>${number}</strong> completed Stage ${stage-1} without hitting.<br>Now waiting for next appearance to start <strong>Stage ${stage}</strong>.`;
+      } else if (action === 'next_stage_started') {
+        alertTitle.textContent = '?? START NEXT STAGE!';
+        alertMessage.innerHTML = `Number <strong>${number}</strong> has appeared again.<br>Starting <strong>Stage ${stage}</strong> tracking for 40 spins. <strong>CONSIDER PLAYING THIS NUMBER!</strong>`;
+      } else if (action === 'hit') {
+        alertTitle.textContent = '? HIT!';
+        alertMessage.innerHTML = `Number <strong>${number}</strong> hit during Stage ${stage}!<br>This number is now removed from tracking.`;
+      }
+      
+      // Show the alert
+      alertBanner.style.display = 'flex';
+      
+      // Auto-hide after 10 seconds
+      setTimeout(() => {
+        if (alertBanner.style.display !== 'none') {
+          alertBanner.style.display = 'none';
+        }
+      }, 10000);
+    }
+
+    // Close alert
+    function closeAlert() {
+      document.getElementById('alertBanner').style.display = 'none';
+    }
+
+    // Acknowledge alert
+    function acknowledgeAlert() {
+      closeAlert();
+    }
+
+    // Check if a number should start being tracked (appears with 100+ misses)
+    function shouldStartTracking(number, misses) {
+      // Only track if number appears (is being added) AND has 100+ misses
+      // AND is not already being tracked
+      return misses[number] >= 100 && 
+             !coldNumbers.some(cn => cn.number === number && cn.active);
+    }
+
+    // Add a cold number to tracking
+    function addColdNumber(number, missesCount, stage = 1, fromWaiting = false) {
+      // Check if already tracking (but hit)
+      const existingIndex = coldNumbers.findIndex(cn => cn.number === number && cn.active);
+      if (existingIndex !== -1) {
+        // Already tracking this number, update it
+        coldNumbers[existingIndex].stage = stage;
+        coldNumbers[existingIndex].spinsLeft = 40;
+        coldNumbers[existingIndex].misses = missesCount;
+        coldNumbers[existingIndex].active = true;
+        coldNumbers[existingIndex].waiting = false;
+        return true;
+      }
+      
+      // Start tracking new cold number
+      coldNumbers.push({
+        number: number,
+        stage: stage,
+        spinsLeft: 40,
+        misses: missesCount,
+        addedAtSpin: history.length,
+        active: true,
+        waiting: false,
+        hit: false
+      });
+      
+      return true;
+    }
+
+    // Update cold number tracking on new spin
+    function updateColdTracking(newNumber) {
+      // Calculate misses BEFORE this spin was added
+      const historyBefore = history.slice(0, -1);
+      const missesBefore = calculateMisses(historyBefore);
+      
+      // First, check if new number is a hit for any actively tracked number
+      coldNumbers.forEach(cn => {
+        if (cn.active && cn.number === newNumber) {
+          // HIT! Remove from tracking
+          cn.hit = true;
+          cn.active = false;
+          trackingStats.totalHits = (trackingStats.totalHits || 0) + 1;
+          
+          // Show hit alert
+          showAlert(newNumber, cn.stage, 'hit');
+        }
+      });
+      
+      // Remove hit numbers from active tracking
+      coldNumbers = coldNumbers.filter(cn => {
+        if (cn.hit) {
+          return false;
+        }
+        return true;
+      });
+      
+      // Update spins left for remaining tracked numbers
+      coldNumbers.forEach(cn => {
+        if (cn.active && !cn.waiting) {
+          cn.spinsLeft--;
+          
+          // If spins left reaches 0 and hasn't hit, move to waiting state
+          if (cn.spinsLeft <= 0 && !cn.hit) {
+            if (cn.stage < 5) {
+              // Move to waiting for next stage
+              cn.active = false;
+              cn.waiting = true;
+              cn.nextStage = cn.stage + 1;
+              
+              // Show stage completed alert
+              showAlert(cn.number, cn.nextStage, 'stage_completed');
+            } else {
+              // Stage 5 reached and no hit, keep in stage 5 but inactive
+              cn.active = false;
+              cn.waiting = false;
+            }
+          }
+        }
+      });
+      
+      // Now check if the new number should start being tracked or advance from waiting
+      let isWaitingNumber = false;
+      let waitingNumber = null;
+      
+      // Check if this number was waiting for next stage
+      for (let i = 0; i < coldNumbers.length; i++) {
+        const cn = coldNumbers[i];
+        if (cn.waiting && cn.number === newNumber) {
+          isWaitingNumber = true;
+          waitingNumber = cn;
+          break;
+        }
+      }
+      
+      if (isWaitingNumber && waitingNumber) {
+        // This number was waiting, now it appears again - start tracking in next stage
+        waitingNumber.active = true;
+        waitingNumber.waiting = false;
+        waitingNumber.stage = waitingNumber.nextStage;
+        waitingNumber.spinsLeft = 40;
+        waitingNumber.misses = missesBefore[newNumber];
+        
+        // Show next stage started alert
+        showAlert(newNumber, waitingNumber.stage, 'next_stage_started');
+      } else if (shouldStartTracking(newNumber, missesBefore)) {
+        // New cold number - start tracking in stage 1
+        addColdNumber(newNumber, missesBefore[newNumber], 1);
+        
+        // Show start tracking alert
+        showAlert(newNumber, 1, 'start_tracking');
+      }
+      
+      // Update misses for all tracked numbers with current history (after adding new spin)
+      const currentMisses = calculateMisses();
+      coldNumbers.forEach(cn => {
+        if (cn.active || cn.waiting) {
+          cn.misses = currentMisses[cn.number];
+        }
+      });
+      
+      saveAllData();
+      updateTrackingDisplay();
+      updateMissesDisplay();
+    }
+
+    // Update the tracking display
+    function updateTrackingDisplay() {
+      const stages = [1, 2, 3, 4, 5];
+      const stats = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+      let waitingCount = 0;
+      
+      stages.forEach(stage => {
+        const container = document.getElementById(`stage${stage}List`);
+        const stageNumbers = coldNumbers.filter(cn => 
+          (cn.stage === stage && cn.active) || 
+          (cn.waiting && cn.nextStage === stage)
+        );
+        
+        // Count active numbers in this stage
+        const activeInStage = coldNumbers.filter(cn => cn.stage === stage && cn.active).length;
+        stats[stage] = activeInStage;
+        
+        // Count waiting numbers for this stage
+        const waitingForStage = coldNumbers.filter(cn => cn.waiting && cn.nextStage === stage).length;
+        waitingCount += waitingForStage;
+        
+        if (stageNumbers.length === 0) {
+          container.innerHTML = `<div class="empty-column">No numbers in stage ${stage}</div>`;
+          return;
+        }
+        
+        container.innerHTML = stageNumbers.map(cn => {
+          const colorClass = getColor(cn.number);
+          const isWaiting = cn.waiting;
+          
+          return `
+            <div class="cold-number ${isWaiting ? 'waiting' : `stage-${stage}`}" id="cold-${cn.number}">
+              <div class="number-info">
+                <div class="number-display ${colorClass}">${cn.number}</div>
+                <div>
+                  <div>${cn.misses} <span class="misses-count">misses</span></div>
+                  ${isWaiting ? 
+                    `<div class="waiting-status">Waiting for Stage ${cn.nextStage}</div>` :
+                    `<div class="tracking-stats">${cn.spinsLeft} <span class="spins-left">spins left</span></div>`
+                  }
+                </div>
+              </div>
+              <div style="font-size: 0.8rem; color: ${isWaiting ? '#ff9800' : '#aaa'};">
+                ${isWaiting ? `Stage ${cn.nextStage-1} ?` : `Stage ${cn.stage}`}
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+      
+      // Update stats
+      const activeColdNumbers = coldNumbers.filter(cn => cn.active).length;
+      document.getElementById('totalColdNumbers').textContent = activeColdNumbers;
+      document.getElementById('waitingCount').textContent = waitingCount;
+      document.getElementById('stage1Count').textContent = stats[1];
+      document.getElementById('stage2Count').textContent = stats[2];
+      document.getElementById('stage3Count').textContent = stats[3];
+      document.getElementById('stage4Count').textContent = stats[4];
+      document.getElementById('stage5Count').textContent = stats[5];
+      document.getElementById('totalHits').textContent = trackingStats.totalHits || 0;
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      
+      // Always show exactly 20 boxes (newest first)
+      const displayCount = 20;
+      for (let i = 0; i < displayCount; i++) {
+        const div = document.createElement("div");
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          div.className = `spin-box ${getColor(n)}`;
+          div.textContent = n;
+        } else {
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        container.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+    }
+
+    // Save all data to localStorage
+    function saveAllData() {
+      localStorage.setItem("history", JSON.stringify(history));
+      localStorage.setItem("coldNumbers", JSON.stringify(coldNumbers));
+      localStorage.setItem("trackingStats", JSON.stringify(trackingStats));
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString();
+      }
+      
+      // Add to history
+      history.push(val);
+      
+      // Update cold number tracking
+      updateColdTracking(val);
+      
+      // Reset input and save
+      input.value = "";
+      saveAllData();
+      updateDisplay();
+      status.textContent = `Added spin: ${val}`;
+    }
+
+    // Recalculate all tracking data from history (for undo)
+    function recalculateAllTracking() {
+      // Clear current tracking data
+      coldNumbers = [];
+      trackingStats = { totalHits: 0 };
+      
+      if (history.length === 0) return;
+      
+      // Replay entire history to rebuild tracking
+      for (let i = 0; i < history.length; i++) {
+        const spin = history[i];
+        
+        // Calculate misses up to this point (before this spin)
+        const historyBefore = history.slice(0, i);
+        const missesBefore = calculateMisses(historyBefore);
+        
+        // Check if this spin hits any actively tracked number
+        coldNumbers.forEach(cn => {
+          if (cn.active && cn.number === spin) {
+            // HIT!
+            cn.hit = true;
+            cn.active = false;
+            trackingStats.totalHits = (trackingStats.totalHits || 0) + 1;
+          }
+        });
+        
+        // Remove hit numbers from active tracking
+        coldNumbers = coldNumbers.filter(cn => !cn.hit);
+        
+        // Update spins left for active tracked numbers
+        coldNumbers.forEach(cn => {
+          if (cn.active && !cn.waiting) {
+            cn.spinsLeft--;
+            
+            if (cn.spinsLeft <= 0 && !cn.hit) {
+              if (cn.stage < 5) {
+                // Move to waiting for next stage
+                cn.active = false;
+                cn.waiting = true;
+                cn.nextStage = cn.stage + 1;
+              } else {
+                // Stage 5 reached, remove
+                cn.active = false;
+                cn.waiting = false;
+              }
+            }
+          }
+        });
+        
+        // Clean up inactive
+        coldNumbers = coldNumbers.filter(cn => cn.active || cn.waiting);
+        
+        // Check if this spin should start new tracking or advance from waiting
+        let isWaitingNumber = false;
+        let waitingNumber = null;
+        
+        for (let j = 0; j < coldNumbers.length; j++) {
+          const cn = coldNumbers[j];
+          if (cn.waiting && cn.number === spin) {
+            isWaitingNumber = true;
+            waitingNumber = cn;
+            break;
+          }
+        }
+        
+        if (isWaitingNumber && waitingNumber) {
+          // Was waiting, now appears - start tracking in next stage
+          waitingNumber.active = true;
+          waitingNumber.waiting = false;
+          waitingNumber.stage = waitingNumber.nextStage;
+          waitingNumber.spinsLeft = 40;
+          delete waitingNumber.nextStage;
+        } else if (missesBefore[spin] >= 100 && 
+                  !coldNumbers.some(cn => cn.number === spin && (cn.active || cn.waiting))) {
+          // New cold number - start tracking in stage 1
+          coldNumbers.push({
+            number: spin,
+            stage: 1,
+            spinsLeft: 40,
+            misses: missesBefore[spin],
+            addedAtSpin: i,
+            active: true,
+            waiting: false,
+            hit: false
+          });
+        }
+        
+        // Update misses for all tracked numbers with current history (up to this spin)
+        const currentMisses = calculateMisses(history.slice(0, i + 1));
+        coldNumbers.forEach(cn => {
+          if (cn.active || cn.waiting) {
+            cn.misses = currentMisses[cn.number];
+          }
+        });
+      }
+    }
+
+    // Undo the last action
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      // Remove last spin
+      history.pop();
+      
+      // Recalculate all tracking from scratch
+      recalculateAllTracking();
+      
+      saveAllData();
+      updateDisplay();
+      updateTrackingDisplay();
+      updateMissesDisplay();
+      status.textContent = "Last spin undone - tracking recalculated";
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This will clear spin history and cold number tracking.")) {
+        history = [];
+        coldNumbers = [];
+        trackingStats = { totalHits: 0 };
+        localStorage.removeItem("history");
+        localStorage.removeItem("coldNumbers");
+        localStorage.removeItem("trackingStats");
+        updateDisplay();
+        updateTrackingDisplay();
+        updateMissesDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+        closeAlert();
+      }
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      // Initial display updates
+      updateDisplay();
+      updateTrackingDisplay();
+      updateMissesDisplay();
+      
+      saveAllData();
+    });
+  </script>
+</body>
+</html>

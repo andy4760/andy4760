@@ -2,98 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Purple Roulette Tracker</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-text-size-adjust: 100%;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      padding: 0.8rem;
-      padding-bottom: 70px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #f0f0f0;
       min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      touch-action: manipulation;
     }
     .container {
-      max-width: 100%;
+      max-width: 1200px;
       margin: 0 auto;
     }
     header {
       text-align: center;
-      padding: 0.8rem 0.5rem;
-      margin-bottom: 0.8rem;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
       background: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
     h1 {
       margin: 0;
-      font-size: 1.6rem;
+      font-size: 2rem;
       background: linear-gradient(to right, #ff416c, #ff4b2b);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .tagline {
       color: #ccc;
       font-style: italic;
-      margin-top: 3px;
-      font-size: 0.8rem;
+      margin-top: 5px;
+      font-size: 0.9rem;
     }
     #recentSpins {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       overflow-x: auto;
-      gap: 6px;
-      margin: 0.8rem 0;
+      gap: 8px;
+      margin: 1rem 0;
       justify-content: flex-start;
-      padding: 10px;
+      padding: 12px;
       background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
+      border-radius: 12px;
       scrollbar-width: thin;
       scrollbar-color: #ff4b2b #1a1a2e;
-      min-height: 55px;
-      width: 100%;
-      -webkit-overflow-scrolling: touch;
+      min-height: 65px;
+      width: 1052px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
     }
     #recentSpins::-webkit-scrollbar {
-      height: 8px;
+      height: 10px;
     }
     #recentSpins::-webkit-scrollbar-track {
       background: #1a1a2e;
-      border-radius: 4px;
+      border-radius: 5px;
     }
     #recentSpins::-webkit-scrollbar-thumb {
       background: #ff4b2b;
-      border-radius: 4px;
+      border-radius: 5px;
     }
     .spin-box {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 2px solid #333;
-      border-radius: 7px;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 18px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-      transition: transform 0.15s ease;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
       flex-shrink: 0;
       position: relative;
     }
     .spin-box:hover {
-      transform: scale(1.05);
+      transform: scale(1.1);
       z-index: 10;
     }
     .red { 
@@ -119,80 +117,77 @@
     /* Special number indicators - different colors for different groups */
     .special-dot {
       position: absolute;
-      top: -4px;
-      right: -4px;
-      width: 10px;
-      height: 10px;
+      top: -5px;
+      right: -5px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       border: 1px solid white;
-      box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
     }
-    .special-group1 { background: #ffeb3b; border-color: #ff9800; }
-    .special-group2 { background: #4caf50; border-color: #2e7d32; }
-    .special-group3 { background: #2196f3; border-color: #1976d2; }
+    .special-group1 { background: #ffeb3b; border-color: #ff9800; } /* Yellow for group 1: 12,21,34 */
+    .special-group2 { background: #4caf50; border-color: #2e7d32; } /* Green for group 2: 14,23,32 */
+    .special-group3 { background: #2196f3; border-color: #1976d2; } /* Blue for group 3: 13,24,31 */
     
     .hit-miss-indicator {
       position: absolute;
-      bottom: -2px;
+      bottom: -3px;
       left: 0;
       right: 0;
-      height: 3px;
-      border-radius: 1.5px;
+      height: 4px;
+      border-radius: 2px;
     }
     .hit-indicator {
       background: linear-gradient(90deg, #4caf50, #8bc34a);
-      box-shadow: 0 0 4px rgba(76, 175, 80, 0.8);
+      box-shadow: 0 0 6px rgba(76, 175, 80, 0.8);
     }
     .miss-indicator {
       background: linear-gradient(90deg, #f44336, #ff9800);
-      box-shadow: 0 0 4px rgba(244, 67, 54, 0.8);
+      box-shadow: 0 0 6px rgba(244, 67, 54, 0.8);
     }
     
     .controls {
       display: flex;
       justify-content: center;
-      gap: 8px;
-      margin: 0.8rem 0;
+      gap: 10px;
+      margin: 1rem 0;
       flex-wrap: wrap;
     }
     #entryCount {
       text-align: center;
-      font-size: 0.8rem;
-      margin-top: 4px;
+      font-size: 0.9rem;
+      margin-top: 5px;
       color: #ffab91;
     }
     input {
-      padding: 8px;
-      font-size: 0.9rem;
-      width: 110px;
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
       text-align: center;
       border: 2px solid #444;
-      border-radius: 7px;
+      border-radius: 8px;
       background: rgba(30, 30, 46, 0.8);
       color: white;
       outline: none;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      -webkit-appearance: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     input:focus {
       border-color: #ff4b2b;
     }
     button {
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      border-radius: 7px;
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
       border: none;
       background: rgba(60, 60, 80, 0.9);
       color: white;
       cursor: pointer;
-      transition: all 0.15s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-      min-height: 36px;
-      min-width: 80px;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
     }
-    button:hover, button:active {
+    button:hover {
       background: rgba(80, 80, 100, 0.9);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
     .controls button:nth-child(2) { 
       background: linear-gradient(145deg, #2196f3, #1976d2); 
@@ -213,83 +208,90 @@
       background: linear-gradient(145deg, #ef5350, #e53935); 
     }
     .legend {
-      display: none; /* Hidden on iPad for space */
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .legend-special1 {
+      background: #ffeb3b;
+    }
+    .legend-special2 {
+      background: #4caf50;
+    }
+    .legend-special3 {
+      background: #2196f3;
     }
     .input-status {
       text-align: center;
-      height: 18px;
-      margin-top: 4px;
-      font-size: 0.75rem;
-      color: #ffab91;
-      width: 100%;
-    }
-    
-    /* Current Sequence Display */
-    .current-sequence {
-      text-align: center;
-      margin: 8px 0;
-      padding: 8px;
-      background: rgba(30, 30, 50, 0.4);
-      border-radius: 7px;
-      border: 1px solid rgba(33, 150, 243, 0.3);
-    }
-    
-    .sequence-display {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #2196f3;
-      margin: 4px 0;
-      word-break: break-word;
-    }
-    
-    .sequence-status {
+      height: 20px;
+      margin-top: 5px;
       font-size: 0.8rem;
-      color: #aaa;
-      margin-top: 2px;
-      word-break: break-word;
+      color: #ffab91;
     }
     
-    /* Tracking Container with Vertical Scroll - iPad Optimized */
+    /* Tracking Container with Vertical Scroll */
     .tracking-container {
-      margin: 1rem 0;
+      margin: 1.5rem 0;
       background: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      padding: 12px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-      max-height: 450px; /* Optimized for iPad Mini 2 */
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      max-height: 550px; /* Slightly taller for more systems */
+      overflow-y: auto; /* Vertical scroll only */
+      overflow-x: hidden; /* Prevent horizontal scroll */
     }
     
     .tracking-container::-webkit-scrollbar {
-      width: 8px;
+      width: 10px;
     }
     
     .tracking-container::-webkit-scrollbar-track {
       background: #1a1a2e;
-      border-radius: 4px;
+      border-radius: 5px;
     }
     
     .tracking-container::-webkit-scrollbar-thumb {
       background: #ff4b2b;
-      border-radius: 4px;
+      border-radius: 5px;
     }
     
     .tracking-container::-webkit-scrollbar-thumb:hover {
       background: #ff2b5b;
     }
     
-    /* Tracking Line Styling - iPad Optimized */
+    /* Tracking Line Styling */
     .tracking-line {
       display: flex;
-      flex-direction: column;
-      padding: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
       background: rgba(30, 30, 50, 0.4);
-      border-radius: 7px;
-      margin-bottom: 8px;
-      min-height: auto;
-      gap: 8px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      min-height: 70px;
     }
     
     .tracking-line:last-child {
@@ -298,43 +300,38 @@
     
     .numbers-display {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex: 1;
     }
     
     .numbers-label {
       font-weight: bold;
-      font-size: 0.85rem;
-      color: inherit;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      min-width: 200px;
+      font-size: 0.9rem;
     }
     
     .special-numbers {
       display: flex;
+      gap: 5px;
       flex-wrap: wrap;
-      gap: 4px;
-      width: 100%;
+      flex: 1;
     }
     
     .special-number {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.9rem;
       font-weight: bold;
       border: 1px solid;
-      flex: 1;
-      min-width: 32px;
-      text-align: center;
     }
     
     .group-numbers-container {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 5px;
     }
     
     .group-numbers {
@@ -343,37 +340,34 @@
     }
     
     .group-number {
-      padding: 3px 6px;
+      padding: 4px 8px;
       border-radius: 4px;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: bold;
       border: 1px solid;
-      flex: 1;
-      text-align: center;
     }
     
     .stats-display {
       display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      width: 100%;
-      padding-top: 4px;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      align-items: center;
+      gap: 25px;
+      min-width: 200px;
+      justify-content: flex-end;
     }
     
     .stat-item {
       text-align: center;
-      flex: 1;
+      min-width: 80px;
     }
     
     .stat-label {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: #aaa;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     
     .stat-value {
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       font-weight: bold;
     }
     
@@ -386,18 +380,17 @@
     }
     
     .logic-info {
-      margin-top: 12px;
-      padding: 10px;
+      margin-top: 15px;
+      padding: 12px;
       background: rgba(30, 30, 50, 0.5);
-      border-radius: 7px;
-      font-size: 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
       color: #aaa;
       border: 1px solid rgba(255, 152, 0, 0.3);
     }
     
     .logic-info strong {
       color: #ff9800;
-      font-size: 0.85rem;
     }
     
     .rule-highlight {
@@ -405,15 +398,37 @@
       font-weight: bold;
     }
     
+    .current-sequence {
+      text-align: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(30, 30, 50, 0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+    }
+    
+    .sequence-display {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #2196f3;
+      margin: 5px 0;
+    }
+    
+    .sequence-status {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 3px;
+    }
+    
     .alert-badge {
       display: inline-block;
-      padding: 2px 6px;
+      padding: 2px 8px;
       background: #ff416c;
       color: white;
-      border-radius: 8px;
-      font-size: 0.7rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
       font-weight: bold;
-      margin-left: 6px;
+      margin-left: 8px;
       animation: pulse 1.5s infinite;
     }
     
@@ -423,26 +438,62 @@
       100% { opacity: 1; }
     }
     
-    /* Colors for the tracking systems - iPad Optimized */
-    .all9-color { border-left: 4px solid #ff416c !important; }
-    .system1-color { border-left: 4px solid #9c27b0 !important; }
-    .system2-color { border-left: 4px solid #4caf50 !important; }
-    .system3-color { border-left: 4px solid #2196f3 !important; }
-    .system4-color { border-left: 4px solid #ff9800 !important; }
-    .system5-color { border-left: 4px solid #e91e63 !important; }
-    .system6-color { border-left: 4px solid #00bcd4 !important; }
-    .system7-color { border-left: 4px solid #8bc34a !important; }
-    .sequence-color { border-left: 4px solid #ff5722 !important; }
+    /* Colors for the tracking systems */
+    .all9-color { 
+      border-left: 4px solid #ff416c !important; 
+    }
+    .system1-color { 
+      border-left: 4px solid #9c27b0 !important; 
+    }
+    .system2-color { 
+      border-left: 4px solid #4caf50 !important; 
+    }
+    .system3-color { 
+      border-left: 4px solid #2196f3 !important; 
+    }
+    .system4-color { 
+      border-left: 4px solid #ff9800 !important; 
+    }
+    .system5-color { 
+      border-left: 4px solid #e91e63 !important; 
+    }
+    .system6-color { 
+      border-left: 4px solid #00bcd4 !important; 
+    }
+    .system7-color { 
+      border-left: 4px solid #8bc34a !important; 
+    }
+    .sequence-color { 
+      border-left: 4px solid #ff5722 !important; 
+    }
     
-    .all9-text { color: #ff416c !important; }
-    .system1-text { color: #9c27b0 !important; }
-    .system2-text { color: #4caf50 !important; }
-    .system3-text { color: #2196f3 !important; }
-    .system4-text { color: #ff9800 !important; }
-    .system5-text { color: #e91e63 !important; }
-    .system6-text { color: #00bcd4 !important; }
-    .system7-text { color: #8bc34a !important; }
-    .sequence-text { color: #ff5722 !important; }
+    .all9-text { 
+      color: #ff416c !important; 
+    }
+    .system1-text { 
+      color: #9c27b0 !important; 
+    }
+    .system2-text { 
+      color: #4caf50 !important; 
+    }
+    .system3-text { 
+      color: #2196f3 !important; 
+    }
+    .system4-text { 
+      color: #ff9800 !important; 
+    }
+    .system5-text { 
+      color: #e91e63 !important; 
+    }
+    .system6-text { 
+      color: #00bcd4 !important; 
+    }
+    .system7-text { 
+      color: #8bc34a !important; 
+    }
+    .sequence-text { 
+      color: #ff5722 !important; 
+    }
     
     .all9-special-number {
       background: rgba(255, 65, 108, 0.2);
@@ -508,44 +559,42 @@
       border: 1px solid rgba(33, 150, 243, 0.3); 
     }
     
-    /* Numpad - iPad Optimized */
     .numpad {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(26, 26, 46, 0.97);
-      padding: 10px;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
       display: flex;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: nowrap;
       overflow-x: auto;
       z-index: 100;
       border-top: 2px solid #ff4b2b;
-      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.4);
-      max-height: 70px;
-      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
     }
     .numpad button {
       flex: 1;
-      min-width: 50px;
-      padding: 10px 0;
-      font-size: 1rem;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
       text-align: center;
       border: none;
-      border-radius: 8px;
-      background: rgba(50, 50, 70, 0.95);
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
       color: white;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
     }
     .numpad button:active {
       transform: scale(0.95);
     }
     .numpad button:hover {
-      background: rgba(70, 70, 90, 0.95);
+      background: rgba(70, 70, 90, 0.9);
     }
     .numpad .enter { 
       background: linear-gradient(145deg, #4caf50, #2e7d32); 
@@ -560,171 +609,133 @@
       background: linear-gradient(145deg, #ef5350, #e53935); 
     }
     
-    /* iPad Mini 2 Specific Optimizations */
-    @media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-      body {
-        padding: 0.6rem;
-        padding-bottom: 65px;
-      }
-      
-      header {
-        padding: 0.6rem 0.4rem;
-        margin-bottom: 0.6rem;
-      }
-      
-      h1 {
-        font-size: 1.4rem;
-      }
-      
-      .tagline {
-        font-size: 0.75rem;
-      }
-      
+    @media (max-width: 1100px) {
       #recentSpins {
-        min-height: 50px;
-        padding: 8px;
-      }
-      
-      .spin-box {
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
-      }
-      
-      .controls {
-        gap: 6px;
-        margin: 0.6rem 0;
-      }
-      
-      input {
-        width: 100px;
-        padding: 7px;
-        font-size: 0.85rem;
-      }
-      
-      button {
-        padding: 7px 10px;
-        font-size: 0.8rem;
-        min-width: 70px;
+        width: 100%;
+        max-width: 100%;
       }
       
       .tracking-container {
-        max-height: 400px;
+        max-height: 650px; /* Taller for more systems on smaller screens */
+      }
+      
+      .tracking-line {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        min-height: auto;
+      }
+      
+      .numbers-display {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .stats-display {
+        justify-content: flex-start;
+        min-width: auto;
+        width: 100%;
+      }
+      
+      .numbers-label {
+        min-width: 150px;
+      }
+      
+      .special-numbers {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+      
+      .tracking-container {
+        max-height: 750px; /* Even taller on mobile for better scrolling */
         padding: 10px;
       }
       
       .tracking-line {
-        padding: 8px;
-        margin-bottom: 6px;
-      }
-      
-      .special-number {
-        padding: 3px 6px;
-        font-size: 0.75rem;
-        min-width: 30px;
+        padding: 10px;
       }
       
       .numbers-label {
-        font-size: 0.8rem;
+        min-width: 120px;
+        font-size: 0.85rem;
       }
       
-      .stat-value {
-        font-size: 1.1rem;
-      }
-      
-      .numpad {
-        padding: 8px;
-        max-height: 65px;
-      }
-      
-      .numpad button {
-        min-width: 45px;
-        padding: 9px 0;
-        font-size: 0.9rem;
-      }
-      
-      .current-sequence {
-        padding: 6px;
-        margin: 6px 0;
-      }
-      
-      .sequence-display {
-        font-size: 0.9rem;
-      }
-      
-      .sequence-status {
-        font-size: 0.75rem;
-      }
-    }
-    
-    @media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-      body {
-        padding: 0.5rem;
-        padding-bottom: 60px;
-      }
-      
-      .tracking-container {
-        max-height: 300px;
-      }
-      
-      .tracking-line {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-      
-      .numbers-display {
-        flex-direction: row;
-        align-items: center;
-        width: auto;
-        flex: 1;
-      }
-      
-      .special-numbers {
-        flex: 1;
-      }
-      
-      .stats-display {
-        width: auto;
-        padding-top: 0;
-        border-top: none;
-      }
-      
-      .numbers-label {
-        min-width: 140px;
-      }
-      
-      #recentSpins {
-        min-height: 45px;
-      }
-      
-      .spin-box {
-        width: 35px;
-        height: 35px;
-        font-size: 15px;
-      }
-    }
-    
-    /* Small screen optimizations */
-    @media screen and (max-width: 767px) {
-      body {
-        padding: 0.5rem;
-        padding-bottom: 60px;
-      }
-      
-      .tracking-container {
-        max-height: 500px;
+      .special-numbers, .group-numbers {
+        gap: 4px;
       }
       
       .special-number, .group-number {
-        padding: 3px 5px;
-        font-size: 0.7rem;
+        padding: 4px 8px;
+        font-size: 0.8rem;
       }
       
-      .numpad button {
-        min-width: 40px;
-        padding: 8px 0;
-        font-size: 0.9rem;
+      .stats-display {
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+      
+      .stat-item {
+        min-width: 70px;
+      }
+      
+      .stat-value {
+        font-size: 1.2rem;
+      }
+      
+      .group-numbers-container {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .tracking-container {
+        max-height: 850px; /* Maximum height on very small screens */
+      }
+      
+      .special-number, .group-number {
+        padding: 3px 6px;
+        font-size: 0.75rem;
+      }
+      
+      .numbers-label {
+        min-width: 100px;
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -740,7 +751,7 @@
     <div id="entryCount">Total spins: 0</div>
     
     <div class="controls">
-      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" inputmode="numeric" />
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
       <button onclick="addNumber()">Add Spin</button>
       <button onclick="undo()">Undo Last</button>
       <button onclick="resetAll()" id="resetButton">Reset All</button>
@@ -1105,14 +1116,14 @@
       }
     };
     
-    // Sequence groups
+    // Sequence groups - CORRECTED RULES
     const SEQUENCE_GROUPS = {
-      group1: ["12", "21", "34"],
-      group2: ["14", "23", "32"],
-      group3: ["13", "24", "31"]
+      group1: ["12", "21", "34"],  // When 12, 21, or 34 appears ? next needs 12, 21, or 34
+      group2: ["14", "23", "32"],  // When 14, 23, or 32 appears ? next needs 14, 23, or 32
+      group3: ["13", "24", "31"]   // When 13, 24, or 31 appears ? next needs 13, 24, or 31
     };
 
-    // Thresholds for alerts
+    // Thresholds for alerts (15+ for all systems, 40+ for sequence)
     const ALERT_THRESHOLDS = {
       all9: 15,
       system1: 15,
@@ -1122,21 +1133,70 @@
       system5: 15,
       system6: 15,
       system7: 15,
-      sequence9: 40
+      sequence9: 40 // Higher threshold for sequence system
     };
 
     // Initialize data from localStorage or defaults
     let history = JSON.parse(localStorage.getItem("history") || "[]");
     let trackingData = JSON.parse(localStorage.getItem("trackingData") || JSON.stringify({
-      all9: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system1: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system2: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system3: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system4: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system5: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system6: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      system7: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-      sequence9: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null, lastSpecialGroup: null }
+      // All 9 numbers tracking (Original System)
+      all9: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      // New tracking systems
+      system1: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      system2: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      system3: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      system4: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      system5: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      system6: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      system7: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null
+      },
+      // 9 Special Track Sequence tracking
+      sequence9: {
+        hits: 0,
+        misses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        lastSpecialGroup: null
+      }
     }));
 
     // Get color for a number
@@ -1158,7 +1218,7 @@
       if (TRACKING_SYSTEMS[system] && TRACKING_SYSTEMS[system].color) {
         return TRACKING_SYSTEMS[system].color;
       }
-      return "#2196f3";
+      return "#2196f3"; // Default blue
     }
 
     // Check which sequence group a number belongs to
@@ -1178,6 +1238,7 @@
 
     // Check and trigger alerts based on thresholds
     function checkAlerts() {
+      // Check each system for alerts
       for (const system in ALERT_THRESHOLDS) {
         const alertElement = document.getElementById(`${system}Alert`);
         if (alertElement) {
@@ -1185,6 +1246,7 @@
             alertElement.style.display = "inline";
             alertElement.innerHTML = `⚠️ <strong>${getSystemDisplayName(system)}:</strong> Misses ${ALERT_THRESHOLDS[system]}+ (${trackingData[system].misses})`;
             
+            // Show browser alert when threshold is first reached
             if (trackingData[system].misses === ALERT_THRESHOLDS[system]) {
               setTimeout(() => {
                 alert(`⚠️ ALERT: ${getSystemDisplayName(system)} misses reached ${ALERT_THRESHOLDS[system]}!`);
@@ -1215,9 +1277,11 @@
       for (const system in TRACKING_SYSTEMS) {
         if (trackingData[system] && trackingData[system].waitingForNext) {
           if (isInTrackingSystem(numStr, system)) {
+            // HIT for this tracking system
             trackingData[system].hits++;
-            trackingData[system].misses = 0;
+            trackingData[system].misses = 0; // Reset misses on hit
           } else {
+            // MISS for this tracking system
             trackingData[system].misses++;
           }
           trackingData[system].waitingForNext = false;
@@ -1232,9 +1296,11 @@
       // Update 9 Special Track Sequence tracking
       if (trackingData.sequence9.waitingForNext) {
         if (isValidForSequenceGroup(numStr, trackingData.sequence9.lastSpecialGroup)) {
+          // HIT for sequence tracking
           trackingData.sequence9.hits++;
-          trackingData.sequence9.misses = 0;
+          trackingData.sequence9.misses = 0; // Reset misses on hit
         } else {
+          // MISS for sequence tracking
           trackingData.sequence9.misses++;
         }
         trackingData.sequence9.waitingForNext = false;
@@ -1250,7 +1316,7 @@
       saveTrackingData();
       updateStatsDisplay();
       updateSequenceDisplay();
-      checkAlerts();
+      checkAlerts(); // Check alerts after updating tracking data
     }
 
     // Update the display with current data
@@ -1307,7 +1373,7 @@
     function updateStatsDisplay() {
       // Update all systems stats
       for (const system in trackingData) {
-        if (system === 'sequence9') continue;
+        if (system === 'sequence9') continue; // Handle sequence separately
         
         const missesElement = document.getElementById(`misses${system.charAt(0).toUpperCase() + system.slice(1)}`);
         const hitsElement = document.getElementById(`hits${system.charAt(0).toUpperCase() + system.slice(1)}`);
@@ -1338,6 +1404,7 @@
       const missesSequence9 = document.getElementById("missesSequence9");
       missesSequence9.textContent = trackingData.sequence9.misses;
       
+      // Add alert badge if threshold reached
       if (trackingData.sequence9.misses >= ALERT_THRESHOLDS.sequence9) {
         if (!missesSequence9.querySelector('.alert-badge')) {
           const badge = document.createElement('span');
@@ -1429,7 +1496,7 @@
           status.textContent = "Invalid number (0-36 or 00)";
           return;
         }
-        val = num.toString();
+        val = num.toString(); // Normalize to string
       }
       
       // Add to history
@@ -1489,7 +1556,7 @@
       updateDisplay();
       updateStatsDisplay();
       updateSequenceDisplay();
-      checkAlerts();
+      checkAlerts(); // Check alerts after undo
       status.textContent = `Undo: ${lastVal} removed`;
     }
 
@@ -1498,22 +1565,68 @@
       if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
         history = [];
         trackingData = {
-          all9: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system1: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system2: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system3: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system4: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system5: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system6: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          system7: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-          sequence9: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null, lastSpecialGroup: null }
+          all9: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system1: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system2: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system3: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system4: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system5: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system6: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          system7: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null
+          },
+          sequence9: {
+            hits: 0,
+            misses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            lastSpecialGroup: null
+          }
         };
         localStorage.removeItem("history");
         localStorage.removeItem("trackingData");
         updateDisplay();
         updateStatsDisplay();
         updateSequenceDisplay();
-        checkAlerts();
+        checkAlerts(); // Check alerts after reset (should clear them)
         document.getElementById("inputStatus").textContent = "All data reset";
       }
     }
@@ -1522,21 +1635,74 @@
     function recalculateTrackingData() {
       // Reset all tracking data
       trackingData = {
-        all9: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system1: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system2: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system3: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system4: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system5: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system6: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        system7: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null },
-        sequence9: { hits: 0, misses: 0, waitingForNext: false, lastSpecial: null, lastSpecialGroup: null }
+        all9: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system1: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system2: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system3: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system4: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system5: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system6: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        system7: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null
+        },
+        sequence9: {
+          hits: 0,
+          misses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          lastSpecialGroup: null
+        }
       };
       
       // Track waiting states for each system
       const waitingStates = {
-        all9: false, system1: false, system2: false, system3: false, system4: false,
-        system5: false, system6: false, system7: false, sequence9: false
+        all9: false,
+        system1: false,
+        system2: false,
+        system3: false,
+        system4: false,
+        system5: false,
+        system6: false,
+        system7: false,
+        sequence9: false
       };
       
       let sequence9LastSpecial = null;
@@ -1551,7 +1717,7 @@
           if (waitingStates[system]) {
             if (isInTrackingSystem(numStr, system)) {
               trackingData[system].hits++;
-              trackingData[system].misses = 0;
+              trackingData[system].misses = 0; // Reset on hit
             } else {
               trackingData[system].misses++;
             }
@@ -1568,7 +1734,7 @@
         if (waitingStates.sequence9) {
           if (isValidForSequenceGroup(numStr, sequence9LastGroup)) {
             trackingData.sequence9.hits++;
-            trackingData.sequence9.misses = 0;
+            trackingData.sequence9.misses = 0; // Reset on hit
           } else {
             trackingData.sequence9.misses++;
           }
@@ -1626,13 +1792,13 @@
         if (e.key === "Enter") addNumber();
       });
       
-      // Recalculate tracking data on load
+      // Recalculate tracking data on load in case of data corruption
       recalculateTrackingData();
       
       updateDisplay();
       updateStatsDisplay();
       updateSequenceDisplay();
-      checkAlerts();
+      checkAlerts(); // Check alerts on page load
     });
   </script>
 </body>

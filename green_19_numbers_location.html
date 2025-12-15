@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Roulette Tracker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+      width: 1052px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .hit-miss-indicator {
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-radius: 2px;
+    }
+    .hit-indicator {
+      background: linear-gradient(90deg, #4caf50, #8bc34a);
+      box-shadow: 0 0 6px rgba(76, 175, 80, 0.8);
+    }
+    .miss-indicator {
+      background: linear-gradient(90deg, #f44336, #ff9800);
+      box-shadow: 0 0 6px rgba(244, 67, 54, 0.8);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    
+    /* Tracking Container with Vertical Scroll */
+    .tracking-container {
+      margin: 1.5rem 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      max-height: 550px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    .tracking-container::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    .tracking-container::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    
+    .tracking-container::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    
+    .tracking-container::-webkit-scrollbar-thumb:hover {
+      background: #ff2b5b;
+    }
+    
+    /* Tracking Line Styling */
+    .tracking-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: rgba(30, 30, 50, 0.4);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      min-height: 70px;
+    }
+    
+    .tracking-line:last-child {
+      margin-bottom: 0;
+    }
+    
+    .numbers-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    
+    .numbers-label {
+      font-weight: bold;
+      min-width: 200px;
+      font-size: 0.9rem;
+    }
+    
+    .special-numbers {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    
+    .special-number {
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border: 1px solid;
+    }
+    
+    .stats-display {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-width: 250px;
+      justify-content: flex-end;
+    }
+    
+    .stat-item {
+      text-align: center;
+      min-width: 70px;
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-bottom: 3px;
+    }
+    
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    
+    .misses-stat {
+      color: #f44336;
+    }
+    
+    .total-misses-stat {
+      color: #ff9800;
+    }
+    
+    .hits-stat {
+      color: #4caf50;
+    }
+    
+    .logic-info {
+      margin-top: 15px;
+      padding: 12px;
+      background: rgba(30, 30, 50, 0.5);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #aaa;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+    
+    .logic-info strong {
+      color: #ff9800;
+    }
+    
+    .rule-highlight {
+      color: #ffeb3b;
+      font-weight: bold;
+    }
+    
+    .current-sequence {
+      text-align: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(30, 30, 50, 0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+    }
+    
+    .sequence-display {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #2196f3;
+      margin: 5px 0;
+    }
+    
+    .sequence-status {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 3px;
+    }
+    
+    .possible-numbers-container {
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(30, 30, 50, 0.6);
+      border-radius: 6px;
+      border: 1px solid rgba(33, 150, 243, 0.2);
+    }
+    
+    .possible-numbers-label {
+      font-size: 0.8rem;
+      color: #ff9800;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .possible-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+    }
+    
+    /* UPDATED: Possible number with roulette colors */
+    .possible-number {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      border: 2px solid;
+      min-width: 30px;
+      text-align: center;
+    }
+    
+    .possible-number.red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+      color: white;
+      border-color: #b71c1c;
+    }
+    
+    .possible-number.black {
+      background: linear-gradient(145deg, #212121, #000000);
+      color: white;
+      border-color: #111;
+    }
+    
+    .possible-number.green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+      color: white;
+      border-color: #1b5e20;
+    }
+    
+    /* NEW: All Systems Stats Container */
+    .all-systems-stats-container {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(30, 30, 50, 0.6);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+    
+    .all-systems-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 5px;
+    }
+    
+    .all-systems-stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: rgba(40, 40, 60, 0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .all-systems-stat-label {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    
+    .all-systems-stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ff9800;
+    }
+    
+    .all-systems-hits-value {
+      color: #4caf50;
+    }
+    
+    .alert-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #ff416c;
+      color: white;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-left: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    
+    /* Colors for the tracking systems */
+    .system1-color { 
+      border-left: 4px solid #9c27b0 !important; 
+    }
+    .system2-color { 
+      border-left: 4px solid #4caf50 !important; 
+    }
+    .system3-color { 
+      border-left: 4px solid #2196f3 !important; 
+    }
+    .system4-color { 
+      border-left: 4px solid #ff9800 !important; 
+    }
+    .system5-color { 
+      border-left: 4px solid #e91e63 !important; 
+    }
+    .system6-color { 
+      border-left: 4px solid #00bcd4 !important; 
+    }
+    .system7-color { 
+      border-left: 4px solid #8bc34a !important; 
+    }
+    
+    .system1-text { 
+      color: #9c27b0 !important; 
+    }
+    .system2-text { 
+      color: #4caf50 !important; 
+    }
+    .system3-text { 
+      color: #2196f3 !important; 
+    }
+    .system4-text { 
+      color: #ff9800 !important; 
+    }
+    .system5-text { 
+      color: #e91e63 !important; 
+    }
+    .system6-text { 
+      color: #00bcd4 !important; 
+    }
+    .system7-text { 
+      color: #8bc34a !important; 
+    }
+    
+    .system1-special-number {
+      background: rgba(156, 39, 176, 0.2);
+      border-color: rgba(156, 39, 176, 0.4);
+      color: #9c27b0;
+    }
+    
+    .system2-special-number {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.4);
+      color: #4caf50;
+    }
+    
+    .system3-special-number {
+      background: rgba(33, 150, 243, 0.2);
+      border-color: rgba(33, 150, 243, 0.4);
+      color: #2196f3;
+    }
+    
+    .system4-special-number {
+      background: rgba(255, 152, 0, 0.2);
+      border-color: rgba(255, 152, 0, 0.4);
+      color: #ff9800;
+    }
+    
+    .system5-special-number {
+      background: rgba(233, 30, 99, 0.2);
+      border-color: rgba(233, 30, 99, 0.4);
+      color: #e91e63;
+    }
+    
+    .system6-special-number {
+      background: rgba(0, 188, 212, 0.2);
+      border-color: rgba(0, 188, 212, 0.4);
+      color: #00bcd4;
+    }
+    
+    .system7-special-number {
+      background: rgba(139, 195, 74, 0.2);
+      border-color: rgba(139, 195, 74, 0.4);
+      color: #8bc34a;
+    }
+    
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    
+    @media (max-width: 1100px) {
+      #recentSpins {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .tracking-container {
+        max-height: 650px;
+      }
+      
+      .tracking-line {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        min-height: auto;
+      }
+      
+      .numbers-display {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .stats-display {
+        justify-content: flex-start;
+        min-width: auto;
+        width: 100%;
+      }
+      
+      .numbers-label {
+        min-width: 150px;
+      }
+      
+      .special-numbers {
+        width: 100%;
+      }
+      
+      .all-systems-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+      
+      .tracking-container {
+        max-height: 750px;
+        padding: 10px;
+      }
+      
+      .tracking-line {
+        padding: 10px;
+      }
+      
+      .numbers-label {
+        min-width: 120px;
+        font-size: 0.85rem;
+      }
+      
+      .special-numbers {
+        gap: 4px;
+      }
+      
+      .special-number {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+      }
+      
+      .stats-display {
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      
+      .stat-item {
+        min-width: 60px;
+      }
+      
+      .stat-value {
+        font-size: 1rem;
+      }
+      
+      .possible-numbers-container {
+        max-height: 100px;
+      }
+      
+      .possible-number {
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        min-width: 26px;
+      }
+      
+      .all-systems-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      
+      .all-systems-stat-item {
+        padding: 8px;
+      }
+      
+      .all-systems-stat-label {
+        font-size: 0.8rem;
+      }
+      
+      .all-systems-stat-value {
+        font-size: 1.3rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .tracking-container {
+        max-height: 850px;
+      }
+      
+      .special-number {
+        padding: 3px 6px;
+        font-size: 0.75rem;
+      }
+      
+      .numbers-label {
+        min-width: 100px;
+        font-size: 0.8rem;
+      }
+      
+      .stat-item {
+        min-width: 50px;
+      }
+      
+      .stat-label {
+        font-size: 0.7rem;
+      }
+      
+      .possible-numbers-container {
+        max-height: 80px;
+      }
+      
+      .possible-number {
+        padding: 2px 4px;
+        font-size: 0.7rem;
+        min-width: 24px;
+      }
+      
+      .all-systems-stat-label {
+        font-size: 0.75rem;
+      }
+      
+      .all-systems-stat-value {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker</h1>
+      <div class="tagline">Track your recent spins and special number patterns</div>
+    </header>
+    
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+
+    <!-- Current Sequence Display -->
+    <div class="current-sequence">
+      <div class="sequence-display" id="currentSequenceDisplay">Waiting for trigger number...</div>
+      <div class="sequence-status" id="currentStatusDisplay">Add a trigger number to start tracking</div>
+      <div id="possibleNumbersDisplay" class="possible-numbers-container" style="display: none;">
+        <div class="possible-numbers-label">Possible Numbers:</div>
+        <div class="possible-numbers" id="possibleNumbersList"></div>
+      </div>
+      
+      <!-- NEW: All Systems Stats Display -->
+      <div id="allSystemsStatsDisplay" class="all-systems-stats-container">
+        <div class="all-systems-stats-grid">
+          <div class="all-systems-stat-item">
+            <div class="all-systems-stat-label">All Systems Misses:</div>
+            <div class="all-systems-stat-value" id="allSystemsMisses">0</div>
+          </div>
+          <div class="all-systems-stat-item">
+            <div class="all-systems-stat-label">All Systems Hits:</div>
+            <div class="all-systems-stat-value all-systems-hits-value" id="allSystemsHits">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simplified Tracking Display with Vertical Scroll -->
+    <div class="tracking-container">
+      <!-- System 1 - UPDATED LOGIC -->
+      <div class="tracking-line system1-color">
+        <div class="numbers-display">
+          <div class="numbers-label system1-text">System 1 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system1-special-number">13</div>
+            <div class="special-number system1-special-number">15</div>
+            <div class="special-number system1-special-number">18</div>
+            <div class="special-number system1-special-number">24</div>
+            <div class="special-number system1-special-number">32</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem1">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem1">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem1">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System 2 - UPDATED LOGIC -->
+      <div class="tracking-line system2-color">
+        <div class="numbers-display">
+          <div class="numbers-label system2-text">System 2 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system2-special-number">8</div>
+            <div class="special-number system2-special-number">19</div>
+            <div class="special-number system2-special-number">26</div>
+            <div class="special-number system2-special-number">34</div>
+            <div class="special-number system2-special-number">21</div>
+            <div class="special-number system2-special-number">33</div>
+            <div class="special-number system2-special-number">36</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem2">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem2">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem2">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System 3 - UPDATED LOGIC -->
+      <div class="tracking-line system3-color">
+        <div class="numbers-display">
+          <div class="numbers-label system3-text">System 3 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system3-special-number">14</div>
+            <div class="special-number system3-special-number">23</div>
+            <div class="special-number system3-special-number">28</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem3">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem3">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem3">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System 4 - UPDATED LOGIC -->
+      <div class="tracking-line system4-color">
+        <div class="numbers-display">
+          <div class="numbers-label system4-text">System 4 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system4-special-number">00</div>
+            <div class="special-number system4-special-number">17</div>
+            <div class="special-number system4-special-number">30</div>
+            <div class="special-number system4-special-number">31</div>
+            <div class="special-number system4-special-number">12</div>
+            <div class="special-number system4-special-number">25</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem4">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem4">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem4">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System 5 - UPDATED REQUIRED NUMBERS -->
+      <div class="tracking-line system5-color">
+        <div class="numbers-display">
+          <div class="numbers-label system5-text">System 5 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system5-special-number">2</div>
+            <div class="special-number system5-special-number">10</div>
+            <div class="special-number system5-special-number">27</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem5">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem5">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem5">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System 6 - UPDATED REQUIRED NUMBERS -->
+      <div class="tracking-line system6-color">
+        <div class="numbers-display">
+          <div class="numbers-label system6-text">System 6 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system6-special-number">4</div>
+            <div class="special-number system6-special-number">7</div>
+            <div class="special-number system6-special-number">9</div>
+            <div class="special-number system6-special-number">16</div>
+            <div class="special-number system6-special-number">20</div>
+            <div class="special-number system6-special-number">3</div>
+            <div class="special-number system6-special-number">22</div>
+            <div class="special-number system6-special-number">29</div>
+            <div class="special-number system6-special-number">35</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem6">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem6">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem6">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System 7 - Unchanged -->
+      <div class="tracking-line system7-color">
+        <div class="numbers-display">
+          <div class="numbers-label system7-text">System 7 (Triggers):</div>
+          <div class="special-numbers">
+            <div class="special-number system7-special-number">5</div>
+            <div class="special-number system7-special-number">6</div>
+            <div class="special-number system7-special-number">11</div>
+            <div class="special-number system7-special-number">0</div>
+            <div class="special-number system7-special-number">1</div>
+            <div class="special-number system7-special-number">7</div>
+            <div class="special-number system7-special-number">16</div>
+          </div>
+        </div>
+        <div class="stats-display">
+          <div class="stat-item">
+            <div class="stat-label">Misses:</div>
+            <div class="stat-value misses-stat" id="missesSystem7">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Hits:</div>
+            <div class="stat-value hits-stat" id="hitsSystem7">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Total Misses:</div>
+            <div class="stat-value total-misses-stat" id="totalMissesSystem7">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="logic-info">
+        <strong>Updated Rules for Systems 1-7:</strong><br>
+        • <span class="rule-highlight">System 1:</span> When 13,15,18,24,32 appears ? next must be: 5,6,11,0,1,7,16,13,15,18,24,32,8,19,26,34,21,33,36<br>
+        • <span class="rule-highlight">System 2:</span> When 8,19,26,34,21,33,36 appears ? next must be: 13,15,18,24,32,8,19,26,34,21,33,36,14,23,28,00,17,30,12<br>
+        • <span class="rule-highlight">System 3:</span> When 14,23,28 appears ? next must be: 8,19,26,34,21,33,36,14,23,28,00,17,30,31,12,25,2,10,27<br>
+        • <span class="rule-highlight">System 4:</span> When 00,17,30,31,12,25 appears ? next must be: 8,21,26,14,23,28,00,17,30,31,12,25,2,10,27,3,29,9,20<br>
+        • <span class="rule-highlight">System 5:</span> When 2,10,27 appears ? next must be: 0,00,2,3,4,7,9,10,12,16,17,20,22,25,27,29,30,31,35<br>
+        • <span class="rule-highlight">System 6:</span> When 4,7,9,16,20,3,22,29,35 appears ? next must be: 0,1,2,3,4,5,6,7,9,10,11,16,18,20,22,27,29,32,35<br>
+        • <span class="rule-highlight">System 7:</span> When 5,6,11,0,1,7,16 appears ? next must be: 13,15,18,24,32,5,6,11,0,1,4,7,9,16,20,3,22,29,35<br>
+        • <span class="rule-highlight">SPECIAL CASE:</span> When 7 or 16 appears (shared by System 6 & 7) ? next must be: 0,1,2,3,4,5,6,7,9,10,11,13,15,16,18,20,22,24,27,29,32,35<br>
+        • <span class="rule-highlight">On HIT:</span> Miss counter resets to 0 for that tracking system<br>
+        • <span class="rule-highlight">On MISS:</span> Total Misses counter increases (never resets)<br>
+        • <span class="rule-highlight">Alerts:</span> All systems alert at 5+ misses<br>
+        • <span class="rule-highlight">System 1:</span> 4,21,33,36<br>
+        • <span class="rule-highlight">System 2:</span> ,26,34,21,33,36,14,23,28,00,
+        • <span class="rule-highlight">System 3:</span> 1,12,25,2,10,27<br>
+        • <span class="rule-highlight">System 4:</span> 5,2,10,27,3,29,9,20<br>
+        • <span class="rule-highlight">System 5:</span> r>
+        • <span class="rule-highlight">System 6:</span> Wh7,29,32,35<br>
+        • <span class="rule-highlight">System 1:</span> 4,21,33,36<br>
+        • <span class="rule-highlight">System 2:</span> ,26,34,21,33,36,14,23,28,00,
+        • <span class="rule-highlight">System 3:</span> 1,12,25,2,10,27<br>
+        • <span class="rule-highlight">System 4:</span> 5,2,10,27,3,29,9,20<br>
+        • <span class="rule-highlight">System 5:</span> r>
+        • <span class="rule-highlight">System 7:</span> When 5,6,11,0,1,,29,35<br>
+        • <span class="rule-highlight">SPECIAL CASE:</span> When 7 or 16 appears 
+        • <span class="rule-highlight">On HIT:</span> Miss counter resets to 0 for that tracking system<br>
+        • <span class="rule-highlight">On MISS:</span> Total Misses counter increases (never resets)<br>
+        • <span class="rule-highlight">Alerts:</span> All systems alert at 5+ misses<br>
+        <span id="system1Alert" style="display: none;">?? System 1: Misses 5+</span>
+        <span id="system2Alert" style="display: none;">?? System 2: Misses 5+</span>
+        <span id="system3Alert" style="display: none;">?? System 3: Misses 5+</span>
+        <span id="system4Alert" style="display: none;">?? System 4: Misses 5+</span>
+        <span id="system5Alert" style="display: none;">?? System 5: Misses 5+</span>
+        <span id="system6Alert" style="display: none;">?? System 6: Misses 5+</span>
+        <span id="system7Alert" style="display: none;">?? System 7: Misses 5+</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">?</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings for roulette
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Helper function to sort numbers in the order: 0, 00, 1, 2, 3, ..., 36
+    function sortNumbersInOrder(numbers) {
+      return numbers.sort((a, b) => {
+        // Handle special cases: 0 and 00 come first
+        if (a === "0") return -1;
+        if (b === "0") return 1;
+        if (a === "00") return b === "0" ? 1 : -1;
+        if (b === "00") return a === "0" ? -1 : 1;
+        
+        // Convert to numbers for comparison
+        const numA = parseInt(a, 10);
+        const numB = parseInt(b, 10);
+        
+        return numA - numB;
+      });
+    }
+
+    // Get color class for a number
+    function getColorClass(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    // Updated tracking systems with new logic (only Systems 1-7)
+    const TRACKING_SYSTEMS = {
+      system1: {
+        numbers: ["13", "15", "18", "24", "32"],
+        color: "#9c27b0",
+        name: "System 1 Numbers",
+        displayName: "System 1",
+        // UPDATED LOGIC: When 13, 15, 18, 24, 32 appear
+        triggers: ["13", "15", "18", "24", "32"],
+        // Next number must be: 5,6,11,0,1,7,16,13,15,18,24,32,8,19,26,34,21,33,36
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["5", "6", "11", "0", "1", "7", "16", "13", "15", "18", "24", "32", "8", "19", "26", "34", "21", "33", "36"])
+      },
+      system2: {
+        numbers: ["8", "19", "26", "34", "21", "33", "36"],
+        color: "#4caf50",
+        name: "System 2 Numbers",
+        displayName: "System 2",
+        // UPDATED LOGIC: When 8,19,26,34,21,33,36 appear
+        triggers: ["8", "19", "26", "34", "21", "33", "36"],
+        // Next number must be: 13,15,18,24,32,8,19,26,34,21,33,36,14,23,28,00,17,30,12
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["13", "15", "18", "24", "32", "8", "19", "26", "34", "21", "33", "36", "14", "23", "28", "00", "17", "30", "12"])
+      },
+      system3: {
+        numbers: ["14", "23", "28"],
+        color: "#2196f3",
+        name: "System 3 Numbers",
+        displayName: "System 3",
+        // UPDATED LOGIC: When 14,23,28 appear
+        triggers: ["14", "23", "28"],
+        // Next number must be: 8,19,26,34,21,33,36,14,23,28,00,17,30,31,12,25,2,10,27
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["8", "19", "26", "34", "21", "33", "36", "14", "23", "28", "00", "17", "30", "31", "12", "25", "2", "10", "27"])
+      },
+      system4: {
+        numbers: ["00", "17", "30", "31", "12", "25"],
+        color: "#ff9800",
+        name: "System 4 Numbers",
+        displayName: "System 4",
+        // UPDATED LOGIC: When 00,17,30,31,12,25 appear
+        triggers: ["00", "17", "30", "31", "12", "25"],
+        // Next number must be: 8,21,26,14,23,28,00,17,30,31,12,25,2,10,27,3,29,9,20
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["8", "21", "26", "14", "23", "28", "00", "17", "30", "31", "12", "25", "2", "10", "27", "3", "29", "9", "20"])
+      },
+      system5: {
+        numbers: ["2", "10", "27"],
+        color: "#e91e63",
+        name: "System 5 Numbers",
+        displayName: "System 5",
+        // UNCHANGED LOGIC: When 2,10,27 appear
+        triggers: ["2", "10", "27"],
+        // UPDATED: Next number must be: 0, 00, 2, 3, 4, 7, 9, 10, 12, 16, 17, 20, 22, 25, 27, 29, 30, 31, 35
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["0", "00", "2", "3", "4", "7", "9", "10", "12", "16", "17", "20", "22", "25", "27", "29", "30", "31", "35"])
+      },
+      system6: {
+        // UPDATED: Now includes 29
+        numbers: ["4", "7", "9", "16", "20", "3", "22", "29", "35"],
+        color: "#00bcd4",
+        name: "System 6 Numbers",
+        displayName: "System 6",
+        // UPDATED LOGIC: When 4,7,9,16,20,3,22,29,35 appear
+        triggers: ["4", "7", "9", "16", "20", "3", "22", "29", "35"],
+        // UPDATED: Next number must be: 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 16, 18, 20, 22, 27, 29, 32, 35
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["0", "1", "2", "3", "4", "5", "6", "7", "9", "10", "11", "16", "18", "20", "22", "27", "29", "32", "35"])
+      },
+      system7: {
+        numbers: ["5", "6", "11", "0", "1", "7", "16"],
+        color: "#8bc34a",
+        name: "System 7 Numbers",
+        displayName: "System 7",
+        // UNCHANGED LOGIC: When 5,6,11,0,1,7,16 appear
+        triggers: ["5", "6", "11", "0", "1", "7", "16"],
+        // Next number must be: 13,15,18,24,32,5,6,11,0,1,4,7,9,16,20,3,22,29,35
+        // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
+        requiredAfterTrigger: sortNumbersInOrder(["13", "15", "18", "24", "32", "5", "6", "11", "0", "1", "4", "7", "9", "16", "20", "3", "22", "29", "35"])
+      }
+    };
+
+    // NEW: Special combined required numbers for when 7 or 16 appears (shared by System 6 & 7)
+    const SPECIAL_SHARED_TRIGGER_NUMBERS = ["7", "16"];
+    const SPECIAL_COMBINED_REQUIRED_NUMBERS = sortNumbersInOrder([
+      "0", "1", "2", "3", "4", "5", "6", "7", "9", "10", "11", 
+      "13", "15", "16", "18", "20", "22", "24", "27", "29", "32", "35"
+    ]);
+
+    // UPDATED: Changed alert thresholds from 10+ to 5+ misses
+    const ALERT_THRESHOLDS = {
+      system1: 5,
+      system2: 5,
+      system3: 5,
+      system4: 5,
+      system5: 5,
+      system6: 5,
+      system7: 5
+    };
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let trackingData = JSON.parse(localStorage.getItem("trackingData") || JSON.stringify({
+      // New tracking systems (Systems 1-7 only)
+      system1: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      },
+      system2: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      },
+      system3: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      },
+      system4: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      },
+      system5: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      },
+      system6: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      },
+      system7: {
+        hits: 0,
+        misses: 0,
+        totalMisses: 0,
+        waitingForNext: false,
+        lastSpecial: null,
+        waitingForHit: false
+      }
+    }));
+
+    // NEW: All Systems Tracking Data
+    let allSystemsData = JSON.parse(localStorage.getItem("allSystemsData") || JSON.stringify({
+      allMisses: 0,
+      allHits: 0
+    }));
+
+    // Check if number is a trigger for a specific tracking system
+    function isTriggerForSystem(n, system) {
+      if (!TRACKING_SYSTEMS[system] || !TRACKING_SYSTEMS[system].triggers) return false;
+      return TRACKING_SYSTEMS[system].triggers.includes(n.toString());
+    }
+
+    // Check if number is in the requiredAfterTrigger list for a system
+    function isInRequiredAfterTrigger(n, system) {
+      if (!TRACKING_SYSTEMS[system] || !TRACKING_SYSTEMS[system].requiredAfterTrigger) return false;
+      return TRACKING_SYSTEMS[system].requiredAfterTrigger.includes(n.toString());
+    }
+
+    // NEW: Check if number is a special shared trigger (7 or 16)
+    function isSpecialSharedTrigger(n) {
+      return SPECIAL_SHARED_TRIGGER_NUMBERS.includes(n.toString());
+    }
+
+    // NEW: Check if number is in the special combined required numbers list
+    function isInSpecialCombinedRequired(n) {
+      return SPECIAL_COMBINED_REQUIRED_NUMBERS.includes(n.toString());
+    }
+
+    // Get system color for display
+    function getSystemColor(system) {
+      if (TRACKING_SYSTEMS[system] && TRACKING_SYSTEMS[system].color) {
+        return TRACKING_SYSTEMS[system].color;
+      }
+      return "#2196f3"; // Default blue
+    }
+
+    // Check and trigger alerts based on thresholds
+    function checkAlerts() {
+      // Check each system for alerts
+      for (const system in ALERT_THRESHOLDS) {
+        const alertElement = document.getElementById(`${system}Alert`);
+        if (alertElement) {
+          if (trackingData[system] && trackingData[system].misses >= ALERT_THRESHOLDS[system]) {
+            alertElement.style.display = "inline";
+            alertElement.innerHTML = `?? <strong>${getSystemDisplayName(system)}:</strong> Misses ${ALERT_THRESHOLDS[system]}+ (${trackingData[system].misses})`;
+            
+            // Show browser alert when threshold is first reached
+            if (trackingData[system].misses === ALERT_THRESHOLDS[system]) {
+              setTimeout(() => {
+                alert(`?? ALERT: ${getSystemDisplayName(system)} misses reached ${ALERT_THRESHOLDS[system]}!`);
+              }, 100);
+            }
+          } else {
+            alertElement.style.display = "none";
+          }
+        }
+      }
+    }
+
+    // Get display name for a system
+    function getSystemDisplayName(system) {
+      if (TRACKING_SYSTEMS[system] && TRACKING_SYSTEMS[system].displayName) {
+        return TRACKING_SYSTEMS[system].displayName;
+      }
+      return system;
+    }
+
+    // Update tracking data based on new spin
+    function updateTrackingData(newNumber) {
+      const numStr = newNumber.toString();
+      let anySystemHadWaitingState = false;
+      let anySystemGotHit = false;
+      
+      // NEW: Check if we have a special shared trigger case
+      let isSpecialCase = false;
+      let specialTriggerSystem = null;
+      
+      // Check if any system was waiting and if it was triggered by 7 or 16
+      for (const system in TRACKING_SYSTEMS) {
+        if (trackingData[system] && trackingData[system].waitingForNext && 
+            trackingData[system].waitingForHit && trackingData[system].lastSpecial) {
+          if (isSpecialSharedTrigger(trackingData[system].lastSpecial)) {
+            isSpecialCase = true;
+            specialTriggerSystem = system;
+            break;
+          }
+        }
+      }
+      
+      // Update all tracking systems
+      for (const system in TRACKING_SYSTEMS) {
+        // If we're waiting for the next number after a trigger
+        if (trackingData[system] && trackingData[system].waitingForNext && trackingData[system].waitingForHit) {
+          anySystemHadWaitingState = true;
+          
+          let isHit = false;
+          
+          // Check for special case (7 or 16 trigger)
+          if (isSpecialCase && specialTriggerSystem === system) {
+            // Use special combined required numbers for 7 or 16 triggers
+            if (isInSpecialCombinedRequired(numStr)) {
+              isHit = true;
+            }
+          } else {
+            // Use normal required numbers for other triggers
+            if (isInRequiredAfterTrigger(numStr, system)) {
+              isHit = true;
+            }
+          }
+          
+          if (isHit) {
+            // HIT for this tracking system
+            trackingData[system].hits++;
+            trackingData[system].misses = 0; // Reset misses on hit
+            trackingData[system].waitingForHit = false; // We got our hit, stop waiting
+            anySystemGotHit = true;
+          } else {
+            // MISS for this tracking system
+            trackingData[system].misses++;
+            trackingData[system].totalMisses++; // Always increase total misses on miss
+            // Keep waitingForHit true because we're still waiting for the required number
+          }
+          trackingData[system].waitingForNext = false; // We've processed the next spin after trigger
+        }
+        
+        // Check if this number triggers any system
+        if (isTriggerForSystem(numStr, system)) {
+          trackingData[system].lastSpecial = numStr;
+          trackingData[system].waitingForNext = true;
+          trackingData[system].waitingForHit = true; // Now we're waiting for a hit
+        }
+      }
+      
+      // NEW: Update All Systems Stats
+      if (anySystemHadWaitingState) {
+        if (anySystemGotHit) {
+          // If any system got a hit, reset all systems misses to 0
+          allSystemsData.allMisses = 0;
+          allSystemsData.allHits++;
+        } else {
+          // If no system got a hit, increment all systems misses
+          allSystemsData.allMisses++;
+        }
+      }
+      
+      saveTrackingData();
+      saveAllSystemsData();
+      updateStatsDisplay();
+      updateAllSystemsStatsDisplay(); // NEW: Update all systems stats display
+      updateSequenceDisplay();
+      checkAlerts(); // Check alerts after updating tracking data
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      
+      // Always show exactly 20 boxes
+      for (let i = 0; i < 20; i++) {
+        const div = document.createElement("div");
+        
+        // Get the spin number (newest first)
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          const nStr = n.toString();
+          div.className = `spin-box ${getColorClass(nStr)}`;
+          div.textContent = nStr;
+          
+          // Add hit/miss indicator if applicable
+          if (spinIndex > 0) {
+            const prevNumber = history[spinIndex - 1];
+            let isHit = false;
+            
+            // Check if previous number was a trigger for any system
+            for (const system in TRACKING_SYSTEMS) {
+              if (isTriggerForSystem(prevNumber, system)) {
+                // Check if this was a special shared trigger
+                if (isSpecialSharedTrigger(prevNumber)) {
+                  isHit = isInSpecialCombinedRequired(nStr);
+                } else {
+                  isHit = isInRequiredAfterTrigger(nStr, system);
+                }
+                break;
+              }
+            }
+            
+            if (isHit !== null) {
+              const indicator = document.createElement("div");
+              indicator.className = `hit-miss-indicator ${isHit ? 'hit-indicator' : 'miss-indicator'}`;
+              div.appendChild(indicator);
+            }
+          }
+        } else {
+          // Empty box for missing spins
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        container.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+    }
+
+    // Update stats display for all systems
+    function updateStatsDisplay() {
+      // Update all systems stats
+      for (const system in trackingData) {
+        const systemKey = system.charAt(0).toUpperCase() + system.slice(1);
+        
+        // Update misses (current consecutive misses)
+        const missesElement = document.getElementById(`misses${systemKey}`);
+        if (missesElement) {
+          missesElement.textContent = trackingData[system].misses;
+          
+          // Add alert badge if threshold reached
+          if (trackingData[system].misses >= ALERT_THRESHOLDS[system]) {
+            if (!missesElement.querySelector('.alert-badge')) {
+              const badge = document.createElement('span');
+              badge.className = 'alert-badge';
+              badge.textContent = 'ALERT';
+              missesElement.appendChild(badge);
+            }
+          } else {
+            const badge = missesElement.querySelector('.alert-badge');
+            if (badge) badge.remove();
+          }
+        }
+        
+        // Update hits
+        const hitsElement = document.getElementById(`hits${systemKey}`);
+        if (hitsElement) {
+          hitsElement.textContent = trackingData[system].hits;
+        }
+        
+        // Update total misses (never resets)
+        const totalMissesElement = document.getElementById(`totalMisses${systemKey}`);
+        if (totalMissesElement) {
+          totalMissesElement.textContent = trackingData[system].totalMisses;
+        }
+      }
+    }
+
+    // NEW: Update All Systems Stats Display
+    function updateAllSystemsStatsDisplay() {
+      document.getElementById("allSystemsMisses").textContent = allSystemsData.allMisses;
+      document.getElementById("allSystemsHits").textContent = allSystemsData.allHits;
+    }
+
+    // Update sequence display (show which system is active)
+    function updateSequenceDisplay() {
+      const sequenceDisplay = document.getElementById("currentSequenceDisplay");
+      const statusDisplay = document.getElementById("currentStatusDisplay");
+      const possibleNumbersContainer = document.getElementById("possibleNumbersDisplay");
+      const possibleNumbersList = document.getElementById("possibleNumbersList");
+      
+      let activeSystem = null;
+      let requiredNumbers = [];
+      let triggerNumber = "";
+      let isSpecialCase = false;
+      
+      // Check all systems for waiting status
+      for (const system in trackingData) {
+        if (trackingData[system].waitingForNext && trackingData[system].waitingForHit && trackingData[system].lastSpecial) {
+          activeSystem = system;
+          triggerNumber = trackingData[system].lastSpecial;
+          
+          // Check if this is a special shared trigger (7 or 16)
+          if (isSpecialSharedTrigger(triggerNumber)) {
+            isSpecialCase = true;
+            requiredNumbers = SPECIAL_COMBINED_REQUIRED_NUMBERS;
+          } else if (TRACKING_SYSTEMS[system] && TRACKING_SYSTEMS[system].requiredAfterTrigger) {
+            requiredNumbers = TRACKING_SYSTEMS[system].requiredAfterTrigger;
+          }
+          break;
+        }
+      }
+      
+      if (activeSystem) {
+        sequenceDisplay.textContent = `${triggerNumber} ? ?`;
+        
+        if (isSpecialCase) {
+          statusDisplay.textContent = `${getSystemDisplayName(activeSystem)} (Special 7/16 Case): Waiting for one of these ${requiredNumbers.length} numbers`;
+          statusDisplay.style.color = "#ff9800"; // Orange color for special case
+        } else {
+          statusDisplay.textContent = `${getSystemDisplayName(activeSystem)}: Waiting for one of these ${requiredNumbers.length} numbers`;
+          statusDisplay.style.color = "#aaa"; // Default color
+        }
+        
+        sequenceDisplay.style.color = getSystemColor(activeSystem);
+        
+        // Show and update possible numbers
+        possibleNumbersContainer.style.display = "block";
+        possibleNumbersList.innerHTML = "";
+        
+        // Display all possible numbers with roulette colors
+        requiredNumbers.forEach(number => {
+          const numberElement = document.createElement("div");
+          const colorClass = getColorClass(number);
+          numberElement.className = `possible-number ${colorClass}`;
+          numberElement.textContent = number;
+          
+          // For special case, add a special border
+          if (isSpecialCase) {
+            numberElement.style.border = "2px solid #ff9800";
+            numberElement.style.boxShadow = "0 2px 4px rgba(255, 152, 0, 0.3)";
+          }
+          
+          possibleNumbersList.appendChild(numberElement);
+        });
+      } else {
+        sequenceDisplay.textContent = "Waiting for trigger number...";
+        statusDisplay.textContent = "Add a trigger number to start tracking";
+        sequenceDisplay.style.color = "#2196f3";
+        statusDisplay.style.color = "#aaa";
+        
+        // Hide possible numbers display
+        possibleNumbersContainer.style.display = "none";
+      }
+    }
+
+    // Save data to localStorage
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+    }
+    
+    function saveTrackingData() {
+      localStorage.setItem("trackingData", JSON.stringify(trackingData));
+    }
+    
+    // NEW: Save All Systems Data
+    function saveAllSystemsData() {
+      localStorage.setItem("allSystemsData", JSON.stringify(allSystemsData));
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString(); // Normalize to string
+      }
+      
+      // Add to history
+      history.push(val);
+      
+      // Update tracking data for all systems
+      updateTrackingData(val);
+      
+      // Reset input and save
+      input.value = "";
+      save();
+      updateDisplay();
+      
+      // Show status message
+      let systemStatus = "";
+      
+      // Check which systems this number triggers
+      const triggeredSystems = [];
+      for (const system in TRACKING_SYSTEMS) {
+        if (isTriggerForSystem(val, system)) {
+          triggeredSystems.push(getSystemDisplayName(system));
+        }
+      }
+      
+      if (triggeredSystems.length > 0) {
+        systemStatus = `Added spin: ${val} (Triggers ${triggeredSystems.join(", ")})`;
+      } else {
+        systemStatus = `Added spin: ${val}`;
+      }
+      
+      status.textContent = systemStatus;
+    }
+
+    // Undo the last action
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      const lastVal = history.pop();
+      
+      // Recalculate tracking data from scratch
+      recalculateTrackingData();
+      
+      save();
+      saveTrackingData();
+      saveAllSystemsData();
+      updateDisplay();
+      updateStatsDisplay();
+      updateAllSystemsStatsDisplay(); // NEW: Update all systems stats display
+      updateSequenceDisplay();
+      checkAlerts(); // Check alerts after undo
+      status.textContent = `Undo: ${lastVal} removed`;
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        trackingData = {
+          system1: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          },
+          system2: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          },
+          system3: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          },
+          system4: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          },
+          system5: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          },
+          system6: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          },
+          system7: {
+            hits: 0,
+            misses: 0,
+            totalMisses: 0,
+            waitingForNext: false,
+            lastSpecial: null,
+            waitingForHit: false
+          }
+        };
+        
+        // NEW: Reset All Systems Data
+        allSystemsData = {
+          allMisses: 0,
+          allHits: 0
+        };
+        
+        localStorage.removeItem("history");
+        localStorage.removeItem("trackingData");
+        localStorage.removeItem("allSystemsData");
+        updateDisplay();
+        updateStatsDisplay();
+        updateAllSystemsStatsDisplay(); // NEW: Update all systems stats display
+        updateSequenceDisplay();
+        checkAlerts(); // Check alerts after reset (should clear them)
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    // Recalculate tracking data from scratch (for undo functionality)
+    function recalculateTrackingData() {
+      // Reset all tracking data
+      trackingData = {
+        system1: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        },
+        system2: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        },
+        system3: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        },
+        system4: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        },
+        system5: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        },
+        system6: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        },
+        system7: {
+          hits: 0,
+          misses: 0,
+          totalMisses: 0,
+          waitingForNext: false,
+          lastSpecial: null,
+          waitingForHit: false
+        }
+      };
+      
+      // NEW: Reset All Systems Data for recalculation
+      let allMissesTemp = 0;
+      let allHitsTemp = 0;
+      let currentAllMisses = 0;
+      
+      // Track waiting states for each system
+      const waitingStates = {
+        system1: false,
+        system2: false,
+        system3: false,
+        system4: false,
+        system5: false,
+        system6: false,
+        system7: false
+      };
+      
+      // Track if we're waiting for a hit in each system
+      const waitingForHitStates = {
+        system1: false,
+        system2: false,
+        system3: false,
+        system4: false,
+        system5: false,
+        system6: false,
+        system7: false
+      };
+      
+      // Track last special number for each system
+      const lastSpecialNumbers = {
+        system1: null,
+        system2: null,
+        system3: null,
+        system4: null,
+        system5: null,
+        system6: null,
+        system7: null
+      };
+      
+      // Track if any system is waiting at each step
+      let anySystemWaiting = false;
+      
+      // Process all history entries
+      for (let i = 0; i < history.length; i++) {
+        const numStr = history[i].toString();
+        anySystemWaiting = false;
+        let anySystemGotHit = false;
+        let isSpecialCase = false;
+        let specialTriggerSystem = null;
+        
+        // First, check if any system is waiting for a hit and if it's a special case
+        for (const system in TRACKING_SYSTEMS) {
+          if (waitingStates[system] && waitingForHitStates[system] && lastSpecialNumbers[system]) {
+            if (isSpecialSharedTrigger(lastSpecialNumbers[system])) {
+              isSpecialCase = true;
+              specialTriggerSystem = system;
+              break;
+            }
+          }
+        }
+        
+        // Process each tracking system
+        for (const system in TRACKING_SYSTEMS) {
+          // If we're waiting for the next number after a trigger
+          if (waitingStates[system] && waitingForHitStates[system]) {
+            anySystemWaiting = true;
+            
+            let isHit = false;
+            
+            // Check for special case (7 or 16 trigger)
+            if (isSpecialCase && specialTriggerSystem === system) {
+              // Use special combined required numbers for 7 or 16 triggers
+              if (isInSpecialCombinedRequired(numStr)) {
+                isHit = true;
+              }
+            } else {
+              // Use normal required numbers for other triggers
+              if (isInRequiredAfterTrigger(numStr, system)) {
+                isHit = true;
+              }
+            }
+            
+            if (isHit) {
+              // HIT for this tracking system
+              trackingData[system].hits++;
+              trackingData[system].misses = 0; // Reset misses on hit
+              waitingForHitStates[system] = false; // We got our hit, stop waiting
+              anySystemGotHit = true;
+            } else {
+              // MISS for this tracking system
+              trackingData[system].misses++;
+              trackingData[system].totalMisses++; // Always increase total misses
+              // Keep waitingForHitStates[system] true because we're still waiting
+            }
+            waitingStates[system] = false; // We've processed the next spin after trigger
+          }
+          
+          // Check if this number triggers any system
+          if (isTriggerForSystem(numStr, system)) {
+            trackingData[system].lastSpecial = numStr;
+            lastSpecialNumbers[system] = numStr;
+            waitingStates[system] = true;
+            waitingForHitStates[system] = true; // Now we're waiting for a hit
+          }
+        }
+        
+        // NEW: Update All Systems Stats during recalculation
+        if (anySystemWaiting) {
+          if (anySystemGotHit) {
+            // If any system got a hit, reset all systems misses to 0
+            currentAllMisses = 0;
+            allHitsTemp++;
+          } else {
+            // If no system got a hit, increment all systems misses
+            currentAllMisses++;
+          }
+          allMissesTemp = currentAllMisses;
+        }
+      }
+      
+      // Update waiting states
+      for (const system in waitingStates) {
+        if (waitingStates[system] && waitingForHitStates[system] && trackingData[system].lastSpecial) {
+          trackingData[system].waitingForNext = true;
+          trackingData[system].waitingForHit = true;
+        }
+      }
+      
+      // NEW: Update All Systems Data after recalculation
+      allSystemsData.allMisses = allMissesTemp;
+      allSystemsData.allHits = allHitsTemp;
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      // Recalculate tracking data on load in case of data corruption
+      recalculateTrackingData();
+      
+      updateDisplay();
+      updateStatsDisplay();
+      updateAllSystemsStatsDisplay(); // NEW: Update all systems stats display
+      updateSequenceDisplay();
+      checkAlerts(); // Check alerts on page load
+    });
+  </script>
+</body>
+</html>

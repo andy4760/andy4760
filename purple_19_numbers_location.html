@@ -1099,7 +1099,7 @@
   </div>
 
   <div class="numpad">
-    <button class="backspace" onclick="backspace()">⌫</button>
+    <button class="backspace" onclick="backspace()">Back</button>
     <button onclick="numpadClick('1')">1</button>
     <button onclick="numpadClick('2')">2</button>
     <button onclick="numpadClick('3')">3</button>
@@ -1157,7 +1157,7 @@
         triggers: ["13", "15", "18", "24", "32"],
         // Next number must be: 5,6,11,0,1,7,16,13,15,18,24,32,8,19,26,34,21,33,36
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["5", "6", "11", "0", "1", "7", "16", "13", "15", "18", "24", "32", "8", "19", "26", "34", "21", "33", "36"])
+        requiredAfterTrigger: (["5", "6", "11", "0", "1", "7", "16", "13", "15", "18", "24", "32", "8", "19", "26", "34", "21", "33", "36"])
       },
       system2: {
         numbers: ["8", "19", "26", "34", "21", "33", "36"],
@@ -1168,7 +1168,7 @@
         triggers: ["8", "19", "26", "34", "21", "33", "36"],
         // Next number must be: 13,15,18,24,32,8,19,26,34,21,33,36,14,23,28,00,17,30,12
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["13", "15", "18", "24", "32", "8", "19", "26", "34", "21", "33", "36", "14", "23", "28", "00", "17", "30", "12"])
+        requiredAfterTrigger: (["13", "15", "18", "24", "32", "8", "19", "26", "34", "21", "33", "36", "14", "23", "28", "00", "17", "30", "12"])
       },
       system3: {
         numbers: ["14", "23", "28"],
@@ -1179,7 +1179,7 @@
         triggers: ["14", "23", "28"],
         // Next number must be: 8,19,26,34,21,33,36,14,23,28,00,17,30,31,12,25,2,10,27
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["8", "19", "26", "34", "21", "33", "36", "14", "23", "28", "00", "17", "30", "31", "12", "25", "2", "10", "27"])
+        requiredAfterTrigger: (["8", "19", "26", "34", "21", "33", "36", "14", "23", "28", "00", "17", "30", "31", "12", "25", "2", "10", "27"])
       },
       system4: {
         numbers: ["00", "17", "30", "31", "12", "25"],
@@ -1188,9 +1188,9 @@
         displayName: "System 4",
         // UPDATED LOGIC: When 00,17,30,31,12,25 appear
         triggers: ["00", "17", "30", "31", "12", "25"],
-        // Next number must be: 8,21,26,14,23,28,00,17,30,31,12,25,2,10,27,3,29,9,20
+        // Next number must be: 14,23,28,00,17,30,31,12,25,2,10,27,3,29,9,20,8,21,26
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["8", "21", "26", "14", "23", "28", "00", "17", "30", "31", "12", "25", "2", "10", "27", "3", "29", "9", "20"])
+        requiredAfterTrigger: ([ "14", "23", "28", "00", "17", "30", "31", "12", "25", "2", "10", "27", "3", "29", "9", "20","8", "21", "26"])
       },
       system5: {
         numbers: ["2", "10", "27"],
@@ -1199,9 +1199,9 @@
         displayName: "System 5",
         // UNCHANGED LOGIC: When 2,10,27 appear
         triggers: ["2", "10", "27"],
-        // UPDATED: Next number must be: 0, 00, 2, 3, 4, 7, 9, 10, 12, 16, 17, 20, 22, 25, 27, 29, 30, 31, 35
+        // UPDATED: Next number must be: 00,17,30,31,12,25,2,10,27,0,4,7,9,16,20,3,22,29,35
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["0", "00", "2", "3", "4", "7", "9", "10", "12", "16", "17", "20", "22", "25", "27", "29", "30", "31", "35"])
+        requiredAfterTrigger: ([ "00", "17", "30", "31", "12", "25", "2", "10", "27","0", "4", "7", "9", "16", "20", "3", "22", "29", "35"])
       },
       system6: {
         // UPDATED: Now includes 29
@@ -1211,9 +1211,9 @@
         displayName: "System 6",
         // UPDATED LOGIC: When 4,7,9,16,20,3,22,29,35 appear
         triggers: ["4", "7", "9", "16", "20", "3", "22", "29", "35"],
-        // UPDATED: Next number must be: 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 16, 18, 20, 22, 27, 29, 32, 35
+        // UPDATED: Next number must be: 18, 32, 5, 6, 11, 0, 1, 4, 7, 9, 16, 20, 3, 22, 29, 35, 2, 10, 27
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["0", "1", "2", "3", "4", "5", "6", "7", "9", "10", "11", "16", "18", "20", "22", "27", "29", "32", "35"])
+        requiredAfterTrigger: (["18", "32", "5", "6", "11", "0", "1", "4", "7", "9", "16", "20", "3", "22", "29", "35", "2", "10", "27"])
       },
       system7: {
         numbers: ["5", "6", "11", "0", "1", "7", "16"],
@@ -1224,15 +1224,15 @@
         triggers: ["5", "6", "11", "0", "1", "7", "16"],
         // Next number must be: 13,15,18,24,32,5,6,11,0,1,4,7,9,16,20,3,22,29,35
         // Sorted in the order: 0, 00, 1, 2, 3, ..., 36
-        requiredAfterTrigger: sortNumbersInOrder(["13", "15", "18", "24", "32", "5", "6", "11", "0", "1", "4", "7", "9", "16", "20", "3", "22", "29", "35"])
+        requiredAfterTrigger: (["13", "15", "18", "24", "32", "5", "6", "11", "0", "1", "4", "7", "9", "16", "20", "3", "22", "29", "35"])
       }
     };
 
     // NEW: Special combined required numbers for when 7 or 16 appears (shared by System 6 & 7)
     const SPECIAL_SHARED_TRIGGER_NUMBERS = ["7", "16"];
-    const SPECIAL_COMBINED_REQUIRED_NUMBERS = sortNumbersInOrder([
-      "0", "1", "2", "3", "4", "5", "6", "7", "9", "10", "11", 
-      "13", "15", "16", "18", "20", "22", "24", "27", "29", "32", "35"
+    const SPECIAL_COMBINED_REQUIRED_NUMBERS = ([
+      "13", "15", "18", "24", "32", "5", "6", "11", "0", "1", "4", 
+      "7", "9", "16", "20", "3", "22", "29", "35", "2", "10", "27"
     ]);
 
     // UPDATED: Changed alert thresholds from 10+ to 5+ misses

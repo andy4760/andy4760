@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Roulette Tracker Pro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    .spins-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 1rem 0;
+      width: 1052px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpinsRow {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+    }
+    #recentSpinsRow::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpinsRow::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpinsRow::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    
+    /* Numbers to Play Sections */
+    .play-sections {
+      display: flex;
+      gap: 20px;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .play-section {
+      flex: 1;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      min-height: 180px;
+      min-width: 300px;
+    }
+    .play-section.full-width {
+      flex: 2;
+      min-height: 250px;
+    }
+    .play-section h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      color: #ffab91;
+    }
+    #numbersToPlay4Plus, 
+    #numbersToPlay4PlusUntilNone,
+    #numbersToPlay3HitsOnly,
+    #numbersToPlay2HitsOnly,
+    #numbersToPlay1HitOnly {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      min-height: 50px;
+    }
+    #numbersToPlay4PlusUntilNone {
+      min-height: 100px;
+    }
+    .play-number {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      border: 2px solid transparent;
+      position: relative;
+      overflow: visible;
+    }
+    .hit-count {
+      font-size: 11px;
+      margin-top: 2px;
+      opacity: 0.9;
+      font-weight: normal;
+    }
+    .miss-counter {
+      position: absolute;
+      top: -12px;
+      right: -8px;
+      background: #2196f3;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      z-index: 2;
+    }
+    .total-misses {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #ffab91;
+    }
+    .miss-number {
+      color: #2196f3;
+      font-weight: bold;
+    }
+    
+    /* New section headers */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 0 5px;
+    }
+    .section-title {
+      font-size: 1.1rem;
+      color: #ffab91;
+    }
+    
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    
+    @media (max-width: 1100px) {
+      .spins-container {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .play-sections {
+        flex-direction: column;
+      }
+      
+      .play-section.full-width {
+        flex: 1;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpinsRow {
+        min-height: 60px;
+      }
+      
+      .play-number {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+      
+      .miss-counter {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+        top: -10px;
+        right: -6px;
+      }
+      
+      .hit-count {
+        font-size: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker Pro</h1>
+      <div class="tagline">Track spins and hot numbers (4+ hits in last 60 spins)</div>
+    </header>
+    
+    <div class="spins-container">
+      <div id="recentSpinsRow"></div>
+    </div>
+ <div class="legend">
+      <div class="legend-item">
+ 
+    <div id="entryCount">Total spins: 0</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+
+    
+<div class="play-sections">
+  <div class="play-section">
+    <h2>Hot Numbers (4+ hits in last 60 spins)</h2>
+    <div id="numbersToPlay4Plus"></div>
+    <div id="totalMisses4Plus" class="total-misses">Total Misses: 0</div>
+  </div>
+  <div class="play-section">
+    <h2>Hot To Cold Numbers (4+ hits until none in last 60 spins)</h2>
+    <div id="numbersToPlay4PlusUntilNone"></div>
+    <div id="totalMisses4PlusUntilNone" class="total-misses">Total Misses: 0</div>
+  </div>
+</div>
+    
+    <div class="play-sections">
+      <div class="play-section">
+        <h2>3 Hits Only (from Hot To Cold)</h2>
+        <div id="numbersToPlay3HitsOnly"></div>
+        <div id="totalMisses3HitsOnly" class="total-misses">Total Misses: 0</div>
+      </div>
+      <div class="play-section">
+        <h2>2 Hits Only (from Hot To Cold)</h2>
+        <div id="numbersToPlay2HitsOnly"></div>
+        <div id="totalMisses2HitsOnly" class="total-misses">Total Misses: 0</div>
+      </div>
+      <div class="play-section">
+        <h2>1 Hit Only (from Hot To Cold)</h2>
+        <div id="numbersToPlay1HitOnly"></div>
+        <div id="totalMisses1HitOnly" class="total-misses">Total Misses: 0</div>
+      </div>
+    </div>
+    
+   
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">Back</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    
+    // 4+ hits section data
+    let missCounters4Plus = JSON.parse(localStorage.getItem("missCounters4Plus") || "{}");
+    let previousMissCounters4Plus = JSON.parse(localStorage.getItem("previousMissCounters4Plus") || "[]");
+    let totalMisses4Plus = parseInt(localStorage.getItem("totalMisses4Plus") || "0");
+    let previousTotalMisses4Plus = JSON.parse(localStorage.getItem("previousTotalMisses4Plus") || "[]");
+    
+    // 4+ hits until none section data
+    let missCounters4PlusUntilNone = JSON.parse(localStorage.getItem("missCounters4PlusUntilNone") || "{}");
+    let previousMissCounters4PlusUntilNone = JSON.parse(localStorage.getItem("previousMissCounters4PlusUntilNone") || "[]");
+    let totalMisses4PlusUntilNone = parseInt(localStorage.getItem("totalMisses4PlusUntilNone") || "0");
+    let previousTotalMisses4PlusUntilNone = JSON.parse(localStorage.getItem("previousTotalMisses4PlusUntilNone") || "[]");
+    
+    // Breakdown sections data - each has its own independent total misses tracking
+    let totalMisses3HitsOnly = parseInt(localStorage.getItem("totalMisses3HitsOnly") || "0");
+    let previousTotalMisses3HitsOnly = JSON.parse(localStorage.getItem("previousTotalMisses3HitsOnly") || "[]");
+    
+    let totalMisses2HitsOnly = parseInt(localStorage.getItem("totalMisses2HitsOnly") || "0");
+    let previousTotalMisses2HitsOnly = JSON.parse(localStorage.getItem("previousTotalMisses2HitsOnly") || "[]");
+    
+    let totalMisses1HitOnly = parseInt(localStorage.getItem("totalMisses1HitOnly") || "0");
+    let previousTotalMisses1HitOnly = JSON.parse(localStorage.getItem("previousTotalMisses1HitOnly") || "[]");
+
+    // Get color for a number
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const row = document.getElementById("recentSpinsRow");
+      row.innerHTML = "";
+      
+      // Show only the last 20 spins (newest first)
+      for (let i = 0; i < 20; i++) {
+        const div = document.createElement("div");
+        
+        // Get the spin number (newest first)
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          div.className = `spin-box ${getColor(n)}`;
+          div.textContent = n;
+        } else {
+          // Empty box for missing spins
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        row.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+      
+      // Update all sections
+      updateNumbersToPlay4Plus();
+      updateNumbersToPlay4PlusUntilNone();
+      updateNumbersToPlay3HitsOnly();
+      updateNumbersToPlay2HitsOnly();
+      updateNumbersToPlay1HitOnly();
+      
+      // Update total misses displays
+      document.getElementById("totalMisses4Plus").innerHTML = `Total Misses: <span class="miss-number">${totalMisses4Plus}</span>`;
+      document.getElementById("totalMisses4PlusUntilNone").innerHTML = `Total Misses: <span class="miss-number">${totalMisses4PlusUntilNone}</span>`;
+      document.getElementById("totalMisses3HitsOnly").innerHTML = `Total Misses: <span class="miss-number">${totalMisses3HitsOnly}</span>`;
+      document.getElementById("totalMisses2HitsOnly").innerHTML = `Total Misses: <span class="miss-number">${totalMisses2HitsOnly}</span>`;
+      document.getElementById("totalMisses1HitOnly").innerHTML = `Total Misses: <span class="miss-number">${totalMisses1HitOnly}</span>`;
+    }
+
+    // Get current numbers in 4+ hits section (based on last 60 spins)
+    function getNumbersIn4PlusSection() {
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      return Object.keys(counts).filter(num => counts[num] >= 4);
+    }
+
+    // Get current numbers in Hot To Cold section
+    function getNumbersInHotToColdSection() {
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      const trackedNumbers = Object.keys(missCounters4PlusUntilNone);
+      return trackedNumbers.filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount >= 1;
+      });
+    }
+
+    // Get current numbers in 3 Hits Only section
+    function getNumbersIn3HitsOnlySection() {
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      return Object.keys(missCounters4PlusUntilNone).filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount === 3;
+      });
+    }
+
+    // Get current numbers in 2 Hits Only section
+    function getNumbersIn2HitsOnlySection() {
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      return Object.keys(missCounters4PlusUntilNone).filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount === 2;
+      });
+    }
+
+    // Get current numbers in 1 Hit Only section
+    function getNumbersIn1HitOnlySection() {
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      return Object.keys(missCounters4PlusUntilNone).filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount === 1;
+      });
+    }
+
+    // Update the numbers to play section for 4+ hits
+    function updateNumbersToPlay4Plus() {
+      const container = document.getElementById("numbersToPlay4Plus");
+      container.innerHTML = "";
+      
+      const numbersToPlay = getNumbersIn4PlusSection();
+      
+      // Get hit counts for display
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Sort by hit count (highest first), then by number
+      numbersToPlay.sort((a, b) => {
+        if (counts[b] !== counts[a]) {
+          return counts[b] - counts[a];
+        }
+        return parseInt(a) - parseInt(b);
+      });
+      
+      // Create elements for numbers
+      numbersToPlay.forEach(num => {
+        const div = document.createElement("div");
+        div.className = `play-number ${getColor(num)}`;
+        
+        // Create main number display
+        const numberSpan = document.createElement("span");
+        numberSpan.textContent = num;
+        div.appendChild(numberSpan);
+        
+        // Create hit count display
+        const hitCountSpan = document.createElement("span");
+        hitCountSpan.className = "hit-count";
+        hitCountSpan.textContent = `${counts[num]} hits`;
+        div.appendChild(hitCountSpan);
+        
+        // Add miss counter if it exists and is greater than 0
+        if (missCounters4Plus[num] !== undefined && missCounters4Plus[num] > 0) {
+          const missCounter = document.createElement("div");
+          missCounter.className = "miss-counter";
+          missCounter.textContent = missCounters4Plus[num];
+          div.appendChild(missCounter);
+        }
+        
+        container.appendChild(div);
+      });
+      
+      // Show message if no numbers qualify
+      if (numbersToPlay.length === 0) {
+        const message = document.createElement("div");
+        message.textContent = "No numbers have 4+ hits";
+        message.style.color = "#ccc";
+        message.style.fontStyle = "italic";
+        container.appendChild(message);
+      }
+    }
+
+    // Update the numbers to play section for 4+ hits until none
+    function updateNumbersToPlay4PlusUntilNone() {
+      const container = document.getElementById("numbersToPlay4PlusUntilNone");
+      container.innerHTML = "";
+      
+      const numbersToPlay = getNumbersInHotToColdSection();
+      
+      // Get hit counts for display
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Sort by hit count (highest first), then by number
+      numbersToPlay.sort((a, b) => {
+        const countA = counts[a] || 0;
+        const countB = counts[b] || 0;
+        if (countB !== countA) {
+          return countB - countA;
+        }
+        return parseInt(a) - parseInt(b);
+      });
+      
+      // Create elements for numbers
+      numbersToPlay.forEach(num => {
+        const currentCount = counts[num] || 0;
+        const div = document.createElement("div");
+        div.className = `play-number ${getColor(num)}`;
+        
+        // Create main number display
+        const numberSpan = document.createElement("span");
+        numberSpan.textContent = num;
+        div.appendChild(numberSpan);
+        
+        // Create hit count display
+        const hitCountSpan = document.createElement("span");
+        hitCountSpan.className = "hit-count";
+        hitCountSpan.textContent = `${currentCount} hits`;
+        div.appendChild(hitCountSpan);
+        
+        // Add miss counter if it exists and is greater than 0
+        if (missCounters4PlusUntilNone[num] !== undefined && missCounters4PlusUntilNone[num] > 0) {
+          const missCounter = document.createElement("div");
+          missCounter.className = "miss-counter";
+          missCounter.textContent = missCounters4PlusUntilNone[num];
+          div.appendChild(missCounter);
+        }
+        
+        container.appendChild(div);
+      });
+      
+      // Show message if no numbers qualify
+      if (numbersToPlay.length === 0) {
+        const message = document.createElement("div");
+        message.textContent = "No numbers in hot-to-cold tracking";
+        message.style.color = "#ccc";
+        message.style.fontStyle = "italic";
+        container.appendChild(message);
+      }
+    }
+
+    // Update the numbers to play section for 3 hits only (from Hot To Cold section)
+    function updateNumbersToPlay3HitsOnly() {
+      const container = document.getElementById("numbersToPlay3HitsOnly");
+      container.innerHTML = "";
+      
+      const numbersToPlay = getNumbersIn3HitsOnlySection();
+      
+      // Get hit counts for display
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Sort by number
+      numbersToPlay.sort((a, b) => parseInt(a) - parseInt(b));
+      
+      // Create elements for numbers
+      numbersToPlay.forEach(num => {
+        const currentCount = counts[num] || 0;
+        const div = document.createElement("div");
+        div.className = `play-number ${getColor(num)}`;
+        
+        // Create main number display
+        const numberSpan = document.createElement("span");
+        numberSpan.textContent = num;
+        div.appendChild(numberSpan);
+        
+        // Create hit count display
+        const hitCountSpan = document.createElement("span");
+        hitCountSpan.className = "hit-count";
+        hitCountSpan.textContent = `${currentCount} hits`;
+        div.appendChild(hitCountSpan);
+        
+        // Add miss counter if it exists and is greater than 0
+        if (missCounters4PlusUntilNone[num] !== undefined && missCounters4PlusUntilNone[num] > 0) {
+          const missCounter = document.createElement("div");
+          missCounter.className = "miss-counter";
+          missCounter.textContent = missCounters4PlusUntilNone[num];
+          div.appendChild(missCounter);
+        }
+        
+        container.appendChild(div);
+      });
+      
+      // Show message if no numbers qualify
+      if (numbersToPlay.length === 0) {
+        const message = document.createElement("div");
+        message.textContent = "No numbers with exactly 3 hits";
+        message.style.color = "#ccc";
+        message.style.fontStyle = "italic";
+        container.appendChild(message);
+      }
+    }
+
+    // Update the numbers to play section for 2 hits only (from Hot To Cold section)
+    function updateNumbersToPlay2HitsOnly() {
+      const container = document.getElementById("numbersToPlay2HitsOnly");
+      container.innerHTML = "";
+      
+      const numbersToPlay = getNumbersIn2HitsOnlySection();
+      
+      // Get hit counts for display
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Sort by number
+      numbersToPlay.sort((a, b) => parseInt(a) - parseInt(b));
+      
+      // Create elements for numbers
+      numbersToPlay.forEach(num => {
+        const currentCount = counts[num] || 0;
+        const div = document.createElement("div");
+        div.className = `play-number ${getColor(num)}`;
+        
+        // Create main number display
+        const numberSpan = document.createElement("span");
+        numberSpan.textContent = num;
+        div.appendChild(numberSpan);
+        
+        // Create hit count display
+        const hitCountSpan = document.createElement("span");
+        hitCountSpan.className = "hit-count";
+        hitCountSpan.textContent = `${currentCount} hits`;
+        div.appendChild(hitCountSpan);
+        
+        // Add miss counter if it exists and is greater than 0
+        if (missCounters4PlusUntilNone[num] !== undefined && missCounters4PlusUntilNone[num] > 0) {
+          const missCounter = document.createElement("div");
+          missCounter.className = "miss-counter";
+          missCounter.textContent = missCounters4PlusUntilNone[num];
+          div.appendChild(missCounter);
+        }
+        
+        container.appendChild(div);
+      });
+      
+      // Show message if no numbers qualify
+      if (numbersToPlay.length === 0) {
+        const message = document.createElement("div");
+        message.textContent = "No numbers with exactly 2 hits";
+        message.style.color = "#ccc";
+        message.style.fontStyle = "italic";
+        container.appendChild(message);
+      }
+    }
+
+    // Update the numbers to play section for 1 hit only (from Hot To Cold section)
+    function updateNumbersToPlay1HitOnly() {
+      const container = document.getElementById("numbersToPlay1HitOnly");
+      container.innerHTML = "";
+      
+      const numbersToPlay = getNumbersIn1HitOnlySection();
+      
+      // Get hit counts for display
+      const last60Spins = history.slice(-60);
+      const counts = {};
+      last60Spins.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Sort by number
+      numbersToPlay.sort((a, b) => parseInt(a) - parseInt(b));
+      
+      // Create elements for numbers
+      numbersToPlay.forEach(num => {
+        const currentCount = counts[num] || 0;
+        const div = document.createElement("div");
+        div.className = `play-number ${getColor(num)}`;
+        
+        // Create main number display
+        const numberSpan = document.createElement("span");
+        numberSpan.textContent = num;
+        div.appendChild(numberSpan);
+        
+        // Create hit count display
+        const hitCountSpan = document.createElement("span");
+        hitCountSpan.className = "hit-count";
+        hitCountSpan.textContent = `${currentCount} hits`;
+        div.appendChild(hitCountSpan);
+        
+        // Add miss counter if it exists and is greater than 0
+        if (missCounters4PlusUntilNone[num] !== undefined && missCounters4PlusUntilNone[num] > 0) {
+          const missCounter = document.createElement("div");
+          missCounter.className = "miss-counter";
+          missCounter.textContent = missCounters4PlusUntilNone[num];
+          div.appendChild(missCounter);
+        }
+        
+        container.appendChild(div);
+      });
+      
+      // Show message if no numbers qualify
+      if (numbersToPlay.length === 0) {
+        const message = document.createElement("div");
+        message.textContent = "No numbers with exactly 1 hit";
+        message.style.color = "#ccc";
+        message.style.fontStyle = "italic";
+        container.appendChild(message);
+      }
+    }
+
+    // Save data to localStorage
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+      
+      // Save 4+ hits section
+      localStorage.setItem("missCounters4Plus", JSON.stringify(missCounters4Plus));
+      localStorage.setItem("previousMissCounters4Plus", JSON.stringify(previousMissCounters4Plus));
+      localStorage.setItem("totalMisses4Plus", totalMisses4Plus.toString());
+      localStorage.setItem("previousTotalMisses4Plus", JSON.stringify(previousTotalMisses4Plus));
+      
+      // Save 4+ hits until none section
+      localStorage.setItem("missCounters4PlusUntilNone", JSON.stringify(missCounters4PlusUntilNone));
+      localStorage.setItem("previousMissCounters4PlusUntilNone", JSON.stringify(previousMissCounters4PlusUntilNone));
+      localStorage.setItem("totalMisses4PlusUntilNone", totalMisses4PlusUntilNone.toString());
+      localStorage.setItem("previousTotalMisses4PlusUntilNone", JSON.stringify(previousTotalMisses4PlusUntilNone));
+      
+      // Save breakdown sections data
+      localStorage.setItem("totalMisses3HitsOnly", totalMisses3HitsOnly.toString());
+      localStorage.setItem("previousTotalMisses3HitsOnly", JSON.stringify(previousTotalMisses3HitsOnly));
+      localStorage.setItem("totalMisses2HitsOnly", totalMisses2HitsOnly.toString());
+      localStorage.setItem("previousTotalMisses2HitsOnly", JSON.stringify(previousTotalMisses2HitsOnly));
+      localStorage.setItem("totalMisses1HitOnly", totalMisses1HitOnly.toString());
+      localStorage.setItem("previousTotalMisses1HitOnly", JSON.stringify(previousTotalMisses1HitOnly));
+    }
+
+    // Get numbers in 4+ hits section BEFORE adding new number
+    function getNumbersIn4PlusSectionBefore(newNumber) {
+      // Get last 60 spins before adding new number
+      const last60SpinsBefore = history.slice(-60);
+      const counts = {};
+      last60SpinsBefore.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      return Object.keys(counts).filter(num => counts[num] >= 4);
+    }
+
+    // Get numbers in Hot To Cold section BEFORE adding new number
+    function getNumbersInHotToColdSectionBefore(newNumber) {
+      // Get last 60 spins before adding new number
+      const last60SpinsBefore = history.slice(-60);
+      const counts = {};
+      last60SpinsBefore.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Use the miss counters from BEFORE the update (which we saved in previousMissCounters4PlusUntilNone)
+      const trackedNumbersBefore = previousMissCounters4PlusUntilNone.length > 0 
+        ? Object.keys(previousMissCounters4PlusUntilNone[previousMissCounters4PlusUntilNone.length - 1])
+        : Object.keys(missCounters4PlusUntilNone);
+      
+      return trackedNumbersBefore.filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount >= 1;
+      });
+    }
+
+    // Get numbers in 3 Hits Only section BEFORE adding new number
+    function getNumbersIn3HitsOnlySectionBefore(newNumber) {
+      // Get last 60 spins before adding new number
+      const last60SpinsBefore = history.slice(-60);
+      const counts = {};
+      last60SpinsBefore.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Use the miss counters from BEFORE the update
+      const trackedNumbersBefore = previousMissCounters4PlusUntilNone.length > 0 
+        ? Object.keys(previousMissCounters4PlusUntilNone[previousMissCounters4PlusUntilNone.length - 1])
+        : Object.keys(missCounters4PlusUntilNone);
+      
+      return trackedNumbersBefore.filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount === 3;
+      });
+    }
+
+    // Get numbers in 2 Hits Only section BEFORE adding new number
+    function getNumbersIn2HitsOnlySectionBefore(newNumber) {
+      // Get last 60 spins before adding new number
+      const last60SpinsBefore = history.slice(-60);
+      const counts = {};
+      last60SpinsBefore.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Use the miss counters from BEFORE the update
+      const trackedNumbersBefore = previousMissCounters4PlusUntilNone.length > 0 
+        ? Object.keys(previousMissCounters4PlusUntilNone[previousMissCounters4PlusUntilNone.length - 1])
+        : Object.keys(missCounters4PlusUntilNone);
+      
+      return trackedNumbersBefore.filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount === 2;
+      });
+    }
+
+    // Get numbers in 1 Hit Only section BEFORE adding new number
+    function getNumbersIn1HitOnlySectionBefore(newNumber) {
+      // Get last 60 spins before adding new number
+      const last60SpinsBefore = history.slice(-60);
+      const counts = {};
+      last60SpinsBefore.forEach(num => {
+        counts[num] = (counts[num] || 0) + 1;
+      });
+      
+      // Use the miss counters from BEFORE the update
+      const trackedNumbersBefore = previousMissCounters4PlusUntilNone.length > 0 
+        ? Object.keys(previousMissCounters4PlusUntilNone[previousMissCounters4PlusUntilNone.length - 1])
+        : Object.keys(missCounters4PlusUntilNone);
+      
+      return trackedNumbersBefore.filter(num => {
+        const currentCount = counts[num] || 0;
+        return currentCount === 1;
+      });
+    }
+
+    // Check if number is in 4+ hits section BEFORE adding new number
+    function isNumberIn4PlusSectionBefore(newNumber) {
+      const numbersInSection = getNumbersIn4PlusSectionBefore(newNumber);
+      return numbersInSection.includes(newNumber);
+    }
+
+    // Check if number is in Hot To Cold section BEFORE adding new number
+    function isNumberInHotToColdSectionBefore(newNumber) {
+      const numbersInSection = getNumbersInHotToColdSectionBefore(newNumber);
+      return numbersInSection.includes(newNumber);
+    }
+
+    // Check if number is in 3 Hits Only section BEFORE adding new number
+    function isNumberIn3HitsOnlySectionBefore(newNumber) {
+      const numbersInSection = getNumbersIn3HitsOnlySectionBefore(newNumber);
+      return numbersInSection.includes(newNumber);
+    }
+
+    // Check if number is in 2 Hits Only section BEFORE adding new number
+    function isNumberIn2HitsOnlySectionBefore(newNumber) {
+      const numbersInSection = getNumbersIn2HitsOnlySectionBefore(newNumber);
+      return numbersInSection.includes(newNumber);
+    }
+
+    // Check if number is in 1 Hit Only section BEFORE adding new number
+    function isNumberIn1HitOnlySectionBefore(newNumber) {
+      const numbersInSection = getNumbersIn1HitOnlySectionBefore(newNumber);
+      return numbersInSection.includes(newNumber);
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString(); // Normalize to string
+      }
+      
+      // Save current state for undo for all sections
+      previousMissCounters4Plus.push(JSON.parse(JSON.stringify(missCounters4Plus)));
+      previousTotalMisses4Plus.push(totalMisses4Plus);
+      
+      previousMissCounters4PlusUntilNone.push(JSON.parse(JSON.stringify(missCounters4PlusUntilNone)));
+      previousTotalMisses4PlusUntilNone.push(totalMisses4PlusUntilNone);
+      
+      // Save state for breakdown sections
+      previousTotalMisses3HitsOnly.push(totalMisses3HitsOnly);
+      previousTotalMisses2HitsOnly.push(totalMisses2HitsOnly);
+      previousTotalMisses1HitOnly.push(totalMisses1HitOnly);
+      
+      // Get numbers in each section BEFORE adding the new number
+      const numbersIn4PlusBefore = getNumbersIn4PlusSectionBefore(val);
+      const numbersInHotToColdBefore = getNumbersInHotToColdSectionBefore(val);
+      const numbersIn3HitsOnlyBefore = getNumbersIn3HitsOnlySectionBefore(val);
+      const numbersIn2HitsOnlyBefore = getNumbersIn2HitsOnlySectionBefore(val);
+      const numbersIn1HitOnlyBefore = getNumbersIn1HitOnlySectionBefore(val);
+      
+      // Check if new number is in each section BEFORE adding it
+      const isHitIn4PlusBefore = isNumberIn4PlusSectionBefore(val);
+      const isHitInHotToColdBefore = isNumberInHotToColdSectionBefore(val);
+      const isHitIn3HitsOnlyBefore = isNumberIn3HitsOnlySectionBefore(val);
+      const isHitIn2HitsOnlyBefore = isNumberIn2HitsOnlySectionBefore(val);
+      const isHitIn1HitOnlyBefore = isNumberIn1HitOnlySectionBefore(val);
+      
+      // Add to history
+      history.push(val);
+      
+      // Update individual miss counters
+      updateMissCounters4Plus(val);
+      updateMissCounters4PlusUntilNone(val);
+      
+      // Update total misses for all sections based on the state BEFORE adding the new number
+      // 4+ hits section
+      if (isHitIn4PlusBefore) {
+        totalMisses4Plus = 0;
+      } else {
+        totalMisses4Plus += numbersIn4PlusBefore.length;
+      }
+      
+      // Hot To Cold section
+      if (isHitInHotToColdBefore) {
+        totalMisses4PlusUntilNone = 0;
+      } else {
+        totalMisses4PlusUntilNone += numbersInHotToColdBefore.length;
+      }
+      
+      // 3 Hits Only section
+      if (isHitIn3HitsOnlyBefore) {
+        totalMisses3HitsOnly = 0;
+      } else {
+        totalMisses3HitsOnly += numbersIn3HitsOnlyBefore.length;
+      }
+      
+      // 2 Hits Only section
+      if (isHitIn2HitsOnlyBefore) {
+        totalMisses2HitsOnly = 0;
+      } else {
+        totalMisses2HitsOnly += numbersIn2HitsOnlyBefore.length;
+      }
+      
+      // 1 Hit Only section
+      if (isHitIn1HitOnlyBefore) {
+        totalMisses1HitOnly = 0;
+      } else {
+        totalMisses1HitOnly += numbersIn1HitOnlyBefore.length;
+      }
+      
+      // Reset input and save
+      input.value = "";
+      save();
+      updateDisplay();
+      status.textContent = `Added spin: ${val}`;
+    }
+
+    // Update miss counters when a number is added (4+ hits section)
+    function updateMissCounters4Plus(newNumber) {
+      // Get the last 60 spins BEFORE adding the new number
+      const last60SpinsBefore = history.slice(-61, -1);
+      
+      // Get the last 60 spins AFTER adding the new number
+      const last60SpinsAfter = history.slice(-60);
+      
+      // Count occurrences of each number BEFORE the new spin
+      const countsBefore = {};
+      last60SpinsBefore.forEach(num => {
+        countsBefore[num] = (countsBefore[num] || 0) + 1;
+      });
+      
+      // Count occurrences of each number AFTER the new spin
+      const countsAfter = {};
+      last60SpinsAfter.forEach(num => {
+        countsAfter[num] = (countsAfter[num] || 0) + 1;
+      });
+      
+      // Find numbers with 4 or more hits AFTER the new spin
+      const numbersToPlayAfter = Object.keys(countsAfter).filter(num => countsAfter[num] >= 4);
+      
+      // Track which numbers are NEW to the section (not currently tracked)
+      const currentTrackedNumbers = new Set(Object.keys(missCounters4Plus));
+      const newlyQualifyingNumbers = numbersToPlayAfter.filter(num => !currentTrackedNumbers.has(num));
+      
+      // Track numbers that are LEAVING the section (had 4+ before, now have <4)
+      const leavingNumbers = [];
+      Object.keys(countsBefore).forEach(num => {
+        const had4PlusBefore = countsBefore[num] >= 4;
+        const has4PlusAfter = countsAfter[num] >= 4;
+        const wasTracked = currentTrackedNumbers.has(num);
+        
+        if (wasTracked && had4PlusBefore && !has4PlusAfter) {
+          leavingNumbers.push(num);
+        }
+      });
+      
+      // Check if the new number is a HIT in the current group
+      const isHitInGroup = currentTrackedNumbers.has(newNumber);
+      
+      if (isHitInGroup) {
+        // HIT: Reset the hit number to 0, others increase by 1
+        missCounters4Plus[newNumber] = 0;
+        
+        Object.keys(missCounters4Plus).forEach(num => {
+          if (num !== newNumber) {
+            missCounters4Plus[num]++;
+          }
+        });
+        
+        newlyQualifyingNumbers.forEach(num => {
+          if (num !== newNumber) {
+            missCounters4Plus[num] = 0;
+          }
+        });
+        
+        leavingNumbers.forEach(num => {
+          delete missCounters4Plus[num];
+        });
+      } else {
+        // MISS: Handle new numbers and increment existing ones
+        newlyQualifyingNumbers.forEach(num => {
+          missCounters4Plus[num] = 0;
+        });
+        
+        numbersToPlayAfter.forEach(num => {
+          if (currentTrackedNumbers.has(num)) {
+            missCounters4Plus[num]++;
+          }
+        });
+        
+        leavingNumbers.forEach(num => {
+          if (missCounters4Plus[num] !== undefined) {
+            missCounters4Plus[num]++;
+          }
+        });
+        
+        leavingNumbers.forEach(num => {
+          delete missCounters4Plus[num];
+        });
+      }
+    }
+
+    // Update miss counters when a number is added (4+ hits until none section)
+    function updateMissCounters4PlusUntilNone(newNumber) {
+      // Get the last 60 spins BEFORE adding the new number
+      const last60SpinsBefore = history.slice(-61, -1);
+      
+      // Get the last 60 spins AFTER adding the new number
+      const last60SpinsAfter = history.slice(-60);
+      
+      // Count occurrences of each number BEFORE the new spin
+      const countsBefore = {};
+      last60SpinsBefore.forEach(num => {
+        countsBefore[num] = (countsBefore[num] || 0) + 1;
+      });
+      
+      // Count occurrences of each number AFTER the new spin
+      const countsAfter = {};
+      last60SpinsAfter.forEach(num => {
+        countsAfter[num] = (countsAfter[num] || 0) + 1;
+      });
+      
+      // Track which numbers are currently being tracked
+      const currentTrackedNumbers = new Set(Object.keys(missCounters4PlusUntilNone));
+      
+      // Numbers that qualify for entry: have 4+ hits AFTER the new spin
+      const newlyQualifyingNumbers = Object.keys(countsAfter).filter(num => 
+        countsAfter[num] >= 4 && !currentTrackedNumbers.has(num)
+      );
+      
+      // Numbers that should leave: were tracked and now have 0 hits
+      const leavingNumbers = [];
+      Object.keys(countsBefore).forEach(num => {
+        const hadAtLeast1Before = (countsBefore[num] || 0) >= 1;
+        const hasAtLeast1After = (countsAfter[num] || 0) >= 1;
+        const wasTracked = currentTrackedNumbers.has(num);
+        
+        // Leave if: was tracked and now has 0 hits
+        if (wasTracked && hadAtLeast1Before && !hasAtLeast1After) {
+          leavingNumbers.push(num);
+        }
+      });
+      
+      // Check if the new number is a HIT in the current group
+      const isHitInGroup = currentTrackedNumbers.has(newNumber);
+      
+      if (isHitInGroup) {
+        // HIT: Reset the hit number to 0, others increase by 1
+        missCounters4PlusUntilNone[newNumber] = 0;
+        
+        // Increment all other tracked numbers
+        Object.keys(missCounters4PlusUntilNone).forEach(num => {
+          if (num !== newNumber) {
+            missCounters4PlusUntilNone[num]++;
+          }
+        });
+        
+        // Add newly qualifying numbers with 0
+        newlyQualifyingNumbers.forEach(num => {
+          if (num !== newNumber) {
+            missCounters4PlusUntilNone[num] = 0;
+          }
+        });
+        
+        // Remove leaving numbers
+        leavingNumbers.forEach(num => {
+          delete missCounters4PlusUntilNone[num];
+        });
+      } else {
+        // MISS: Handle new numbers and increment existing ones
+        
+        // Add newly qualifying numbers with miss counter 0
+        newlyQualifyingNumbers.forEach(num => {
+          missCounters4PlusUntilNone[num] = 0;
+        });
+        
+        // Increment ALL currently tracked numbers that are NOT newly added
+        Object.keys(missCounters4PlusUntilNone).forEach(num => {
+          // Only increment if the number was already tracked before this spin
+          // (not one of the newly qualifying numbers from this spin)
+          if (currentTrackedNumbers.has(num) && !newlyQualifyingNumbers.includes(num)) {
+            missCounters4PlusUntilNone[num]++;
+          }
+        });
+        
+        // Also add misses for numbers that are leaving
+        leavingNumbers.forEach(num => {
+          if (missCounters4PlusUntilNone[num] !== undefined) {
+            missCounters4PlusUntilNone[num]++;
+          }
+        });
+        
+        // Remove numbers that are leaving (down to 0 hits)
+        leavingNumbers.forEach(num => {
+          delete missCounters4PlusUntilNone[num];
+        });
+      }
+    }
+
+    // Undo the last action
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      // Remove the last spin
+      const lastVal = history.pop();
+      
+      // Restore previous state for all sections if available
+      if (previousMissCounters4Plus.length > 0 && 
+          previousMissCounters4PlusUntilNone.length > 0 &&
+          previousTotalMisses3HitsOnly.length > 0 &&
+          previousTotalMisses2HitsOnly.length > 0 &&
+          previousTotalMisses1HitOnly.length > 0) {
+        
+        // Restore 4+ section
+        missCounters4Plus = previousMissCounters4Plus.pop();
+        totalMisses4Plus = previousTotalMisses4Plus.pop();
+        
+        // Restore 4+ until none section
+        missCounters4PlusUntilNone = previousMissCounters4PlusUntilNone.pop();
+        totalMisses4PlusUntilNone = previousTotalMisses4PlusUntilNone.pop();
+        
+        // Restore breakdown sections
+        totalMisses3HitsOnly = previousTotalMisses3HitsOnly.pop();
+        totalMisses2HitsOnly = previousTotalMisses2HitsOnly.pop();
+        totalMisses1HitOnly = previousTotalMisses1HitOnly.pop();
+        
+      } else {
+        // If no previous state, recalculate everything from scratch
+        recalculateAllMissCounters();
+      }
+      
+      save();
+      updateDisplay();
+      status.textContent = `Undo: ${lastVal} removed`;
+    }
+
+    // Recalculate all miss counters from scratch
+    function recalculateAllMissCounters() {
+      // Clear all data
+      missCounters4Plus = {};
+      totalMisses4Plus = 0;
+      
+      missCounters4PlusUntilNone = {};
+      totalMisses4PlusUntilNone = 0;
+      
+      totalMisses3HitsOnly = 0;
+      totalMisses2HitsOnly = 0;
+      totalMisses1HitOnly = 0;
+      
+      // Clear previous state arrays
+      previousMissCounters4Plus = [];
+      previousTotalMisses4Plus = [];
+      previousMissCounters4PlusUntilNone = [];
+      previousTotalMisses4PlusUntilNone = [];
+      previousTotalMisses3HitsOnly = [];
+      previousTotalMisses2HitsOnly = [];
+      previousTotalMisses1HitOnly = [];
+      
+      // Save empty starting state
+      previousMissCounters4Plus.push(JSON.parse(JSON.stringify(missCounters4Plus)));
+      previousTotalMisses4Plus.push(totalMisses4Plus);
+      previousMissCounters4PlusUntilNone.push(JSON.parse(JSON.stringify(missCounters4PlusUntilNone)));
+      previousTotalMisses4PlusUntilNone.push(totalMisses4PlusUntilNone);
+      previousTotalMisses3HitsOnly.push(totalMisses3HitsOnly);
+      previousTotalMisses2HitsOnly.push(totalMisses2HitsOnly);
+      previousTotalMisses1HitOnly.push(totalMisses1HitOnly);
+      
+      // Process each spin in order to rebuild tracking
+      const tempHistory = [...history];
+      history = [];
+      
+      tempHistory.forEach((spin, index) => {
+        // Save state before this spin
+        previousMissCounters4Plus.push(JSON.parse(JSON.stringify(missCounters4Plus)));
+        previousTotalMisses4Plus.push(totalMisses4Plus);
+        previousMissCounters4PlusUntilNone.push(JSON.parse(JSON.stringify(missCounters4PlusUntilNone)));
+        previousTotalMisses4PlusUntilNone.push(totalMisses4PlusUntilNone);
+        previousTotalMisses3HitsOnly.push(totalMisses3HitsOnly);
+        previousTotalMisses2HitsOnly.push(totalMisses2HitsOnly);
+        previousTotalMisses1HitOnly.push(totalMisses1HitOnly);
+        
+        // Add the spin
+        history.push(spin);
+        
+        // Update individual miss counters
+        updateMissCounters4Plus(spin);
+        updateMissCounters4PlusUntilNone(spin);
+        
+        // Calculate what sections the number was in BEFORE this spin
+        const numbersIn4PlusBefore = getNumbersIn4PlusSectionBefore(spin);
+        const numbersInHotToColdBefore = getNumbersInHotToColdSectionBefore(spin);
+        const numbersIn3HitsOnlyBefore = getNumbersIn3HitsOnlySectionBefore(spin);
+        const numbersIn2HitsOnlyBefore = getNumbersIn2HitsOnlySectionBefore(spin);
+        const numbersIn1HitOnlyBefore = getNumbersIn1HitOnlySectionBefore(spin);
+        
+        const isHitIn4PlusBefore = numbersIn4PlusBefore.includes(spin);
+        const isHitInHotToColdBefore = numbersInHotToColdBefore.includes(spin);
+        const isHitIn3HitsOnlyBefore = numbersIn3HitsOnlyBefore.includes(spin);
+        const isHitIn2HitsOnlyBefore = numbersIn2HitsOnlyBefore.includes(spin);
+        const isHitIn1HitOnlyBefore = numbersIn1HitOnlyBefore.includes(spin);
+        
+        // Update total misses based on state BEFORE the spin
+        if (isHitIn4PlusBefore) {
+          totalMisses4Plus = 0;
+        } else {
+          totalMisses4Plus += numbersIn4PlusBefore.length;
+        }
+        
+        if (isHitInHotToColdBefore) {
+          totalMisses4PlusUntilNone = 0;
+        } else {
+          totalMisses4PlusUntilNone += numbersInHotToColdBefore.length;
+        }
+        
+        if (isHitIn3HitsOnlyBefore) {
+          totalMisses3HitsOnly = 0;
+        } else {
+          totalMisses3HitsOnly += numbersIn3HitsOnlyBefore.length;
+        }
+        
+        if (isHitIn2HitsOnlyBefore) {
+          totalMisses2HitsOnly = 0;
+        } else {
+          totalMisses2HitsOnly += numbersIn2HitsOnlyBefore.length;
+        }
+        
+        if (isHitIn1HitOnlyBefore) {
+          totalMisses1HitOnly = 0;
+        } else {
+          totalMisses1HitOnly += numbersIn1HitOnlyBefore.length;
+        }
+      });
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        
+        // Reset all sections
+        missCounters4Plus = {};
+        previousMissCounters4Plus = [];
+        totalMisses4Plus = 0;
+        previousTotalMisses4Plus = [];
+        
+        missCounters4PlusUntilNone = {};
+        previousMissCounters4PlusUntilNone = [];
+        totalMisses4PlusUntilNone = 0;
+        previousTotalMisses4PlusUntilNone = [];
+        
+        totalMisses3HitsOnly = 0;
+        previousTotalMisses3HitsOnly = [];
+        
+        totalMisses2HitsOnly = 0;
+        previousTotalMisses2HitsOnly = [];
+        
+        totalMisses1HitOnly = 0;
+        previousTotalMisses1HitOnly = [];
+        
+        // Clear all localStorage
+        localStorage.removeItem("history");
+        localStorage.removeItem("missCounters4Plus");
+        localStorage.removeItem("previousMissCounters4Plus");
+        localStorage.removeItem("totalMisses4Plus");
+        localStorage.removeItem("previousTotalMisses4Plus");
+        localStorage.removeItem("missCounters4PlusUntilNone");
+        localStorage.removeItem("previousMissCounters4PlusUntilNone");
+        localStorage.removeItem("totalMisses4PlusUntilNone");
+        localStorage.removeItem("previousTotalMisses4PlusUntilNone");
+        localStorage.removeItem("totalMisses3HitsOnly");
+        localStorage.removeItem("previousTotalMisses3HitsOnly");
+        localStorage.removeItem("totalMisses2HitsOnly");
+        localStorage.removeItem("previousTotalMisses2HitsOnly");
+        localStorage.removeItem("totalMisses1HitOnly");
+        localStorage.removeItem("previousTotalMisses1HitOnly");
+        
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      updateDisplay();
+    });
+  </script>
+</body>
+</html>

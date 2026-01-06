@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Roulette Tracker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+      width: 100%;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    .duplicate-section {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    .duplicate-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #ffeb3b;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #ffeb3b;
+    }
+    .duplicate-groups {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+    .group-box {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+    }
+    .group-header {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+      color: #ccc;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    .duplicate-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      min-height: 40px;
+    }
+    .duplicate-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .duplicate-number {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+      border: 2px solid transparent;
+    }
+    .duplicate-count {
+      font-size: 10px;
+      color: #ffeb3b;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .no-duplicates {
+      color: #888;
+      font-style: italic;
+      text-align: center;
+      padding: 10px;
+      width: 100%;
+    }
+    .misses-counter {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #2196F3;
+      font-weight: bold;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .misses-counter span {
+      flex: 1;
+    }
+    .misses-reset-btn {
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      border-radius: 4px;
+      background: rgba(255, 87, 34, 0.7);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: 8px;
+    }
+    .misses-reset-btn:hover {
+      background: rgba(255, 87, 34, 0.9);
+      transform: scale(1.05);
+    }
+    .privilege-indicator {
+      font-size: 9px;
+      color: #FF9800;
+      background: rgba(255, 152, 0, 0.2);
+      padding: 1px 3px;
+      border-radius: 3px;
+      margin-top: 2px;
+    }
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    
+    /* Alert Modal */
+    .alert-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .alert-content {
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      border: 3px solid;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0; }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .alert-title {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    
+    .new-triplicate-title {
+      color: #FF9800;
+      border-color: #FF9800;
+    }
+    
+    .hit-title {
+      color: #4CAF50;
+      border-color: #4CAF50;
+    }
+    
+    .auto-reset-title {
+      color: #2196F3;
+      border-color: #2196F3;
+    }
+    
+    .alert-number {
+      font-size: 3.5rem;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 10px;
+      display: inline-block;
+      min-width: 120px;
+      border: 3px solid;
+      box-shadow: 0 0 15px currentColor;
+    }
+    
+    .alert-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+      border-color: #b71c1c;
+      color: white;
+    }
+    
+    .alert-black {
+      background: linear-gradient(145deg, #212121, #000000);
+      border-color: #111;
+      color: white;
+    }
+    
+    .alert-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+      border-color: #1b5e20;
+      color: white;
+    }
+    
+    .alert-group {
+      font-size: 1.3rem;
+      color: #FFC107;
+      margin: 10px 0;
+    }
+    
+    .alert-message {
+      font-size: 1.1rem;
+      margin: 15px 0;
+      color: #ccc;
+    }
+    
+    .alert-count {
+      font-size: 1rem;
+      color: #ff9800;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    
+    .close-alert {
+      background: linear-gradient(145deg, #2196F3, #1976D2);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.2s ease;
+    }
+    
+    .close-alert:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+    }
+    
+    /* New styling for side-by-side sections */
+    .combined-sections {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    
+    .combined-section {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .combined-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #ffeb3b;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #ffeb3b;
+    }
+    
+    @media (max-width: 1100px) {
+      #recentSpins {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+      
+      .duplicate-groups {
+        flex-direction: column;
+      }
+      
+      .group-box {
+        min-width: 100%;
+      }
+      
+      .combined-sections {
+        flex-direction: column;
+      }
+      
+      .combined-section {
+        min-width: 100%;
+      }
+      
+      .misses-counter {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .misses-reset-btn {
+        margin-left: 0;
+        width: 100%;
+      }
+      
+      .alert-content {
+        padding: 20px;
+        width: 95%;
+      }
+      
+      .alert-title {
+        font-size: 1.5rem;
+      }
+      
+      .alert-number {
+        font-size: 2.5rem;
+        min-width: 100px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Green Roulette Tracker</h1>
+      <div class="tagline">Track your recent spins (60-spin window)</div>
+    </header>
+
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color legend-red"></div>
+        <span>Red</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-black"></div>
+        <span>Black</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-green"></div>
+        <span>Green</span>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+
+    <!-- 60-Spin Sections -->
+    <div class="duplicate-section">
+      <div class="duplicate-title">Group A and B Triplicates (60 Spins)</div>
+      <div class="duplicate-groups">
+        <div class="group-box">
+          <div class="group-header">Group A Triplicates (60)</div>
+          <div id="groupADuplicates60" class="duplicate-list">
+            <div class="no-duplicates">No triplicates</div>
+          </div>
+          <div class="misses-counter">
+            <span id="groupAMissesText60">Total misses: 0</span>
+            <button class="misses-reset-btn" onclick="resetMisses('A60')">Reset Misses</button>
+          </div>
+        </div>
+        
+        <div class="group-box">
+          <div class="group-header">Group B Triplicates (60)</div>
+          <div id="groupBDuplicates60" class="duplicate-list">
+            <div class="no-duplicates">No triplicates</div>
+          </div>
+          <div class="misses-counter">
+            <span id="groupBMissesText60">Total misses: 0</span>
+            <button class="misses-reset-btn" onclick="resetMisses('B60')">Reset Misses</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Combined Sections Side by Side -->
+    <div class="duplicate-section">
+      <div class="duplicate-title">Combined Tracking (60 Spins)</div>
+      <div class="combined-sections">
+        <div class="combined-section">
+          <div class="combined-title">Triplicate Numbers Only (60)</div>
+          <div id="triplicateNumbers60" class="duplicate-list">
+            <div class="no-duplicates">No triplicates</div>
+          </div>
+          <div class="misses-counter">
+            <span id="triplicateMissesText60">Total misses: 0</span>
+            <button class="misses-reset-btn" onclick="resetMisses('T60')">Reset Misses</button>
+          </div>
+        </div>
+        
+        <div class="combined-section">
+          <div class="combined-title">Auto-reset Numbers Only (60)</div>
+          <div id="autoResetNumbers60" class="duplicate-list">
+            <div class="no-duplicates">No auto-reset numbers</div>
+          </div>
+          <div class="misses-counter">
+            <span id="autoResetMissesText60">Total misses: 0</span>
+            <button class="misses-reset-btn" onclick="resetMisses('R60')">Reset Misses</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div id="alertModal" class="alert-modal">
+    <div class="alert-content" id="alertContent">
+      <div class="alert-title" id="alertTitle">?? HIT! ??</div>
+      <div class="alert-group" id="alertGroupText">Group A</div>
+      <div id="alertNumber" class="alert-number alert-red">0</div>
+      <div class="alert-message" id="alertMessage">Triplicate found in Group A!</div>
+      <div class="alert-count" id="alertCount">Now appears 3 times in last 60 spins</div>
+      <button class="close-alert" onclick="closeAlert()">Continue</button>
+    </div>
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">Back</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button onclick="numpadClick('00')">00</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings for roulette
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Define groups
+    const groupA = [0,2,3,5,6,11,12,14,15,21,22,24,25,27,29,32,33,35,36];
+    const groupB = ["00",1,4,7,8,9,10,13,16,17,18,19,20,23,26,28,30,31,34];
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    
+    // 60-spin window variables
+    let missesA60 = parseInt(localStorage.getItem("missesA60") || "0");
+    let missesB60 = parseInt(localStorage.getItem("missesB60") || "0");
+    let missesT60 = parseInt(localStorage.getItem("missesT60") || "0");
+    let missesR60 = parseInt(localStorage.getItem("missesR60") || "0");
+    
+    let autoResetPrivilegeA60 = JSON.parse(localStorage.getItem("autoResetPrivilegeA60") || "[]");
+    let autoResetPrivilegeB60 = JSON.parse(localStorage.getItem("autoResetPrivilegeB60") || "[]");
+    let autoResetPrivilegeAll60 = JSON.parse(localStorage.getItem("autoResetPrivilegeAll60") || "[]");
+    
+    // Track which numbers have been hit in Triplicate Numbers Only section
+    let triplicateNumbersHit60 = JSON.parse(localStorage.getItem("triplicateNumbersHit60") || "[]");
+    
+    // Track state history for undo functionality
+    let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
+
+    // Get color for a number
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      const num = parseInt(n, 10);
+      if (colors.red.includes(num)) return "red";
+      if (colors.black.includes(num)) return "black";
+      return "";
+    }
+
+    // Check if number is in Group A or B
+    function getGroup(n) {
+      const num = typeof n === 'string' && n !== "00" ? parseInt(n) : n;
+      if (groupA.includes(num)) return "A";
+      if (groupB.includes(num)) return "B";
+      return null;
+    }
+
+    // Save current state to history
+    function saveState() {
+      const state = {
+        history: [...history],
+        // 60-spin window
+        missesA60,
+        missesB60,
+        missesT60,
+        missesR60,
+        autoResetPrivilegeA60: [...autoResetPrivilegeA60],
+        autoResetPrivilegeB60: [...autoResetPrivilegeB60],
+        autoResetPrivilegeAll60: [...autoResetPrivilegeAll60],
+        triplicateNumbersHit60: [...triplicateNumbersHit60]
+      };
+      stateHistory.push(state);
+      
+      // Keep only last 50 states to prevent memory issues
+      if (stateHistory.length > 50) {
+        stateHistory = stateHistory.slice(-50);
+      }
+      
+      localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+    }
+
+    // Restore previous state
+    function restorePreviousState() {
+      if (stateHistory.length > 0) {
+        const previousState = stateHistory.pop();
+        
+        history = previousState.history;
+        
+        // 60-spin window
+        missesA60 = previousState.missesA60;
+        missesB60 = previousState.missesB60;
+        missesT60 = previousState.missesT60;
+        missesR60 = previousState.missesR60;
+        autoResetPrivilegeA60 = previousState.autoResetPrivilegeA60;
+        autoResetPrivilegeB60 = previousState.autoResetPrivilegeB60;
+        autoResetPrivilegeAll60 = previousState.autoResetPrivilegeAll60;
+        triplicateNumbersHit60 = previousState.triplicateNumbersHit60;
+        
+        // Save everything to localStorage
+        saveAllToLocalStorage();
+        
+        return true;
+      }
+      return false;
+    }
+
+    // Find triplicate numbers in last N spins, separated by group
+    function findTriplicatesByGroup(windowSize) {
+      const lastSpins = history.slice(-windowSize);
+      const countMap = {};
+      const groupATriplicates = {};
+      const groupBTriplicates = {};
+      const allTriplicates = {};
+      
+      // Count occurrences in last N spins
+      lastSpins.forEach(n => {
+        countMap[n] = (countMap[n] || 0) + 1;
+      });
+      
+      // Separate triplicates by group
+      for (const [num, count] of Object.entries(countMap)) {
+        if (count >= 3) {
+          const group = getGroup(num);
+          allTriplicates[num] = count;
+          if (group === "A") {
+            groupATriplicates[num] = count;
+          } else if (group === "B") {
+            groupBTriplicates[num] = count;
+          }
+        }
+      }
+      
+      return {
+        groupA: groupATriplicates,
+        groupB: groupBTriplicates,
+        all: allTriplicates
+      };
+    }
+
+    // Get auto-reset numbers (numbers that have auto-reset privilege)
+    function getAutoResetNumbers(windowSize) {
+      const lastSpins = history.slice(-windowSize);
+      const countMap = {};
+      const autoResetNumbers = {};
+      
+      // Count occurrences in last N spins
+      lastSpins.forEach(n => {
+        countMap[n] = (countMap[n] || 0) + 1;
+      });
+      
+      // Find numbers with auto-reset privilege
+      for (const num of autoResetPrivilegeAll60) {
+        if (countMap[num] >= 2) {
+          autoResetNumbers[num] = countMap[num];
+        }
+      }
+      
+      return autoResetNumbers;
+    }
+
+    // Get triplicate numbers for Triplicate Numbers Only section (excludes hit numbers)
+    function getTriplicateNumbersOnly(windowSize) {
+      const lastSpins = history.slice(-windowSize);
+      const countMap = {};
+      const triplicateNumbers = {};
+      
+      // Count occurrences in last N spins
+      lastSpins.forEach(n => {
+        countMap[n] = (countMap[n] || 0) + 1;
+      });
+      
+      // Find numbers that appear 3+ times and haven't been hit yet
+      for (const [num, count] of Object.entries(countMap)) {
+        if (count >= 3 && !triplicateNumbersHit60.includes(num)) {
+          triplicateNumbers[num] = count;
+        }
+      }
+      
+      return triplicateNumbers;
+    }
+
+    // Calculate misses and update privileges for each group and window size
+    function calculateMissesAndPrivilegesForWindow(windowSize, missesA, missesB, missesT, missesR, autoResetPrivilegeA, autoResetPrivilegeB, autoResetPrivilegeAll, windowSuffix) {
+      if (history.length === 0) {
+        return { missesA, missesB, missesT, missesR, autoResetPrivilegeA, autoResetPrivilegeB, autoResetPrivilegeAll };
+      }
+      
+      const lastSpin = history[history.length - 1];
+      const lastGroup = getGroup(lastSpin);
+      
+      // Get all spins EXCEPT the last one
+      const previousSpins = history.slice(0, -1);
+      const previousLastSpins = previousSpins.slice(-windowSize);
+      
+      // Count occurrences in previous N spins (before this spin)
+      const prevCountMap = {};
+      previousLastSpins.forEach(n => {
+        prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+      });
+      
+      // Get current last N spins (after adding the new spin)
+      const currentLastSpins = history.slice(-windowSize);
+      const currentCountMap = {};
+      currentLastSpins.forEach(n => {
+        currentCountMap[n] = (currentCountMap[n] || 0) + 1;
+      });
+      
+      // Check for triplicates in Group A BEFORE this spin
+      const prevTriplicatesA = [];
+      for (const [num, count] of Object.entries(prevCountMap)) {
+        const group = getGroup(num);
+        if (group === "A" && count >= 3) {
+          prevTriplicatesA.push(num);
+        }
+      }
+      
+      // Check for triplicates in Group B BEFORE this spin
+      const prevTriplicatesB = [];
+      for (const [num, count] of Object.entries(prevCountMap)) {
+        const group = getGroup(num);
+        if (group === "B" && count >= 3) {
+          prevTriplicatesB.push(num);
+        }
+      }
+      
+      // Check for ALL triplicates BEFORE this spin (for Triplicate Numbers Only section)
+      const prevAllTriplicates = [];
+      for (const [num, count] of Object.entries(prevCountMap)) {
+        if (count >= 3) {
+          prevAllTriplicates.push(num);
+        }
+      }
+      
+      // Check for auto-reset numbers BEFORE this spin (for Auto-reset Numbers Only section)
+      const prevAutoResetTriplicates = [];
+      for (const [num, count] of Object.entries(prevCountMap)) {
+        if (count >= 3 && autoResetPrivilegeAll.includes(num)) {
+          prevAutoResetTriplicates.push(num);
+        }
+      }
+      
+      // Handle Group A misses and privileges
+      if (prevTriplicatesA.length > 0) {
+        // Check if last spin is a Group A triplicate
+        if (lastGroup === "A" && prevTriplicatesA.includes(lastSpin)) {
+          // HIT: Reset misses to 0 and grant auto-reset privilege to this number
+          missesA = 0;
+          if (!autoResetPrivilegeA.includes(lastSpin)) {
+            autoResetPrivilegeA.push(lastSpin);
+          }
+          if (!autoResetPrivilegeAll.includes(lastSpin)) {
+            autoResetPrivilegeAll.push(lastSpin);
+          }
+        } else {
+          // MISS: Add misses for each triplicate
+          missesA += prevTriplicatesA.length;
+        }
+      }
+      
+      // Check for 3?2 transitions in Group A (auto-reset triggers)
+      let groupAAutoReset = false;
+      let groupAAutoResetNumber = null;
+      for (const [num, prevCount] of Object.entries(prevCountMap)) {
+        const group = getGroup(num);
+        if (group === "A" && prevCount === 3) {
+          const currentCount = currentCountMap[num] || 0;
+          if (currentCount === 2) {
+            // Check if this number has auto-reset privilege
+            if (autoResetPrivilegeA.includes(num)) {
+              groupAAutoReset = true;
+              groupAAutoResetNumber = num;
+              // Remove privilege since it was used
+              autoResetPrivilegeA = autoResetPrivilegeA.filter(n => n !== num);
+              autoResetPrivilegeAll = autoResetPrivilegeAll.filter(n => n !== num);
+            }
+          }
+        }
+      }
+      
+      if (groupAAutoReset) {
+        missesA = 0;
+        setTimeout(() => showAutoResetAlert(groupAAutoResetNumber, 'A', 2, windowSuffix), 100);
+      }
+      
+      // Handle Group B misses and privileges
+      if (prevTriplicatesB.length > 0) {
+        // Check if last spin is a Group B triplicate
+        if (lastGroup === "B" && prevTriplicatesB.includes(lastSpin)) {
+          // HIT: Reset misses to 0 and grant auto-reset privilege to this number
+          missesB = 0;
+          if (!autoResetPrivilegeB.includes(lastSpin)) {
+            autoResetPrivilegeB.push(lastSpin);
+          }
+          if (!autoResetPrivilegeAll.includes(lastSpin)) {
+            autoResetPrivilegeAll.push(lastSpin);
+          }
+        } else {
+          // MISS: Add misses for each triplicate
+          missesB += prevTriplicatesB.length;
+        }
+      }
+      
+      // Check for 3?2 transitions in Group B (auto-reset triggers)
+      let groupBAutoReset = false;
+      let groupBAutoResetNumber = null;
+      for (const [num, prevCount] of Object.entries(prevCountMap)) {
+        const group = getGroup(num);
+        if (group === "B" && prevCount === 3) {
+          const currentCount = currentCountMap[num] || 0;
+          if (currentCount === 2) {
+            // Check if this number has auto-reset privilege
+            if (autoResetPrivilegeB.includes(num)) {
+              groupBAutoReset = true;
+              groupBAutoResetNumber = num;
+              // Remove privilege since it was used
+              autoResetPrivilegeB = autoResetPrivilegeB.filter(n => n !== num);
+              autoResetPrivilegeAll = autoResetPrivilegeAll.filter(n => n !== num);
+            }
+          }
+        }
+      }
+      
+      if (groupBAutoReset) {
+        missesB = 0;
+        setTimeout(() => showAutoResetAlert(groupBAutoResetNumber, 'B', 2, windowSuffix), 100);
+      }
+      
+      // Handle Triplicate Numbers Only section (all groups combined)
+      // FIX: We need to check if the last spin itself became a triplicate (3 appearances)
+      const lastSpinPrevCount = prevCountMap[lastSpin] || 0;
+      const lastSpinCurrentCount = currentCountMap[lastSpin] || 0;
+      
+      // Check if last spin became a new triplicate (went from 2 to 3 appearances)
+      const becameNewTriplicate = lastSpinPrevCount === 2 && lastSpinCurrentCount === 3;
+      
+      // Also check if last spin was already a triplicate and stays a triplicate
+      const wasAlreadyTriplicate = lastSpinPrevCount >= 3 && lastSpinCurrentCount >= 3;
+      
+      // Get all triplicates that existed BEFORE this spin (excluding hit numbers)
+      const prevAllTriplicatesNotHit = prevAllTriplicates.filter(num => !triplicateNumbersHit60.includes(num));
+      
+      if (prevAllTriplicatesNotHit.length > 0) {
+        // Check if last spin is ANY triplicate (from any group) that hasn't been hit yet
+        if (prevAllTriplicatesNotHit.includes(lastSpin)) {
+          // HIT: Reset misses to 0 and mark this number as hit
+          missesT = 0;
+          if (!triplicateNumbersHit60.includes(lastSpin)) {
+            triplicateNumbersHit60.push(lastSpin);
+          }
+        } else {
+          // MISS: Add misses for each triplicate that hasn't been hit
+          missesT += prevAllTriplicatesNotHit.length;
+        }
+      }
+      
+      // SPECIAL CASE: If last spin became a new triplicate AND there were existing triplicates
+      // but the last spin is NOT one of them, we still need to count it as a new triplicate
+      // for the Triplicate Numbers Only section (it will appear in the display but not count as hit yet)
+      if (becameNewTriplicate && !prevAllTriplicatesNotHit.includes(lastSpin)) {
+        // This is a new triplicate - it will appear in Triplicate Numbers Only section
+        // but doesn't count as a hit or miss yet
+      }
+      
+      // Check for 3?2 transitions for all triplicates (auto-reset triggers for Triplicate Numbers section)
+      let allAutoReset = false;
+      let allAutoResetNumber = null;
+      for (const [num, prevCount] of Object.entries(prevCountMap)) {
+        if (prevCount === 3 && !triplicateNumbersHit60.includes(num)) {
+          const currentCount = currentCountMap[num] || 0;
+          if (currentCount === 2) {
+            // Check if this number has auto-reset privilege in the all groups list
+            if (autoResetPrivilegeAll.includes(num)) {
+              allAutoReset = true;
+              allAutoResetNumber = num;
+              // Remove privilege since it was used
+              autoResetPrivilegeAll = autoResetPrivilegeAll.filter(n => n !== num);
+            }
+          }
+        }
+      }
+      
+      if (allAutoReset) {
+        missesT = 0;
+        setTimeout(() => showAutoResetAlert(allAutoResetNumber, 'All', 2, windowSuffix), 100);
+      }
+      
+      // Handle Auto-reset Numbers Only section
+      if (prevAutoResetTriplicates.length > 0) {
+        // Check if last spin is an auto-reset triplicate
+        if (prevAutoResetTriplicates.includes(lastSpin)) {
+          // HIT: Reset misses to 0
+          missesR = 0;
+        } else {
+          // MISS: Add misses for each auto-reset triplicate
+          missesR += prevAutoResetTriplicates.length;
+        }
+      }
+      
+      // Check for 3?2 transitions for auto-reset numbers (auto-reset triggers for Auto-reset Numbers section)
+      let autoResetSectionAutoReset = false;
+      let autoResetSectionNumber = null;
+      for (const [num, prevCount] of Object.entries(prevCountMap)) {
+        if (prevCount === 3 && autoResetPrivilegeAll.includes(num)) {
+          const currentCount = currentCountMap[num] || 0;
+          if (currentCount === 2) {
+            autoResetSectionAutoReset = true;
+            autoResetSectionNumber = num;
+          }
+        }
+      }
+      
+      if (autoResetSectionAutoReset) {
+        missesR = 0;
+        setTimeout(() => showAutoResetAlert(autoResetSectionNumber, 'Auto-reset', 2, windowSuffix), 100);
+      }
+      
+      return { missesA, missesB, missesT, missesR, autoResetPrivilegeA, autoResetPrivilegeB, autoResetPrivilegeAll };
+    }
+
+    // Main function to calculate misses and privileges for 60-spin window
+    function calculateMissesAndPrivileges() {
+      if (history.length === 0) return;
+      
+      // Calculate for 60-spin window
+      const result60 = calculateMissesAndPrivilegesForWindow(
+        60, 
+        missesA60, missesB60, missesT60, missesR60,
+        autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeAll60,
+        "60"
+      );
+      
+      // Update 60-spin variables
+      missesA60 = result60.missesA;
+      missesB60 = result60.missesB;
+      missesT60 = result60.missesT;
+      missesR60 = result60.missesR;
+      autoResetPrivilegeA60 = result60.autoResetPrivilegeA;
+      autoResetPrivilegeB60 = result60.autoResetPrivilegeB;
+      autoResetPrivilegeAll60 = result60.autoResetPrivilegeAll;
+    }
+
+    // Show alert for new triplicate or hit
+    function showAlert(number, group, count, alertType, windowSuffix) {
+      const modal = document.getElementById('alertModal');
+      const content = document.getElementById('alertContent');
+      const alertNumber = document.getElementById('alertNumber');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertGroupText = document.getElementById('alertGroupText');
+      const alertMessage = document.getElementById('alertMessage');
+      const alertCount = document.getElementById('alertCount');
+      
+      // Set the number with proper color
+      const color = getColor(number);
+      alertNumber.textContent = number;
+      alertNumber.className = `alert-number alert-${color}`;
+      
+      // Set group text
+      if (group === 'All') {
+        alertGroupText.textContent = `All Groups (${windowSuffix} spins)`;
+      } else if (group === 'Auto-reset') {
+        alertGroupText.textContent = `Auto-reset Numbers (${windowSuffix} spins)`;
+      } else {
+        alertGroupText.textContent = `Group ${group} (${windowSuffix} spins)`;
+      }
+      
+      // Set title and styling based on alert type
+      if (alertType === 'newTriplicate') {
+        alertTitle.textContent = '?? NEW TRIPLICATE! ??';
+        alertTitle.className = 'alert-title new-triplicate-title';
+        content.style.borderColor = '#FF9800';
+        content.style.boxShadow = '0 10px 30px rgba(255, 152, 0, 0.3)';
+        alertMessage.textContent = `New triplicate found!`;
+      } else if (alertType === 'hit') {
+        alertTitle.textContent = '?? HIT! ??';
+        alertTitle.className = 'alert-title hit-title';
+        content.style.borderColor = '#4CAF50';
+        content.style.boxShadow = '0 10px 30px rgba(76, 175, 80, 0.3)';
+        alertMessage.textContent = `HIT! Number appears 3 times!`;
+      }
+      
+      // Set count
+      alertCount.textContent = `Now appears ${count} times in last ${windowSuffix} spins`;
+      
+      // Show modal
+      modal.style.display = 'flex';
+    }
+
+    // Show alert for automatic misses reset
+    function showAutoResetAlert(number, group, count, windowSuffix) {
+      const modal = document.getElementById('alertModal');
+      const content = document.getElementById('alertContent');
+      const alertNumber = document.getElementById('alertNumber');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertGroupText = document.getElementById('alertGroupText');
+      const alertMessage = document.getElementById('alertMessage');
+      const alertCount = document.getElementById('alertCount');
+      
+      // Set the number with proper color
+      const color = getColor(number);
+      alertNumber.textContent = number;
+      alertNumber.className = `alert-number alert-${color}`;
+      
+      // Set group text
+      if (group === 'All') {
+        alertGroupText.textContent = `All Groups (${windowSuffix} spins)`;
+      } else if (group === 'Auto-reset') {
+        alertGroupText.textContent = `Auto-reset Numbers (${windowSuffix} spins)`;
+      } else {
+        alertGroupText.textContent = `Group ${group} (${windowSuffix} spins)`;
+      }
+      
+      // Set title and styling for auto-reset
+      alertTitle.textContent = '?? AUTO-RESET! ??';
+      alertTitle.className = 'alert-title auto-reset-title';
+      content.style.borderColor = '#2196F3';
+      content.style.boxShadow = '0 10px 30px rgba(33, 150, 243, 0.3)';
+      alertMessage.textContent = `Misses auto-reset to 0!`;
+      alertCount.textContent = `Number ${number} used its auto-reset privilege (${windowSuffix} spins)`;
+      
+      // Show modal
+      modal.style.display = 'flex';
+    }
+
+    // Close alert
+    function closeAlert() {
+      document.getElementById('alertModal').style.display = 'none';
+    }
+
+    // Check for new triplicate or hit when adding a number
+    function checkForAlert(lastSpin) {
+      // Check for 60-spin window
+      const lastSpins = history.slice(-60);
+      const countMap = {};
+      
+      // Count occurrences in last 60 spins
+      lastSpins.forEach(n => {
+        countMap[n] = (countMap[n] || 0) + 1;
+      });
+      
+      const count = countMap[lastSpin] || 0;
+      const group = getGroup(lastSpin);
+      
+      // If this number appears 3 or more times
+      if (count >= 3) {
+        // Check the previous count (before this spin)
+        const previousSpins = history.slice(0, -1);
+        const previousLastSpins = previousSpins.slice(-60);
+        const prevCountMap = {};
+        
+        previousLastSpins.forEach(n => {
+          prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+        });
+        
+        const prevCount = prevCountMap[lastSpin] || 0;
+        
+        // If it went from 2 to 3 occurrences, it's a NEW TRIPLICATE
+        if (prevCount === 2 && count === 3) {
+          showAlert(lastSpin, group, count, 'newTriplicate', '60');
+        }
+        // If it was already 3 and stays 3, it's a HIT (already in triplicate)
+        else if (prevCount === 3 && count === 3) {
+          showAlert(lastSpin, group, count, 'hit', '60');
+        }
+      }
+    }
+
+    // Update triplicate displays for 60-spin window
+    function updateDuplicateDisplayForWindow(windowSize, suffix, missesA, missesB, missesT, missesR, autoResetPrivilegeA, autoResetPrivilegeB, autoResetPrivilegeAll) {
+      const triplicates = findTriplicatesByGroup(windowSize);
+      const autoResetNumbers = getAutoResetNumbers(windowSize);
+      const triplicateNumbersOnly = getTriplicateNumbersOnly(windowSize);
+      
+      // Update Group A triplicates
+      const groupADisplay = document.getElementById(`groupADuplicates${suffix}`);
+      const triplicateNumbersA = Object.keys(triplicates.groupA);
+      if (triplicateNumbersA.length === 0) {
+        groupADisplay.innerHTML = '<div class="no-duplicates">No triplicates</div>';
+      } else {
+        groupADisplay.innerHTML = '';
+        for (const [num, count] of Object.entries(triplicates.groupA)) {
+          const color = getColor(num);
+          const item = document.createElement("div");
+          item.className = "duplicate-item";
+          
+          const numberDiv = document.createElement("div");
+          numberDiv.className = `duplicate-number ${color}`;
+          numberDiv.textContent = num;
+          
+          const countDiv = document.createElement("div");
+          countDiv.className = "duplicate-count";
+          countDiv.textContent = count;
+          
+          // Add privilege indicator
+          if (autoResetPrivilegeA.includes(num)) {
+            const privilegeDiv = document.createElement("div");
+            privilegeDiv.className = "privilege-indicator";
+            privilegeDiv.textContent = "AUTO-RESET";
+            item.appendChild(privilegeDiv);
+          }
+          
+          item.appendChild(numberDiv);
+          item.appendChild(countDiv);
+          groupADisplay.appendChild(item);
+        }
+      }
+      
+      // Update Group B triplicates
+      const groupBDisplay = document.getElementById(`groupBDuplicates${suffix}`);
+      const triplicateNumbersB = Object.keys(triplicates.groupB);
+      if (triplicateNumbersB.length === 0) {
+        groupBDisplay.innerHTML = '<div class="no-duplicates">No triplicates</div>';
+      } else {
+        groupBDisplay.innerHTML = '';
+        for (const [num, count] of Object.entries(triplicates.groupB)) {
+          const color = getColor(num);
+          const item = document.createElement("div");
+          item.className = "duplicate-item";
+          
+          const numberDiv = document.createElement("div");
+          numberDiv.className = `duplicate-number ${color}`;
+          numberDiv.textContent = num;
+          
+          const countDiv = document.createElement("div");
+          countDiv.className = "duplicate-count";
+          countDiv.textContent = count;
+          
+          // Add privilege indicator
+          if (autoResetPrivilegeB.includes(num)) {
+            const privilegeDiv = document.createElement("div");
+            privilegeDiv.className = "privilege-indicator";
+            privilegeDiv.textContent = "AUTO-RESET";
+            item.appendChild(privilegeDiv);
+          }
+          
+          item.appendChild(numberDiv);
+          item.appendChild(countDiv);
+          groupBDisplay.appendChild(item);
+        }
+      }
+      
+      // Update Triplicate Numbers Only (all groups, excluding hit numbers)
+      const triplicateDisplay = document.getElementById(`triplicateNumbers${suffix}`);
+      const triplicateOnlyNumbers = Object.keys(triplicateNumbersOnly);
+      if (triplicateOnlyNumbers.length === 0) {
+        triplicateDisplay.innerHTML = '<div class="no-duplicates">No triplicates</div>';
+      } else {
+        triplicateDisplay.innerHTML = '';
+        for (const [num, count] of Object.entries(triplicateNumbersOnly)) {
+          const color = getColor(num);
+          const item = document.createElement("div");
+          item.className = "duplicate-item";
+          
+          const numberDiv = document.createElement("div");
+          numberDiv.className = `duplicate-number ${color}`;
+          numberDiv.textContent = num;
+          
+          const countDiv = document.createElement("div");
+          countDiv.className = "duplicate-count";
+          countDiv.textContent = count;
+          
+          // Add privilege indicator if this number has auto-reset privilege
+          if (autoResetPrivilegeAll.includes(num)) {
+            const privilegeDiv = document.createElement("div");
+            privilegeDiv.className = "privilege-indicator";
+            privilegeDiv.textContent = "AUTO-RESET";
+            item.appendChild(privilegeDiv);
+          }
+          
+          item.appendChild(numberDiv);
+          item.appendChild(countDiv);
+          triplicateDisplay.appendChild(item);
+        }
+      }
+      
+      // Update Auto-reset Numbers Only
+      const autoResetDisplay = document.getElementById(`autoResetNumbers${suffix}`);
+      const autoResetNumberList = Object.keys(autoResetNumbers);
+      if (autoResetNumberList.length === 0) {
+        autoResetDisplay.innerHTML = '<div class="no-duplicates">No auto-reset numbers</div>';
+      } else {
+        autoResetDisplay.innerHTML = '';
+        for (const [num, count] of Object.entries(autoResetNumbers)) {
+          const color = getColor(num);
+          const item = document.createElement("div");
+          item.className = "duplicate-item";
+          
+          const numberDiv = document.createElement("div");
+          numberDiv.className = `duplicate-number ${color}`;
+          numberDiv.textContent = num;
+          
+          const countDiv = document.createElement("div");
+          countDiv.className = "duplicate-count";
+          countDiv.textContent = count;
+          
+          // Add privilege indicator
+          const privilegeDiv = document.createElement("div");
+          privilegeDiv.className = "privilege-indicator";
+          privilegeDiv.textContent = "AUTO-RESET";
+          item.appendChild(privilegeDiv);
+          
+          item.appendChild(numberDiv);
+          item.appendChild(countDiv);
+          autoResetDisplay.appendChild(item);
+        }
+      }
+      
+      // Update misses counters
+      document.getElementById(`groupAMissesText${suffix}`).textContent = `Total misses: ${missesA}`;
+      document.getElementById(`groupBMissesText${suffix}`).textContent = `Total misses: ${missesB}`;
+      document.getElementById(`triplicateMissesText${suffix}`).textContent = `Total misses: ${missesT}`;
+      document.getElementById(`autoResetMissesText${suffix}`).textContent = `Total misses: ${missesR}`;
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      
+      // Always show exactly 40 boxes
+      for (let i = 0; i < 40; i++) {
+        const div = document.createElement("div");
+        
+        // Get the spin number (newest first)
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          const color = getColor(n);
+          div.className = `spin-box ${color}`;
+          div.textContent = n;
+        } else {
+          // Empty box for missing spins
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        container.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+      
+      // Update 60-spin window
+      updateDuplicateDisplayForWindow(
+        60, "60", 
+        missesA60, missesB60, missesT60, missesR60,
+        autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeAll60
+      );
+    }
+
+    // Save all data to localStorage
+    function saveAllToLocalStorage() {
+      localStorage.setItem("history", JSON.stringify(history));
+      
+      // 60-spin window
+      localStorage.setItem("missesA60", missesA60);
+      localStorage.setItem("missesB60", missesB60);
+      localStorage.setItem("missesT60", missesT60);
+      localStorage.setItem("missesR60", missesR60);
+      localStorage.setItem("autoResetPrivilegeA60", JSON.stringify(autoResetPrivilegeA60));
+      localStorage.setItem("autoResetPrivilegeB60", JSON.stringify(autoResetPrivilegeB60));
+      localStorage.setItem("autoResetPrivilegeAll60", JSON.stringify(autoResetPrivilegeAll60));
+      localStorage.setItem("triplicateNumbersHit60", JSON.stringify(triplicateNumbersHit60));
+      
+      localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString(); // Normalize to string
+      }
+      
+      // Save current state before adding new spin
+      saveState();
+      
+      // Add to history
+      history.push(val);
+      
+      // Check for alerts (new triplicate or hit)
+      checkForAlert(val);
+      
+      // Calculate misses and update privileges for 60-spin window
+      calculateMissesAndPrivileges();
+      
+      // Reset input and save
+      input.value = "";
+      saveAllToLocalStorage();
+      updateDisplay();
+      
+      // Show status with group info
+      const group = getGroup(val);
+      const color = getColor(val);
+      status.textContent = `Added spin: ${val} (Group ${group}, ${color})`;
+    }
+
+    // Undo the last action
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      // Restore previous state from history
+      if (restorePreviousState()) {
+        updateDisplay();
+        status.textContent = "Last spin undone. State restored.";
+      } else {
+        // Fallback: manually remove last spin and recalculate
+        history.pop();
+        recalculateFromScratch();
+        saveAllToLocalStorage();
+        updateDisplay();
+        status.textContent = "Last spin undone. All data recalculated.";
+      }
+    }
+
+    // Recalculate everything from scratch (fallback for undo)
+    function recalculateFromScratch() {
+      // Reset all state for 60-spin window
+      missesA60 = 0;
+      missesB60 = 0;
+      missesT60 = 0;
+      missesR60 = 0;
+      autoResetPrivilegeA60 = [];
+      autoResetPrivilegeB60 = [];
+      autoResetPrivilegeAll60 = [];
+      triplicateNumbersHit60 = [];
+      
+      if (history.length === 0) {
+        return;
+      }
+      
+      // Process each spin in order to rebuild state for 60-spin window
+      for (let i = 0; i < history.length; i++) {
+        const currentSpin = history[i];
+        const currentGroup = getGroup(currentSpin);
+        
+        // Process for 60-spin window
+        const previousSpins60 = history.slice(0, i);
+        const previousLast60 = previousSpins60.slice(-60);
+        const currentLast60 = history.slice(0, i + 1).slice(-60);
+        
+        // Count occurrences before this spin
+        const prevCountMap = {};
+        previousLast60.forEach(n => {
+          prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+        });
+        
+        // Count occurrences after this spin
+        const currentCountMap = {};
+        currentLast60.forEach(n => {
+          currentCountMap[n] = (currentCountMap[n] || 0) + 1;
+        });
+        
+        // Find triplicates in previous spins
+        const prevTriplicatesA = [];
+        const prevTriplicatesB = [];
+        const prevAllTriplicates = [];
+        const prevAutoResetTriplicates = [];
+        
+        for (const [num, count] of Object.entries(prevCountMap)) {
+          if (count >= 3) {
+            const group = getGroup(num);
+            prevAllTriplicates.push(num);
+            
+            if (group === "A") {
+              prevTriplicatesA.push(num);
+            } else if (group === "B") {
+              prevTriplicatesB.push(num);
+            }
+            
+            if (autoResetPrivilegeAll60.includes(num)) {
+              prevAutoResetTriplicates.push(num);
+            }
+          }
+        }
+        
+        // Check for 3?2 transitions (auto-reset triggers)
+        for (const [num, prevCount] of Object.entries(prevCountMap)) {
+          const group = getGroup(num);
+          const currentCount = currentCountMap[num] || 0;
+          
+          if (prevCount === 3 && currentCount === 2) {
+            // Auto-reset for Group A
+            if (group === "A" && autoResetPrivilegeA60.includes(num)) {
+              missesA60 = 0;
+              autoResetPrivilegeA60 = autoResetPrivilegeA60.filter(n => n !== num);
+              autoResetPrivilegeAll60 = autoResetPrivilegeAll60.filter(n => n !== num);
+            }
+            
+            // Auto-reset for Group B
+            if (group === "B" && autoResetPrivilegeB60.includes(num)) {
+              missesB60 = 0;
+              autoResetPrivilegeB60 = autoResetPrivilegeB60.filter(n => n !== num);
+              autoResetPrivilegeAll60 = autoResetPrivilegeAll60.filter(n => n !== num);
+            }
+            
+            // Auto-reset for All triplicates
+            if (autoResetPrivilegeAll60.includes(num)) {
+              missesT60 = 0;
+              autoResetPrivilegeAll60 = autoResetPrivilegeAll60.filter(n => n !== num);
+            }
+            
+            // Auto-reset for Auto-reset Numbers section
+            if (autoResetPrivilegeAll60.includes(num)) {
+              missesR60 = 0;
+            }
+          }
+        }
+        
+        // Check if current spin is a hit (triplicate that was already a triplicate)
+        const currentCount = currentCountMap[currentSpin] || 0;
+        const prevCount = prevCountMap[currentSpin] || 0;
+        if (currentCount >= 3 && prevCount >= 3) {
+          // Grant auto-reset privilege for hitting a triplicate
+          if (currentGroup === "A" && !autoResetPrivilegeA60.includes(currentSpin)) {
+            autoResetPrivilegeA60.push(currentSpin);
+          } else if (currentGroup === "B" && !autoResetPrivilegeB60.includes(currentSpin)) {
+            autoResetPrivilegeB60.push(currentSpin);
+          }
+          
+          if (!autoResetPrivilegeAll60.includes(currentSpin)) {
+            autoResetPrivilegeAll60.push(currentSpin);
+          }
+          
+          // Mark as hit in Triplicate Numbers Only section
+          if (!triplicateNumbersHit60.includes(currentSpin)) {
+            triplicateNumbersHit60.push(currentSpin);
+          }
+        }
+        
+        // Calculate misses for Group A
+        if (prevTriplicatesA.length > 0) {
+          if (currentGroup === "A" && prevTriplicatesA.includes(currentSpin)) {
+            missesA60 = 0;
+          } else {
+            missesA60 += prevTriplicatesA.length;
+          }
+        }
+        
+        // Calculate misses for Group B
+        if (prevTriplicatesB.length > 0) {
+          if (currentGroup === "B" && prevTriplicatesB.includes(currentSpin)) {
+            missesB60 = 0;
+          } else {
+            missesB60 += prevTriplicatesB.length;
+          }
+        }
+        
+        // Calculate misses for Triplicate Numbers Only section
+        const prevAllTriplicatesNotHit = prevAllTriplicates.filter(num => !triplicateNumbersHit60.includes(num));
+        if (prevAllTriplicatesNotHit.length > 0) {
+          if (prevAllTriplicatesNotHit.includes(currentSpin)) {
+            missesT60 = 0;
+          } else {
+            missesT60 += prevAllTriplicatesNotHit.length;
+          }
+        }
+        
+        // Calculate misses for Auto-reset Numbers Only section
+        if (prevAutoResetTriplicates.length > 0) {
+          if (prevAutoResetTriplicates.includes(currentSpin)) {
+            missesR60 = 0;
+          } else {
+            missesR60 += prevAutoResetTriplicates.length;
+          }
+        }
+      }
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        missesA60 = 0;
+        missesB60 = 0;
+        missesT60 = 0;
+        missesR60 = 0;
+        autoResetPrivilegeA60 = [];
+        autoResetPrivilegeB60 = [];
+        autoResetPrivilegeAll60 = [];
+        triplicateNumbersHit60 = [];
+        stateHistory = [];
+        localStorage.clear();
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    // Reset misses for specific group and window
+    function resetMisses(groupWithSuffix) {
+      const group = groupWithSuffix.substring(0, 1);
+      const suffix = groupWithSuffix.substring(1);
+      
+      let groupName = '';
+      if (group === 'A') groupName = 'Group A';
+      else if (group === 'B') groupName = 'Group B';
+      else if (group === 'T') groupName = 'Triplicate Numbers';
+      else if (group === 'R') groupName = 'Auto-reset Numbers';
+      
+      if (confirm(`Are you sure you want to reset misses for ${groupName} (${suffix} spins) to 0?`)) {
+        // Save current state before resetting
+        saveState();
+        
+        if (group === 'A' && suffix === '60') {
+          missesA60 = 0;
+        } else if (group === 'B' && suffix === '60') {
+          missesB60 = 0;
+        } else if (group === 'T' && suffix === '60') {
+          missesT60 = 0;
+        } else if (group === 'R' && suffix === '60') {
+          missesR60 = 0;
+        }
+        
+        saveAllToLocalStorage();
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = `${groupName} (${suffix} spins) misses reset to 0`;
+      }
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      // Close modal when clicking outside
+      document.getElementById('alertModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeAlert();
+        }
+      });
+      
+      // Close modal with Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeAlert();
+        }
+      });
+      
+      // Auto-focus input when clicking anywhere on the page
+      document.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON' && e.target.className !== 'spin-box') {
+          document.getElementById('numberInput').focus();
+        }
+      });
+      
+      // Focus input on load
+      document.getElementById('numberInput').focus();
+      
+      // Initialize state history with current state if empty
+      if (stateHistory.length === 0 && history.length > 0) {
+        saveState();
+      }
+      
+      updateDisplay();
+    });
+  </script>
+</body>
+</html>

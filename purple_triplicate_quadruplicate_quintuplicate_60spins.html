@@ -240,26 +240,78 @@
       background: #ff6b3d;
     }
     
-    /* Side-by-side sections container */
+    /* Side-by-side sections container - UPDATED FOR IPAD MINI */
     .side-by-side-sections {
       display: flex;
       gap: 20px;
       margin-bottom: 20px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 15px;
     }
     
-    @media (max-width: 1100px) {
-      .side-by-side-sections {
-        flex-direction: column;
-      }
+    .side-by-side-sections::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    .side-by-side-sections::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    
+    .side-by-side-sections::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
     }
     
     .duplicate-section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 12px;
       padding: 15px;
-      flex: 1;
-      min-width: 0;
+      flex: 1 0 300px; /* Minimum width for readability */
+      min-width: 300px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* For very small screens, allow wrapping */
+    @media (max-width: 768px) {
+      .side-by-side-sections {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        gap: 15px;
+      }
+      
+      .duplicate-section {
+        flex: 1 1 100%;
+        min-width: 100%;
+      }
+    }
+    
+    /* For iPad Mini and similar sizes - horizontal scroll */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .side-by-side-sections {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 15px;
+      }
+      
+      .duplicate-section {
+        flex: 0 0 calc(33.333% - 20px); /* 3 columns minus gap */
+        min-width: calc(33.333% - 20px);
+      }
+    }
+    
+    /* For larger screens */
+    @media (min-width: 1025px) {
+      .side-by-side-sections {
+        flex-wrap: nowrap;
+        overflow-x: hidden; /* No scroll needed on large screens */
+      }
+      
+      .duplicate-section {
+        flex: 1;
+        min-width: 0;
+      }
     }
     
     .duplicate-title {
@@ -300,6 +352,15 @@
       }
     }
     
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .combined-misses-sections {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 15px;
+        padding-bottom: 10px;
+      }
+    }
+    
     .combined-misses-section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 12px;
@@ -308,6 +369,13 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       text-align: center;
       border: 2px solid;
+    }
+    
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .combined-misses-section {
+        flex: 0 0 calc(50% - 10px);
+        min-width: calc(50% - 10px);
+      }
     }
     
     .combined-all-title {
@@ -722,6 +790,60 @@
         flex-direction: column;
       }
     }
+    
+    /* ADDED: Optimize for iPad Mini (768px to 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .container {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+      
+      .side-by-side-sections {
+        margin-left: -5px;
+        margin-right: -5px;
+      }
+      
+      .duplicate-section {
+        padding: 12px;
+        flex: 0 0 calc(33.333% - 10px);
+        min-width: calc(33.333% - 10px);
+      }
+      
+      .duplicate-title {
+        font-size: 1.1rem;
+      }
+      
+      .duplicate-number {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+      
+      .duplicate-count {
+        font-size: 9px;
+      }
+      
+      .misses-counter {
+        font-size: 0.85rem;
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .misses-reset-btn {
+        width: 100%;
+        margin-left: 0;
+        font-size: 0.65rem;
+        padding: 3px 6px;
+      }
+      
+      .combined-misses-section {
+        padding: 12px;
+      }
+      
+      .combined-misses-title {
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -759,11 +881,11 @@
 
     <!-- Scrollable Container for Duplicate Sections -->
     <div class="duplicate-sections-container">
-      <!-- Side-by-side sections container -->
+      <!-- Side-by-side sections container - Now horizontally scrollable on iPad Mini -->
       <div class="side-by-side-sections">
         <!-- Triplicates Section -->
         <div class="duplicate-section">
-          <div class="duplicate-title triplicate-title">Triplicates</div>
+          <div class="duplicate-title triplicate-title">Triplicates 60 Spins</div>
           <div class="duplicate-groups">
             <div class="group-box">
               <div id="allTriplicates60" class="duplicate-list">
@@ -771,7 +893,7 @@
               </div>
               <div class="misses-counter triplicate-misses">
                 <span id="allTriMissesText60">Total misses: 0</span>
-                <button class="misses-reset-btn" onclick="resetMisses('AllTri60')">Reset Misses</button>
+               
               </div>
             </div>
           </div>
@@ -779,7 +901,7 @@
 
         <!-- Quadruplicates Section -->
         <div class="duplicate-section">
-          <div class="duplicate-title quadruplicate-title">Quadruplicates</div>
+          <div class="duplicate-title quadruplicate-title">Quadruplicates 60 Spins</div>
           <div class="duplicate-groups">
             <div class="group-box">
               <div id="allQuadruplicates60" class="duplicate-list">
@@ -787,7 +909,7 @@
               </div>
               <div class="misses-counter quadruplicate-misses">
                 <span id="allQuadMissesText60">Total misses: 0</span>
-                <button class="misses-reset-btn" onclick="resetMisses('AllQuad60')">Reset Misses</button>
+                
               </div>
             </div>
           </div>
@@ -795,7 +917,7 @@
 
         <!-- Quintuplicates Section -->
         <div class="duplicate-section">
-          <div class="duplicate-title quintuplicate-title">Quintuplicates</div>
+          <div class="duplicate-title quintuplicate-title">Quintuplicates 60 Spins</div>
           <div class="duplicate-groups">
             <div class="group-box">
               <div id="allQuintuplicates60" class="duplicate-list">
@@ -803,7 +925,7 @@
               </div>
               <div class="misses-counter quintuplicate-misses">
                 <span id="allQuintMissesText60">Total misses: 0</span>
-                <button class="misses-reset-btn" onclick="resetMisses('AllQuint60')">Reset Misses</button>
+
               </div>
             </div>
           </div>
@@ -819,7 +941,7 @@
             <div class="group-box">
               <div class="misses-counter combined-all-misses">
                 <span id="combinedMissesTextAll">Total Combined Misses: 0</span>
-                <button class="misses-reset-btn" onclick="resetMisses('CombinedAll')">Reset Misses</button>
+
               </div>
             </div>
           </div>
@@ -827,12 +949,12 @@
 
         <!-- Combined Misses (Quadruplicates + Quintuplicates) -->
         <div class="combined-misses-section">
-          <div class="combined-misses-title combined-quad-quint-title">Combined Misses (Quadruplicates + Quintuplicates)</div>
+          <div class="combined-misses-title combined-quad-quint-title">Combined Misses (Quad + Quint)</div>
           <div class="duplicate-groups">
             <div class="group-box">
               <div class="misses-counter combined-quad-quint-misses">
                 <span id="combinedMissesTextQuadQuint">Total Combined Misses: 0</span>
-                <button class="misses-reset-btn" onclick="resetMisses('CombinedQuadQuint')">Reset Misses</button>
+
               </div>
             </div>
           </div>

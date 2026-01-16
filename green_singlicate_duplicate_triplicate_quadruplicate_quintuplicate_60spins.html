@@ -240,8 +240,8 @@
       background: #ff6b3d;
     }
     
-    /* First row: Singlicate, Duplicate, Triplicate, Quadruplicate, Quintuplicate */
-    .top-sections-row {
+    /* NEW LAYOUT: First row with Singlicates, Duplicates, Combined Misses (Sing+Duplicates) */
+    .first-row {
       display: flex;
       gap: 20px;
       margin-bottom: 20px;
@@ -250,22 +250,22 @@
       padding-bottom: 15px;
     }
     
-    .top-sections-row::-webkit-scrollbar {
+    .first-row::-webkit-scrollbar {
       height: 8px;
     }
     
-    .top-sections-row::-webkit-scrollbar-track {
+    .first-row::-webkit-scrollbar-track {
       background: #1a1a2e;
       border-radius: 5px;
     }
     
-    .top-sections-row::-webkit-scrollbar-thumb {
+    .first-row::-webkit-scrollbar-thumb {
       background: #ff4b2b;
       border-radius: 5px;
     }
     
-    /* Second row: Combined Misses */
-    .bottom-sections-row {
+    /* Second row with Triplicates, Quadruplicates, Quintuplicates, Combined Misses (Tri+Quad+Quint) */
+    .second-row {
       display: flex;
       gap: 20px;
       margin-top: 15px;
@@ -274,63 +274,41 @@
       padding-bottom: 15px;
     }
     
-    .bottom-sections-row::-webkit-scrollbar {
+    .second-row::-webkit-scrollbar {
       height: 8px;
     }
     
-    .bottom-sections-row::-webkit-scrollbar-track {
+    .second-row::-webkit-scrollbar-track {
       background: #1a1a2e;
       border-radius: 5px;
     }
     
-    .bottom-sections-row::-webkit-scrollbar-thumb {
+    .second-row::-webkit-scrollbar-thumb {
       background: #ff4b2b;
       border-radius: 5px;
     }
     
-    .duplicate-section {
+    /* Section styles for all sections */
+    .section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 12px;
       padding: 15px;
       flex: 1 0 300px; /* Minimum width for readability */
       min-width: 300px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* For Singlicate section - same style as other sections */
-    .singlicate-section {
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 12px;
-      padding: 15px;
-      flex: 1 0 300px;
-      min-width: 300px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* Combined misses sections - smaller width */
-    .combined-misses-section {
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 12px;
-      padding: 15px;
-      flex: 1 0 300px;
-      min-width: 300px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       text-align: center;
-      border: 2px solid;
     }
     
     /* For very small screens, allow wrapping */
     @media (max-width: 768px) {
-      .top-sections-row,
-      .bottom-sections-row {
+      .first-row,
+      .second-row {
         flex-wrap: wrap;
         overflow-x: visible;
         gap: 15px;
       }
       
-      .duplicate-section,
-      .singlicate-section,
-      .combined-misses-section {
+      .section {
         flex: 1 1 100%;
         min-width: 100%;
       }
@@ -338,36 +316,28 @@
     
     /* For iPad Mini and similar sizes - horizontal scroll */
     @media (min-width: 769px) and (max-width: 1024px) {
-      .top-sections-row,
-      .bottom-sections-row {
+      .first-row,
+      .second-row {
         flex-wrap: nowrap;
         overflow-x: auto;
         gap: 15px;
       }
       
-      .duplicate-section,
-      .singlicate-section {
-        flex: 0 0 calc(25% - 20px); /* 4 columns minus gap */
-        min-width: calc(25% - 20px);
-      }
-      
-      .combined-misses-section {
-        flex: 0 0 calc(33.333% - 20px); /* Third width for Combined Misses */
+      .section {
+        flex: 0 0 calc(33.333% - 20px); /* 3 columns minus gap */
         min-width: calc(33.333% - 20px);
       }
     }
     
     /* For larger screens */
     @media (min-width: 1025px) {
-      .top-sections-row,
-      .bottom-sections-row {
+      .first-row,
+      .second-row {
         flex-wrap: nowrap;
         overflow-x: hidden; /* No scroll needed on large screens */
       }
       
-      .duplicate-section,
-      .singlicate-section,
-      .combined-misses-section {
+      .section {
         flex: 1;
         min-width: 0;
       }
@@ -408,18 +378,13 @@
     }
     
     .combined-sing-dup-title {
-      color: #4CAF50; /* Green color for Singlicates + Duplicates */
-      border-color: #4CAF50;
+      color: #FFC107; /* Yellow color for Combined Sing+Duplicates */
+      border-color: #FFC107;
     }
     
     .combined-tri-quad-quint-title {
-      color: #FF9800;
-      border-color: #FF9800;
-    }
-    
-    .combined-quad-quint-title {
-      color: #9C27B0;
-      border-color: #9C27B0;
+      color: #FF5722; /* Deep orange color for Combined Tri+Quad+Quint */
+      border-color: #FF5722;
     }
     
     .duplicate-groups {
@@ -539,15 +504,11 @@
     }
     
     .combined-sing-dup-misses {
-      color: #4CAF50; /* Green color for Singlicates + Duplicates misses */
+      color: #FFC107; /* Yellow color for Singlicates + Duplicates misses */
     }
     
     .combined-tri-quad-quint-misses {
-      color: #FF9800;
-    }
-    
-    .combined-quad-quint-misses {
-      color: #9C27B0;
+      color: #FF5722; /* Deep orange color for Tri+Quad+Quint misses */
     }
     
     .misses-counter span {
@@ -841,8 +802,8 @@
         max-height: 450px;
       }
       
-      .top-sections-row,
-      .bottom-sections-row {
+      .first-row,
+      .second-row {
         flex-direction: column;
       }
     }
@@ -854,20 +815,13 @@
         padding: 0 10px;
       }
       
-      .top-sections-row,
-      .bottom-sections-row {
+      .first-row,
+      .second-row {
         margin-left: -5px;
         margin-right: -5px;
       }
       
-      .duplicate-section,
-      .singlicate-section {
-        padding: 12px;
-        flex: 0 0 calc(25% - 10px);
-        min-width: calc(25% - 10px);
-      }
-      
-      .combined-misses-section {
+      .section {
         padding: 12px;
         flex: 0 0 calc(33.333% - 10px);
         min-width: calc(33.333% - 10px);
@@ -903,15 +857,13 @@
     
     /* For larger screens */
     @media (min-width: 1025px) {
-      .top-sections-row,
-      .bottom-sections-row {
+      .first-row,
+      .second-row {
         flex-wrap: nowrap;
         overflow-x: hidden; /* No scroll needed on large screens */
       }
       
-      .duplicate-section,
-      .singlicate-section,
-      .combined-misses-section {
+      .section {
         flex: 1;
         min-width: 0;
       }
@@ -938,10 +890,10 @@
     
     <!-- Scrollable Container for Duplicate Sections -->
     <div class="duplicate-sections-container">
-      <!-- First Row: Singlicate, Duplicate, Triplicate, Quadruplicate, Quintuplicate -->
-      <div class="top-sections-row">
+      <!-- First Row: Singlicates, Duplicates, Combined Misses (Singlicates+Duplicates) -->
+      <div class="first-row">
         <!-- Singlicates Section -->
-        <div class="singlicate-section">
+        <div class="section">
           <div class="duplicate-title singlicate-title">Singlicates</div>
           <div class="duplicate-groups">
             <div class="group-box">
@@ -957,7 +909,7 @@
         </div>
 
         <!-- Duplicates Section (EXACTLY 2 times) -->
-        <div class="duplicate-section">
+        <div class="section">
           <div class="duplicate-title duplicate-duplicate-title">Duplicates</div>
           <div class="duplicate-groups">
             <div class="group-box">
@@ -972,8 +924,24 @@
           </div>
         </div>
 
+        <!-- Combined Misses (Singlicates + Duplicates) -->
+        <div class="section">
+          <div class="duplicate-title combined-sing-dup-title">Combined Misses (Singlicates + Duplicates)</div>
+          <div class="duplicate-groups">
+            <div class="group-box">
+              <div class="misses-counter combined-sing-dup-misses">
+                <span id="combinedMissesTextSingDup">Total Combined Misses: 0</span>
+                <button class="misses-reset-btn" onclick="resetMisses('CombinedSingDup')">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Second Row: Triplicates, Quadruplicates, Quintuplicates, Combined Misses (Tri+Quad+Quint) -->
+      <div class="second-row">
         <!-- Triplicates Section -->
-        <div class="duplicate-section">
+        <div class="section">
           <div class="duplicate-title triplicate-title">Triplicates</div>
           <div class="duplicate-groups">
             <div class="group-box">
@@ -989,7 +957,7 @@
         </div>
 
         <!-- Quadruplicates Section -->
-        <div class="duplicate-section">
+        <div class="section">
           <div class="duplicate-title quadruplicate-title">Quadruplicates</div>
           <div class="duplicate-groups">
             <div class="group-box">
@@ -1005,7 +973,7 @@
         </div>
 
         <!-- Quintuplicates Section -->
-        <div class="duplicate-section">
+        <div class="section">
           <div class="duplicate-title quintuplicate-title">Quintuplicates</div>
           <div class="duplicate-groups">
             <div class="group-box">
@@ -1019,25 +987,9 @@
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Second Row: Combined Misses -->
-      <div class="bottom-sections-row">
-        <!-- Combined Misses (Singlicates + Duplicates) -->
-        <div class="combined-misses-section">
-          <div class="duplicate-title combined-sing-dup-title">Combined Misses (Singlicates + Duplicates)</div>
-          <div class="duplicate-groups">
-            <div class="group-box">
-              <div class="misses-counter combined-sing-dup-misses">
-                <span id="combinedMissesTextSingDup">Total Combined Misses: 0</span>
-                <button class="misses-reset-btn" onclick="resetMisses('CombinedSingDup')">Reset</button>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- Combined Misses (Triplicates + Quadruplicates + Quintuplicates) -->
-        <div class="combined-misses-section">
+        <div class="section">
           <div class="duplicate-title combined-tri-quad-quint-title">Combined Misses (Tri + Quad + Quint)</div>
           <div class="duplicate-groups">
             <div class="group-box">
@@ -1109,7 +1061,7 @@
     // Quintuplicate tracking variables (60-spin window)
     let allMissesQuint60 = parseInt(localStorage.getItem("allMissesQuint60") || "0");
     
-    // Combined misses tracking - SINGLICATES + DUPLICATES ONLY (changed from All Categories)
+    // Combined misses tracking - SINGLICATES + DUPLICATES ONLY
     let combinedMissesSingDup = parseInt(localStorage.getItem("combinedMissesSingDup") || "0");
     
     // Combined misses tracking - TRI+QUAD+QUINT
@@ -1546,7 +1498,7 @@
       const prevQuadruplicates = getPreviousQuadruplicates();
       const prevQuintuplicates = getPreviousQuintuplicates();
       
-      // Calculate combined misses for SINGLICATES + DUPLICATES ONLY (changed from All Categories)
+      // Calculate combined misses for SINGLICATES + DUPLICATES ONLY
       const singDupPreviousCategories = [...prevSinglicates, ...prevDuplicates];
       if (singDupPreviousCategories.length > 0) {
         if (singDupPreviousCategories.includes(lastSpin)) {

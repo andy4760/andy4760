@@ -621,31 +621,6 @@
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
     
-    .new-cold-numbers-title {
-      color: #607D8B;
-      border-color: #607D8B;
-    }
-    
-    .new-singlicate-title {
-      color: #4CAF50;
-      border-color: #4CAF50;
-    }
-    
-    .new-duplicate-title {
-      color: #00BCD4;
-      border-color: #00BCD4;
-    }
-    
-    .new-triplicate-title {
-      color: #FF9800;
-      border-color: #FF9800;
-    }
-    
-    .new-quadruplicate-title {
-      color: #9C27B0;
-      border-color: #9C27B0;
-    }
-    
     .hit-title {
       color: #4CAF50;
       border-color: #4CAF50;
@@ -1007,13 +982,13 @@
     </div>
   </div>
 
-  <!-- Alert Modal for Category Hits/New Categories -->
+  <!-- Alert Modal for Category Hits -->
   <div id="alertModal" class="alert-modal">
     <div class="alert-content" id="alertContent">
-      <div class="alert-title" id="alertTitle">?? HIT! ??</div>
+      <div class="alert-title hit-title" id="alertTitle">?? HIT! ??</div>
       <div class="alert-group" id="alertGroupText">Group A</div>
       <div id="alertNumber" class="alert-number alert-red">0</div>
-      <div class="alert-message" id="alertMessage">Triplicate found in Group A!</div>
+      <div class="alert-message" id="alertMessage">Category HIT! Misses reset to 0!</div>
       <div class="alert-count" id="alertCount">Now appears 3 times in last 60 spins</div>
       <button class="close-alert" onclick="closeAlert()">Continue</button>
     </div>
@@ -1022,7 +997,7 @@
   <!-- NEW: High Misses Alert Modal -->
   <div id="highMissesAlertModal" class="alert-modal">
     <div class="alert-content" id="highMissesAlertContent">
-      <div class="alert-title high-misses-title" id="highMissesAlertTitle">🚨 HIGH MISSES ALERT! 🚨</div>
+      <div class="alert-title high-misses-title" id="highMissesAlertTitle">?? HIGH MISSES ALERT! ??</div>
       <div id="highMissesAlertNumber" class="alert-number alert-high-misses">100</div>
       <div class="alert-group" id="highMissesAlertCategory">Category: Zerolicates</div>
       <div class="alert-message" id="highMissesAlertMessage">Total misses have reached 100!</div>
@@ -1788,8 +1763,8 @@
       document.getElementById('highMissesAlertModal').style.display = 'none';
     }
 
-    // Show alert for new category or hit
-    function showAlert(number, group, count, alertType, windowSuffix, minCount, sectionType = 'cold') {
+    // Show alert for category hit
+    function showHitAlert(number, group, count, sectionType) {
       const modal = document.getElementById('alertModal');
       const content = document.getElementById('alertContent');
       const alertNumber = document.getElementById('alertNumber');
@@ -1811,73 +1786,40 @@
       else if (sectionType === 'triplicate') typeText = "Triplicate";
       else if (sectionType === 'quadruplicate') typeText = "Quadruplicate";
       
-      alertGroupText.textContent = `${typeText} - ${group} (${windowSuffix} spins)`;
+      alertGroupText.textContent = `${typeText} - ${group} (60 spins)`;
       
-      // Set title and styling based on alert type
-      if (alertType === 'newCategory') {
-        let titleText = '';
-        let className = '';
-        let borderColor = '';
-        
-        if (sectionType === 'cold') {
-          titleText = '?? NEW COLD NUMBER! ??';
-          className = 'new-cold-numbers-title';
-          borderColor = '#607D8B';
-        } else if (sectionType === 'singlicate') {
-          titleText = '?? NEW SINGLICATE! ??';
-          className = 'new-singlicate-title';
-          borderColor = '#4CAF50';
-        } else if (sectionType === 'duplicate') {
-          titleText = '?? NEW DUPLICATE! ??';
-          className = 'new-duplicate-title';
-          borderColor = '#00BCD4';
-        } else if (sectionType === 'triplicate') {
-          titleText = '?? NEW TRIPLICATE! ??';
-          className = 'new-triplicate-title';
-          borderColor = '#FF9800';
-        } else if (sectionType === 'quadruplicate') {
-          titleText = '?? NEW QUADRUPLICATE! ??';
-          className = 'new-quadruplicate-title';
-          borderColor = '#9C27B0';
-        }
-        
-        alertTitle.textContent = titleText;
-        alertTitle.className = `alert-title ${className}`;
-        content.style.borderColor = borderColor;
-        content.style.boxShadow = `0 10px 30px ${borderColor}30`;
-        alertMessage.textContent = `New ${typeText.toLowerCase()} found in ${group}!`;
-      } else if (alertType === 'hit') {
-        alertTitle.textContent = '?? HIT! ??';
-        alertTitle.className = 'alert-title hit-title';
-        content.style.borderColor = '#4CAF50';
-        content.style.boxShadow = '0 10px 30px rgba(76, 175, 80, 0.3)';
-        
-        if (sectionType === 'cold') {
-          alertMessage.textContent = `Cold Number HIT! Cold number misses reset to 0.`;
-        } else if (sectionType === 'singlicate') {
-          alertMessage.textContent = `Singlicate HIT! Singlicate misses reset to 0.`;
-        } else if (sectionType === 'duplicate') {
-          alertMessage.textContent = `Duplicate HIT! Duplicate misses reset to 0.`;
-        } else if (sectionType === 'triplicate') {
-          alertMessage.textContent = `Triplicate HIT! Number moves to Quadruplicates. Triplicate misses reset to 0.`;
-        } else if (sectionType === 'quadruplicate') {
-          alertMessage.textContent = `Quadruplicate HIT! Quadruplicate misses reset to 0.`;
-        }
+      // Set title and styling
+      alertTitle.textContent = '?? HIT! ??';
+      alertTitle.className = 'alert-title hit-title';
+      content.style.borderColor = '#4CAF50';
+      content.style.boxShadow = '0 10px 30px rgba(76, 175, 80, 0.3)';
+      
+      // Set message based on section type
+      if (sectionType === 'cold') {
+        alertMessage.textContent = `Cold Number HIT! Cold number misses reset to 0.`;
+      } else if (sectionType === 'singlicate') {
+        alertMessage.textContent = `Singlicate HIT! Singlicate misses reset to 0.`;
+      } else if (sectionType === 'duplicate') {
+        alertMessage.textContent = `Duplicate HIT! Duplicate misses reset to 0.`;
+      } else if (sectionType === 'triplicate') {
+        alertMessage.textContent = `Triplicate HIT! Number moves to Quadruplicates. Triplicate misses reset to 0.`;
+      } else if (sectionType === 'quadruplicate') {
+        alertMessage.textContent = `Quadruplicate HIT! Quadruplicate misses reset to 0.`;
       }
       
       // Set count
       if (sectionType === 'cold') {
         alertCount.textContent = `Has not appeared in last 60+ spins`;
       } else {
-        alertCount.textContent = `Now appears ${count} times in last ${windowSuffix} spins`;
+        alertCount.textContent = `Now appears ${count} times in last 60 spins`;
       }
       
       // Show modal
       modal.style.display = 'flex';
     }
 
-    // Check for new category or hit when adding a number
-    function checkForAlert(lastSpin) {
+    // Check for hit when adding a number
+    function checkForHitAlert(lastSpin) {
       const lastSpins = history.slice(-60);
       const countMap = {};
       
@@ -1901,81 +1843,49 @@
       const prevCount = prevCountMap[lastSpin] || 0;
       
       // Check for cold numbers (0 occurrences in last 60+ spins)
-      // A number becomes cold when it hasn't appeared in 60+ spins
-      if (history.length >= 60) {
-        const lastOccurrenceIndex = history.lastIndexOf(lastSpin);
-        const spinsSinceLast = previousSpins.length - 1 - lastOccurrenceIndex;
-        
-        // Check if this number just became cold (60+ spins since last appearance)
-        if (spinsSinceLast >= 60 && !coldNumbers.includes(lastSpin)) {
-          coldNumbers.push(lastSpin);
-          showAlert(lastSpin, group, 0, 'newCategory', '60+', 0, 'cold');
-        }
-        // Check if a cold number was hit
-        else if (prevCount === 0 && count === 1 && coldNumbers.includes(lastSpin)) {
-          showAlert(lastSpin, group, count, 'hit', '60+', 0, 'cold');
-        }
+      // Check if a cold number was hit
+      if (prevCount === 0 && count === 1 && coldNumbers.includes(lastSpin)) {
+        showHitAlert(lastSpin, group, count, 'cold');
+        return true;
       }
       
       // Check for singlicates (EXACTLY 1 time)
-      if (prevCount === 0 && count === 1 && !coldNumbers.includes(lastSpin)) {
-        showAlert(lastSpin, group, count, 'newCategory', '60', 1, 'singlicate');
-      }
-      else if (prevCount === 1 && count === 1) {
+      if (prevCount === 1 && count === 1) {
         const prevSinglicates = getPreviousSinglicates();
         if (prevSinglicates.includes(lastSpin)) {
-          showAlert(lastSpin, group, count, 'hit', '60', 1, 'singlicate');
-        }
-      }
-      else if (prevCount === 1 && count === 2) {
-        const index = singlicateNumbers.indexOf(lastSpin);
-        if (index > -1) {
-          singlicateNumbers.splice(index, 1);
+          showHitAlert(lastSpin, group, count, 'singlicate');
+          return true;
         }
       }
       
       // Check for duplicates (EXACTLY 2 times)
-      if (prevCount === 1 && count === 2) {
-        showAlert(lastSpin, group, count, 'newCategory', '60', 2, 'duplicate');
-      }
-      else if (prevCount === 2 && count === 2) {
+      if (prevCount === 2 && count === 2) {
         const prevDuplicates = getPreviousDuplicates();
         if (prevDuplicates.includes(lastSpin)) {
-          showAlert(lastSpin, group, count, 'hit', '60', 2, 'duplicate');
-        }
-      }
-      else if (prevCount === 2 && count === 3) {
-        const index = duplicateNumbers.indexOf(lastSpin);
-        if (index > -1) {
-          duplicateNumbers.splice(index, 1);
+          showHitAlert(lastSpin, group, count, 'duplicate');
+          return true;
         }
       }
       
       // Check for triplicates
-      if (count >= 3) {
-        if (prevCount === 2 && count === 3) {
-          showAlert(lastSpin, group, count, 'newCategory', '60', 3, 'triplicate');
-        }
-        else if (prevCount === 3 && count === 3) {
-          const prevTriplicates = getPreviousTriplicates();
-          if (prevTriplicates.includes(lastSpin)) {
-            showAlert(lastSpin, group, count, 'hit', '60', 3, 'triplicate');
-          }
+      if (prevCount === 3 && count === 3) {
+        const prevTriplicates = getPreviousTriplicates();
+        if (prevTriplicates.includes(lastSpin)) {
+          showHitAlert(lastSpin, group, count, 'triplicate');
+          return true;
         }
       }
       
       // Check for quadruplicates
-      if (count >= 4) {
-        if (prevCount === 3 && count === 4) {
-          showAlert(lastSpin, group, count, 'newCategory', '60', 4, 'quadruplicate');
-        }
-        else if (prevCount === 4 && count === 4) {
-          const prevQuadruplicates = getPreviousQuadruplicates();
-          if (prevQuadruplicates.includes(lastSpin)) {
-            showAlert(lastSpin, group, count, 'hit', '60', 4, 'quadruplicate');
-          }
+      if (prevCount === 4 && count === 4) {
+        const prevQuadruplicates = getPreviousQuadruplicates();
+        if (prevQuadruplicates.includes(lastSpin)) {
+          showHitAlert(lastSpin, group, count, 'quadruplicate');
+          return true;
         }
       }
+      
+      return false;
     }
 
     // Update duplicate displays
@@ -2242,8 +2152,8 @@
       // Calculate misses for all windows
       calculateMissesAll();
       
-      // Check for alerts (new category or hit)
-      checkForAlert(val);
+      // Check for hit alert
+      checkForHitAlert(val);
       
       // NEW: Check for high misses (100+)
       checkForHighMisses();
@@ -2644,3 +2554,4 @@
   </script>
 </body>
 </html>
+     

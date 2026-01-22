@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Red Roulette Tracker</title>
   <style>
-    /* ALL CSS STYLES REMAIN EXACTLY THE SAME AS BEFORE */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -1348,12 +1347,22 @@
     function resetMisses(groupWithSuffix) {
       let type, suffix;
       
-      if (groupWithSuffix.startsWith('OnceOrNever')) {
+      // Check if it's "OnceOrNever60" or "TwoOrMore60"
+      if (groupWithSuffix === 'OnceOrNever60') {
         type = 'OnceOrNever';
-        suffix = groupWithSuffix.substring(12);
-      } else if (groupWithSuffix.startsWith('TwoOrMore')) {
+        suffix = '60';
+      } else if (groupWithSuffix === 'TwoOrMore60') {
         type = 'TwoOrMore';
-        suffix = groupWithSuffix.substring(9);
+        suffix = '60';
+      } else {
+        // Try alternative parsing for backward compatibility
+        if (groupWithSuffix.includes('OnceOrNever')) {
+          type = 'OnceOrNever';
+          suffix = groupWithSuffix.replace('OnceOrNever', '');
+        } else if (groupWithSuffix.includes('TwoOrMore')) {
+          type = 'TwoOrMore';
+          suffix = groupWithSuffix.replace('TwoOrMore', '');
+        }
       }
       
       let typeText = '';

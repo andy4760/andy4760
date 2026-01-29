@@ -731,6 +731,76 @@
         min-width: 0;
       }
     }
+    
+    /* Alert notification style */
+    .alert-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(145deg, #f44336, #d32f2f);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      font-weight: bold;
+      animation: slideIn 0.5s ease-out;
+      max-width: 350px;
+      border-left: 5px solid #ffcc00;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .alert-title {
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .alert-title::before {
+      content: "⚠️";
+      font-size: 1.5rem;
+    }
+    
+    .alert-content {
+      font-size: 0.9rem;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+    
+    .close-alert {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .alert-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -751,8 +821,8 @@
       <div id="inputStatus" class="input-status"></div>
     </div>
     
-   
-    </div>
+    <!-- Alert notifications will appear here -->
+    <div id="alertContainer"></div>
     
     <!-- Scrollable Container for Sections -->
     <div class="duplicate-sections-container">
@@ -823,7 +893,8 @@
         </div>
       </div>
     </div>
- <!-- Combined Total Misses Section (Placed on second row) -->
+    
+    <!-- Combined Total Misses Section (Placed on second row) -->
     <div class="combined-total-section">
       <div class="combined-total-title">Combined Total Misses</div>
       <div class="combined-total-display">
@@ -833,939 +904,335 @@
       <div style="font-size: 0.85rem; color: #90caf9; margin-top: 8px;">
         Resets to 0 when any category hits
       </div>
-  </div>
+    </div>
 
-  <div class="numpad">
-    <button class="backspace" onclick="backspace()">Back</button>
-    <button onclick="numpadClick('1')">1</button>
-    <button onclick="numpadClick('2')">2</button>
-    <button onclick="numpadClick('3')">3</button>
-    <button onclick="numpadClick('4')">4</button>
-    <button onclick="numpadClick('5')">5</button>
-    <button onclick="numpadClick('6')">6</button>
-    <button onclick="numpadClick('7')">7</button>
-    <button onclick="numpadClick('8')">8</button>
-    <button onclick="numpadClick('9')">9</button>
-    <button onclick="numpadClick('0')">0</button>
-    <button class="enter" onclick="addNumber()">Enter</button>
-  </div>
+    <div class="numpad">
+      <button class="backspace" onclick="backspace()">Back</button>
+      <button onclick="numpadClick('1')">1</button>
+      <button onclick="numpadClick('2')">2</button>
+      <button onclick="numpadClick('3')">3</button>
+      <button onclick="numpadClick('4')">4</button>
+      <button onclick="numpadClick('5')">5</button>
+      <button onclick="numpadClick('6')">6</button>
+      <button onclick="numpadClick('7')">7</button>
+      <button onclick="numpadClick('8')">8</button>
+      <button onclick="numpadClick('9')">9</button>
+      <button onclick="numpadClick('0')">0</button>
+      <button class="enter" onclick="addNumber()">Enter</button>
+    </div>
 
-  <script>
-    // Define color mappings for roulette
-    const colors = {
-      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
-      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
-      green: ["0", "00"]
-    };
-
-    // Define groups
-    const groupA = [0,2,3,5,6,11,12,14,15,21,22,24,25,27,29,32,33,35,36];
-    const groupB = ["00",1,4,7,8,9,10,13,16,17,18,19,20,23,26,28,30,31,34];
-
-    // Initialize data from localStorage or defaults
-    let history = JSON.parse(localStorage.getItem("history") || "[]");
-    
-    // Combined tracking variables (60-spin window)
-    let twoThreeOnlyMisses60 = parseInt(localStorage.getItem("twoThreeOnlyMisses60") || "0");
-    let fourOnlyMisses60 = parseInt(localStorage.getItem("fourOnlyMisses60") || "0");
-    let fiveOrMoreMisses60 = parseInt(localStorage.getItem("fiveOrMoreMisses60") || "0");
-    let fiveUntilZeroMisses60 = parseInt(localStorage.getItem("fiveUntilZeroMisses60") || "0");
-    
-    // NEW: Combined Total Misses
-    let combinedTotalMisses = parseInt(localStorage.getItem("combinedTotalMisses") || "0");
-    
-    // Track numbers in each category
-    let twoThreeOnlyNumbers = JSON.parse(localStorage.getItem("twoThreeOnlyNumbers") || "[]");
-    let fourOnlyNumbers = JSON.parse(localStorage.getItem("fourOnlyNumbers") || "[]");
-    let fiveOrMoreNumbers = JSON.parse(localStorage.getItem("fiveOrMoreNumbers") || "[]");
-    let fiveUntilZeroNumbers = JSON.parse(localStorage.getItem("fiveUntilZeroNumbers") || "[]");
-    
-    // Track state history for undo functionality
-    let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
-
-    // Get color for a number
-    function getColor(n) {
-      if (colors.green.includes(n)) return "green";
-      const num = parseInt(n, 10);
-      if (colors.red.includes(num)) return "red";
-      if (colors.black.includes(num)) return "black";
-      return "";
-    }
-
-    // Check if number is in Group A or B
-    function getGroup(n) {
-      const num = typeof n === 'string' && n !== "00" ? parseInt(n) : n;
-      if (groupA.includes(num)) return "A";
-      if (groupB.includes(num)) return "B";
-      return null;
-    }
-
-    // Save current state to history
-    function saveState() {
-      const state = {
-        history: [...history],
-        twoThreeOnlyMisses60,
-        fourOnlyMisses60,
-        fiveOrMoreMisses60,
-        fiveUntilZeroMisses60,
-        combinedTotalMisses, // NEW: Save combined total
-        twoThreeOnlyNumbers: [...twoThreeOnlyNumbers],
-        fourOnlyNumbers: [...fourOnlyNumbers],
-        fiveOrMoreNumbers: [...fiveOrMoreNumbers],
-        fiveUntilZeroNumbers: [...fiveUntilZeroNumbers]
+    <script>
+      // Define color mappings for roulette
+      const colors = {
+        red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+        black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+        green: ["0", "00"]
       };
-      stateHistory.push(state);
+
+      // Define groups
+      const groupA = [0,2,3,5,6,11,12,14,15,21,22,24,25,27,29,32,33,35,36];
+      const groupB = ["00",1,4,7,8,9,10,13,16,17,18,19,20,23,26,28,30,31,34];
+
+      // Initialize data from localStorage or defaults
+      let history = JSON.parse(localStorage.getItem("history") || "[]");
       
-      // Keep only last 50 states to prevent memory issues
-      if (stateHistory.length > 50) {
-        stateHistory = stateHistory.slice(-50);
+      // Combined tracking variables (60-spin window)
+      let twoThreeOnlyMisses60 = parseInt(localStorage.getItem("twoThreeOnlyMisses60") || "0");
+      let fourOnlyMisses60 = parseInt(localStorage.getItem("fourOnlyMisses60") || "0");
+      let fiveOrMoreMisses60 = parseInt(localStorage.getItem("fiveOrMoreMisses60") || "0");
+      let fiveUntilZeroMisses60 = parseInt(localStorage.getItem("fiveUntilZeroMisses60") || "0");
+      
+      // NEW: Combined Total Misses
+      let combinedTotalMisses = parseInt(localStorage.getItem("combinedTotalMisses") || "0");
+      
+      // Track numbers in each category
+      let twoThreeOnlyNumbers = JSON.parse(localStorage.getItem("twoThreeOnlyNumbers") || "[]");
+      let fourOnlyNumbers = JSON.parse(localStorage.getItem("fourOnlyNumbers") || "[]");
+      let fiveOrMoreNumbers = JSON.parse(localStorage.getItem("fiveOrMoreNumbers") || "[]");
+      let fiveUntilZeroNumbers = JSON.parse(localStorage.getItem("fiveUntilZeroNumbers") || "[]");
+      
+      // Track state history for undo functionality
+      let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
+      
+      // Track which categories have triggered 100+ alerts
+      let alertedCategories = JSON.parse(localStorage.getItem("alertedCategories") || "{}");
+
+      // Get color for a number
+      function getColor(n) {
+        if (colors.green.includes(n)) return "green";
+        const num = parseInt(n, 10);
+        if (colors.red.includes(num)) return "red";
+        if (colors.black.includes(num)) return "black";
+        return "";
+      }
+
+      // Check if number is in Group A or B
+      function getGroup(n) {
+        const num = typeof n === 'string' && n !== "00" ? parseInt(n) : n;
+        if (groupA.includes(num)) return "A";
+        if (groupB.includes(num)) return "B";
+        return null;
+      }
+
+      // Show alert notification for 100+ misses
+      function showAlertFor100Plus(categoryName, missesCount, color) {
+        // Don't show duplicate alerts for the same category
+        if (alertedCategories[categoryName]) {
+          return;
+        }
+        
+        // Mark this category as alerted
+        alertedCategories[categoryName] = true;
+        localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
+        
+        const alertContainer = document.getElementById("alertContainer");
+        
+        const alertDiv = document.createElement("div");
+        alertDiv.className = "alert-notification";
+        alertDiv.style.borderLeftColor = color;
+        
+        alertDiv.innerHTML = `
+          <button class="close-alert" onclick="this.parentElement.remove();">×</button>
+          <div class="alert-title">100+ MISSES ALERT!</div>
+          <div class="alert-content">
+            <strong>${categoryName}</strong> has reached <strong>${missesCount} total misses</strong>!
+            <br>Consider resetting this category or adjusting your strategy.
+          </div>
+        `;
+        
+        alertContainer.appendChild(alertDiv);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+          if (alertDiv.parentElement) {
+            alertDiv.remove();
+          }
+        }, 10000);
       }
       
-      localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
-    }
-
-    // Restore previous state
-    function restorePreviousState() {
-      if (stateHistory.length > 0) {
-        const previousState = stateHistory.pop();
+      // Check for 100+ misses and show alerts
+      function checkFor100PlusMisses() {
+        const categories = [
+          { name: "Two and Three Only", misses: twoThreeOnlyMisses60, color: "#FF9800" },
+          { name: "Four Only", misses: fourOnlyMisses60, color: "#F44336" },
+          { name: "Five or More", misses: fiveOrMoreMisses60, color: "#9C27B0" },
+          { name: "Five until Zero", misses: fiveUntilZeroMisses60, color: "#00BCD4" },
+          { name: "Combined Total", misses: combinedTotalMisses, color: "#2196F3" }
+        ];
         
-        history = previousState.history;
-        twoThreeOnlyMisses60 = previousState.twoThreeOnlyMisses60 || 0;
-        fourOnlyMisses60 = previousState.fourOnlyMisses60 || 0;
-        fiveOrMoreMisses60 = previousState.fiveOrMoreMisses60 || 0;
-        fiveUntilZeroMisses60 = previousState.fiveUntilZeroMisses60 || 0;
-        combinedTotalMisses = previousState.combinedTotalMisses || 0; // NEW: Restore combined total
-        twoThreeOnlyNumbers = previousState.twoThreeOnlyNumbers || [];
-        fourOnlyNumbers = previousState.fourOnlyNumbers || [];
-        fiveOrMoreNumbers = previousState.fiveOrMoreNumbers || [];
-        fiveUntilZeroNumbers = previousState.fiveUntilZeroNumbers || [];
-        
-        // Save everything to localStorage
-        saveAllToLocalStorage();
-        
-        return true;
+        categories.forEach(category => {
+          if (category.misses >= 100) {
+            showAlertFor100Plus(category.name, category.misses, category.color);
+          }
+        });
       }
-      return false;
-    }
+      
+      // Clear alerts for a specific category when its misses are reset
+      function clearAlertForCategory(categoryName) {
+        if (alertedCategories[categoryName]) {
+          delete alertedCategories[categoryName];
+          localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
+        }
+      }
 
-    // Find all "Two and Three Only" numbers in last N spins (2-3 times)
-    function findTwoThreeOnlyNumbers(windowSize) {
-      const lastSpins = history.slice(-windowSize);
-      const countMap = {};
-      const twoThreeOnlyList = {};
-      
-      // Count occurrences in last N spins
-      lastSpins.forEach(n => {
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-      
-      // Find numbers with 2-3 occurrences
-      for (let i = 0; i <= 36; i++) {
-        const num = i.toString();
-        const count = countMap[num] || 0;
-        if (count >= 2 && count <= 3) {
-          twoThreeOnlyList[num] = {
-            count: count,
-            group: getGroup(num),
+      // Save current state to history
+      function saveState() {
+        const state = {
+          history: [...history],
+          twoThreeOnlyMisses60,
+          fourOnlyMisses60,
+          fiveOrMoreMisses60,
+          fiveUntilZeroMisses60,
+          combinedTotalMisses, // NEW: Save combined total
+          twoThreeOnlyNumbers: [...twoThreeOnlyNumbers],
+          fourOnlyNumbers: [...fourOnlyNumbers],
+          fiveOrMoreNumbers: [...fiveOrMoreNumbers],
+          fiveUntilZeroNumbers: [...fiveUntilZeroNumbers]
+        };
+        stateHistory.push(state);
+        
+        // Keep only last 50 states to prevent memory issues
+        if (stateHistory.length > 50) {
+          stateHistory = stateHistory.slice(-50);
+        }
+        
+        localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+      }
+
+      // Restore previous state
+      function restorePreviousState() {
+        if (stateHistory.length > 0) {
+          const previousState = stateHistory.pop();
+          
+          history = previousState.history;
+          twoThreeOnlyMisses60 = previousState.twoThreeOnlyMisses60 || 0;
+          fourOnlyMisses60 = previousState.fourOnlyMisses60 || 0;
+          fiveOrMoreMisses60 = previousState.fiveOrMoreMisses60 || 0;
+          fiveUntilZeroMisses60 = previousState.fiveUntilZeroMisses60 || 0;
+          combinedTotalMisses = previousState.combinedTotalMisses || 0; // NEW: Restore combined total
+          twoThreeOnlyNumbers = previousState.twoThreeOnlyNumbers || [];
+          fourOnlyNumbers = previousState.fourOnlyNumbers || [];
+          fiveOrMoreNumbers = previousState.fiveOrMoreNumbers || [];
+          fiveUntilZeroNumbers = previousState.fiveUntilZeroNumbers || [];
+          
+          // Save everything to localStorage
+          saveAllToLocalStorage();
+          
+          return true;
+        }
+        return false;
+      }
+
+      // Find all "Two and Three Only" numbers in last N spins (2-3 times)
+      function findTwoThreeOnlyNumbers(windowSize) {
+        const lastSpins = history.slice(-windowSize);
+        const countMap = {};
+        const twoThreeOnlyList = {};
+        
+        // Count occurrences in last N spins
+        lastSpins.forEach(n => {
+          countMap[n] = (countMap[n] || 0) + 1;
+        });
+        
+        // Find numbers with 2-3 occurrences
+        for (let i = 0; i <= 36; i++) {
+          const num = i.toString();
+          const count = countMap[num] || 0;
+          if (count >= 2 && count <= 3) {
+            twoThreeOnlyList[num] = {
+              count: count,
+              group: getGroup(num),
+              isActive: true
+            };
+          }
+        }
+        
+        // Check for "00"
+        const count00 = countMap["00"] || 0;
+        if (count00 >= 2 && count00 <= 3) {
+          twoThreeOnlyList["00"] = {
+            count: count00,
+            group: getGroup("00"),
             isActive: true
           };
         }
+        
+        return twoThreeOnlyList;
       }
-      
-      // Check for "00"
-      const count00 = countMap["00"] || 0;
-      if (count00 >= 2 && count00 <= 3) {
-        twoThreeOnlyList["00"] = {
-          count: count00,
-          group: getGroup("00"),
-          isActive: true
-        };
-      }
-      
-      return twoThreeOnlyList;
-    }
 
-    // Find all "Four Only" numbers in last N spins (Exactly 4 times)
-    function findFourOnlyNumbers(windowSize) {
-      const lastSpins = history.slice(-windowSize);
-      const countMap = {};
-      const fourOnlyList = {};
-      
-      // Count occurrences in last N spins
-      lastSpins.forEach(n => {
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-      
-      // Find numbers with exactly 4 occurrences
-      for (let i = 0; i <= 36; i++) {
-        const num = i.toString();
-        const count = countMap[num] || 0;
-        if (count === 4) {
-          fourOnlyList[num] = {
-            count: count,
-            group: getGroup(num)
+      // Find all "Four Only" numbers in last N spins (Exactly 4 times)
+      function findFourOnlyNumbers(windowSize) {
+        const lastSpins = history.slice(-windowSize);
+        const countMap = {};
+        const fourOnlyList = {};
+        
+        // Count occurrences in last N spins
+        lastSpins.forEach(n => {
+          countMap[n] = (countMap[n] || 0) + 1;
+        });
+        
+        // Find numbers with exactly 4 occurrences
+        for (let i = 0; i <= 36; i++) {
+          const num = i.toString();
+          const count = countMap[num] || 0;
+          if (count === 4) {
+            fourOnlyList[num] = {
+              count: count,
+              group: getGroup(num)
+            };
+          }
+        }
+        
+        // Check for "00"
+        const count00 = countMap["00"] || 0;
+        if (count00 === 4) {
+          fourOnlyList["00"] = {
+            count: count00,
+            group: getGroup("00")
           };
         }
+        
+        return fourOnlyList;
       }
-      
-      // Check for "00"
-      const count00 = countMap["00"] || 0;
-      if (count00 === 4) {
-        fourOnlyList["00"] = {
-          count: count00,
-          group: getGroup("00")
-        };
-      }
-      
-      return fourOnlyList;
-    }
 
-    // Find all "Five or More" numbers in last N spins (5+ times)
-    function findFiveOrMoreNumbers(windowSize) {
-      const lastSpins = history.slice(-windowSize);
-      const countMap = {};
-      const fiveOrMoreList = {};
-      
-      // Count occurrences in last N spins
-      lastSpins.forEach(n => {
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-      
-      // Find numbers with 5+ occurrences
-      for (let i = 0; i <= 36; i++) {
-        const num = i.toString();
-        const count = countMap[num] || 0;
-        if (count >= 5) {
-          fiveOrMoreList[num] = {
-            count: count,
-            group: getGroup(num)
+      // Find all "Five or More" numbers in last N spins (5+ times)
+      function findFiveOrMoreNumbers(windowSize) {
+        const lastSpins = history.slice(-windowSize);
+        const countMap = {};
+        const fiveOrMoreList = {};
+        
+        // Count occurrences in last N spins
+        lastSpins.forEach(n => {
+          countMap[n] = (countMap[n] || 0) + 1;
+        });
+        
+        // Find numbers with 5+ occurrences
+        for (let i = 0; i <= 36; i++) {
+          const num = i.toString();
+          const count = countMap[num] || 0;
+          if (count >= 5) {
+            fiveOrMoreList[num] = {
+              count: count,
+              group: getGroup(num)
+            };
+          }
+        }
+        
+        // Check for "00"
+        const count00 = countMap["00"] || 0;
+        if (count00 >= 5) {
+          fiveOrMoreList["00"] = {
+            count: count00,
+            group: getGroup("00")
           };
         }
-      }
-      
-      // Check for "00"
-      const count00 = countMap["00"] || 0;
-      if (count00 >= 5) {
-        fiveOrMoreList["00"] = {
-          count: count00,
-          group: getGroup("00")
-        };
-      }
-      
-      return fiveOrMoreList;
-    }
-
-    // Find all "Five until Zero" numbers - numbers that have reached 5+ hits
-    // and remain until they have zero occurrences in the last 60 spins
-    function findFiveUntilZeroNumbers(windowSize) {
-      const lastSpins = history.slice(-windowSize);
-      const countMap = {};
-      const fiveUntilZeroList = {};
-      
-      // Count occurrences in last N spins
-      lastSpins.forEach(n => {
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-      
-      // Find all numbers in fiveUntilZeroNumbers array
-      // Include them if they have at least 1 occurrence in last N spins
-      for (const num of fiveUntilZeroNumbers) {
-        const count = countMap[num] || 0;
-        if (count > 0) {
-          fiveUntilZeroList[num] = {
-            count: count,
-            group: getGroup(num)
-          };
-        }
-      }
-      
-      return fiveUntilZeroList;
-    }
-
-    // Get "Two and Three Only" numbers BEFORE the current spin (2-3 times)
-    function getPreviousTwoThreeOnlyNumbers() {
-      if (history.length === 0) return [];
-      
-      const previousSpins = history.slice(0, -1);
-      const previousLast60 = previousSpins.slice(-60);
-      const prevCountMap = {};
-      
-      // Count occurrences in previous 60 spins (before this spin)
-      previousLast60.forEach(n => {
-        prevCountMap[n] = (prevCountMap[n] || 0) + 1;
-      });
-      
-      const prevTwoThreeOnlyNumbers = [];
-      
-      // Find numbers with 2-3 occurrences BEFORE this spin AND are in twoThreeOnlyNumbers array
-      for (const num of twoThreeOnlyNumbers) {
-        const count = prevCountMap[num] || 0;
-        if (count >= 2 && count <= 3) {
-          prevTwoThreeOnlyNumbers.push(num);
-        }
-      }
-      
-      return prevTwoThreeOnlyNumbers;
-    }
-
-    // Get "Four Only" numbers BEFORE the current spin (Exactly 4 times)
-    function getPreviousFourOnlyNumbers() {
-      if (history.length === 0) return [];
-      
-      const previousSpins = history.slice(0, -1);
-      const previousLast60 = previousSpins.slice(-60);
-      const prevCountMap = {};
-      
-      // Count occurrences in previous 60 spins (before this spin)
-      previousLast60.forEach(n => {
-        prevCountMap[n] = (prevCountMap[n] || 0) + 1;
-      });
-      
-      const prevFourOnlyNumbers = [];
-      
-      // Find numbers with exactly 4 occurrences BEFORE this spin AND are in fourOnlyNumbers array
-      for (const num of fourOnlyNumbers) {
-        const count = prevCountMap[num] || 0;
-        if (count === 4) {
-          prevFourOnlyNumbers.push(num);
-        }
-      }
-      
-      return prevFourOnlyNumbers;
-    }
-
-    // Get "Five or More" numbers BEFORE the current spin (5+ times)
-    function getPreviousFiveOrMoreNumbers() {
-      if (history.length === 0) return [];
-      
-      const previousSpins = history.slice(0, -1);
-      const previousLast60 = previousSpins.slice(-60);
-      const prevCountMap = {};
-      
-      // Count occurrences in previous 60 spins (before this spin)
-      previousLast60.forEach(n => {
-        prevCountMap[n] = (prevCountMap[n] || 0) + 1;
-      });
-      
-      const prevFiveOrMoreNumbers = [];
-      
-      // Find numbers with 5+ occurrences BEFORE this spin AND are in fiveOrMoreNumbers array
-      for (const num of fiveOrMoreNumbers) {
-        const count = prevCountMap[num] || 0;
-        if (count >= 5) {
-          prevFiveOrMoreNumbers.push(num);
-        }
-      }
-      
-      return prevFiveOrMoreNumbers;
-    }
-
-    // Get "Five until Zero" numbers BEFORE the current spin
-    function getPreviousFiveUntilZeroNumbers() {
-      if (history.length === 0) return [];
-      
-      const previousSpins = history.slice(0, -1);
-      const previousLast60 = previousSpins.slice(-60);
-      const prevCountMap = {};
-      
-      // Count occurrences in previous 60 spins (before this spin)
-      previousLast60.forEach(n => {
-        prevCountMap[n] = (prevCountMap[n] || 0) + 1;
-      });
-      
-      const prevFiveUntilZeroNumbers = [];
-      
-      // Find numbers in fiveUntilZeroNumbers array that have at least 1 occurrence
-      for (const num of fiveUntilZeroNumbers) {
-        const count = prevCountMap[num] || 0;
-        if (count > 0) {
-          prevFiveUntilZeroNumbers.push(num);
-        }
-      }
-      
-      return prevFiveUntilZeroNumbers;
-    }
-
-    // Check if a number should be removed from "Two and Three Only" state
-    function checkRemoveFromTwoThreeOnlyNumbers(num) {
-      const lastSpins = history.slice(-60);
-      const count = lastSpins.filter(n => n === num).length;
-      
-      // Remove from "Two and Three Only" state if count is not 2-3
-      if ((count < 2 || count > 3) && twoThreeOnlyNumbers.includes(num)) {
-        const index = twoThreeOnlyNumbers.indexOf(num);
-        if (index > -1) {
-          twoThreeOnlyNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      // Also check if the number has fallen out of the 60-spin window completely
-      const inLast60 = lastSpins.includes(num);
-      if (!inLast60 && twoThreeOnlyNumbers.includes(num)) {
-        const index = twoThreeOnlyNumbers.indexOf(num);
-        if (index > -1) {
-          twoThreeOnlyNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      return false; // Not removed
-    }
-
-    // Check if a number should be removed from "Four Only" state
-    function checkRemoveFromFourOnlyNumbers(num) {
-      const lastSpins = history.slice(-60);
-      const count = lastSpins.filter(n => n === num).length;
-      
-      // Remove from "Four Only" state if count is not exactly 4
-      if (count !== 4 && fourOnlyNumbers.includes(num)) {
-        const index = fourOnlyNumbers.indexOf(num);
-        if (index > -1) {
-          fourOnlyNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      // Also check if the number has fallen out of the 60-spin window completely
-      const inLast60 = lastSpins.includes(num);
-      if (!inLast60 && fourOnlyNumbers.includes(num)) {
-        const index = fourOnlyNumbers.indexOf(num);
-        if (index > -1) {
-          fourOnlyNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      return false; // Not removed
-    }
-
-    // Check if a number should be removed from "Five or More" state
-    function checkRemoveFromFiveOrMoreNumbers(num) {
-      const lastSpins = history.slice(-60);
-      const count = lastSpins.filter(n => n === num).length;
-      
-      // Remove from "Five or More" state if count drops below 5
-      if (count < 5 && fiveOrMoreNumbers.includes(num)) {
-        const index = fiveOrMoreNumbers.indexOf(num);
-        if (index > -1) {
-          fiveOrMoreNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      // Also check if the number has fallen out of the 60-spin window completely
-      const inLast60 = lastSpins.includes(num);
-      if (!inLast60 && fiveOrMoreNumbers.includes(num)) {
-        const index = fiveOrMoreNumbers.indexOf(num);
-        if (index > -1) {
-          fiveOrMoreNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      return false; // Not removed
-    }
-
-    // Check if a number should be removed from "Five until Zero" state
-    function checkRemoveFromFiveUntilZeroNumbers(num) {
-      const lastSpins = history.slice(-60);
-      const count = lastSpins.filter(n => n === num).length;
-      
-      // Remove from "Five until Zero" state only if count is 0
-      if (count === 0 && fiveUntilZeroNumbers.includes(num)) {
-        const index = fiveUntilZeroNumbers.indexOf(num);
-        if (index > -1) {
-          fiveUntilZeroNumbers.splice(index, 1);
-          return true; // Removed
-        }
-      }
-      
-      return false; // Not removed
-    }
-
-    // Main function to calculate all misses
-    function calculateMissesAll() {
-      if (history.length === 0) return;
-      
-      // Store the current spin
-      const lastSpin = history[history.length - 1];
-      
-      // Get all previous categories BEFORE making any changes to state arrays
-      const prevTwoThreeOnlyNumbers = getPreviousTwoThreeOnlyNumbers();
-      const prevFourOnlyNumbers = getPreviousFourOnlyNumbers();
-      const prevFiveOrMoreNumbers = getPreviousFiveOrMoreNumbers();
-      const prevFiveUntilZeroNumbers = getPreviousFiveUntilZeroNumbers();
-      
-      // Track if any category had a hit (for combined total reset)
-      let hadHit = false;
-      
-      // Calculate "Two and Three Only" misses (2-3 times)
-      if (prevTwoThreeOnlyNumbers.length > 0) {
-        if (prevTwoThreeOnlyNumbers.includes(lastSpin)) {
-          // HIT: "Two and Three Only" number hit - reset misses to 0
-          twoThreeOnlyMisses60 = 0;
-          hadHit = true;
-        } else {
-          // MISS: Add misses for each "Two and Three Only" number
-          twoThreeOnlyMisses60 += prevTwoThreeOnlyNumbers.length;
-        }
-      }
-      
-      // Calculate "Four Only" misses (exactly 4 times)
-      if (prevFourOnlyNumbers.length > 0) {
-        if (prevFourOnlyNumbers.includes(lastSpin)) {
-          // HIT: "Four Only" number hit - reset misses to 0
-          fourOnlyMisses60 = 0;
-          hadHit = true;
-        } else {
-          // MISS: Add misses for each "Four Only" number
-          fourOnlyMisses60 += prevFourOnlyNumbers.length;
-        }
-      }
-      
-      // Calculate "Five or More" misses (5+ times)
-      if (prevFiveOrMoreNumbers.length > 0) {
-        if (prevFiveOrMoreNumbers.includes(lastSpin)) {
-          // HIT: "Five or More" number hit - reset misses to 0
-          fiveOrMoreMisses60 = 0;
-          hadHit = true;
-        } else {
-          // MISS: Add misses for each "Five or More" number
-          fiveOrMoreMisses60 += prevFiveOrMoreNumbers.length;
-        }
-      }
-      
-      // Calculate "Five until Zero" misses
-      if (prevFiveUntilZeroNumbers.length > 0) {
-        if (prevFiveUntilZeroNumbers.includes(lastSpin)) {
-          // HIT: "Five until Zero" number hit - reset misses to 0
-          fiveUntilZeroMisses60 = 0;
-          hadHit = true;
-        } else {
-          // MISS: Add misses for each "Five until Zero" number
-          fiveUntilZeroMisses60 += prevFiveUntilZeroNumbers.length;
-        }
-      }
-      
-      // NEW: Update Combined Total Misses
-      if (hadHit) {
-        // Reset Combined Total Misses to 0 if any category had a hit
-        combinedTotalMisses = 0;
-      } else {
-        // Add to Combined Total Misses: sum of all misses added in this spin
-        let totalMissesThisSpin = 0;
-        if (prevTwoThreeOnlyNumbers.length > 0) totalMissesThisSpin += prevTwoThreeOnlyNumbers.length;
-        if (prevFourOnlyNumbers.length > 0) totalMissesThisSpin += prevFourOnlyNumbers.length;
-        if (prevFiveOrMoreNumbers.length > 0) totalMissesThisSpin += prevFiveOrMoreNumbers.length;
-        if (prevFiveUntilZeroNumbers.length > 0) totalMissesThisSpin += prevFiveUntilZeroNumbers.length;
         
-        combinedTotalMisses += totalMissesThisSpin;
+        return fiveOrMoreList;
       }
-      
-      // NOW update the state arrays AFTER all calculations are done
-      
-      // Check if last spin should be added to categories
-      const lastSpins = history.slice(-60);
-      const count = lastSpins.filter(n => n === lastSpin).length;
-      
-      // Update "Two and Three Only" numbers (2-3 times)
-      if (count >= 2 && count <= 3) {
-        if (!twoThreeOnlyNumbers.includes(lastSpin)) {
-          twoThreeOnlyNumbers.push(lastSpin);
-        }
-        // Remove from other categories if it's there (except Five until Zero)
-        const fourOnlyIndex = fourOnlyNumbers.indexOf(lastSpin);
-        if (fourOnlyIndex > -1) {
-          fourOnlyNumbers.splice(fourOnlyIndex, 1);
-        }
-        const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(lastSpin);
-        if (fiveOrMoreIndex > -1) {
-          fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
-        }
-      }
-      // Update "Four Only" numbers (exactly 4 times)
-      else if (count === 4) {
-        if (!fourOnlyNumbers.includes(lastSpin)) {
-          fourOnlyNumbers.push(lastSpin);
-        }
-        // Remove from other categories if it's there (except Five until Zero)
-        const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(lastSpin);
-        if (twoThreeOnlyIndex > -1) {
-          twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
-        }
-        const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(lastSpin);
-        if (fiveOrMoreIndex > -1) {
-          fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
-        }
-      }
-      // Update "Five or More" numbers (5+ times)
-      else if (count >= 5) {
-        if (!fiveOrMoreNumbers.includes(lastSpin)) {
-          fiveOrMoreNumbers.push(lastSpin);
-        }
-        // Remove from other categories if it's there (except Five until Zero)
-        const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(lastSpin);
-        if (twoThreeOnlyIndex > -1) {
-          twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
-        }
-        const fourOnlyIndex = fourOnlyNumbers.indexOf(lastSpin);
-        if (fourOnlyIndex > -1) {
-          fourOnlyNumbers.splice(fourOnlyIndex, 1);
-        }
-      }
-      
-      // Check for "Five until Zero" - add if count reaches 5+ for the first time
-      // This ensures a number enters the category only when it first reaches 5 hits
-      if (count >= 5 && !fiveUntilZeroNumbers.includes(lastSpin)) {
-        fiveUntilZeroNumbers.push(lastSpin);
-      }
-      
-      // Check if any numbers should be removed from categories
-      const numbersToCheck = [...twoThreeOnlyNumbers, ...fourOnlyNumbers, ...fiveOrMoreNumbers, ...fiveUntilZeroNumbers];
-      numbersToCheck.forEach(num => {
-        checkRemoveFromTwoThreeOnlyNumbers(num);
-        checkRemoveFromFourOnlyNumbers(num);
-        checkRemoveFromFiveOrMoreNumbers(num);
-        checkRemoveFromFiveUntilZeroNumbers(num);
-      });
-      
-      // Update all numbers that might have changed categories
-      // Check all possible roulette numbers
-      const allNumbers = [...Array(37).keys()].map(n => n.toString()).concat(["00"]);
-      
-      for (const num of allNumbers) {
-        const countInLast60 = lastSpins.filter(n => n === num).length;
+
+      // Find all "Five until Zero" numbers - numbers that have reached 5+ hits
+      // and remain until they have zero occurrences in the last 60 spins
+      function findFiveUntilZeroNumbers(windowSize) {
+        const lastSpins = history.slice(-windowSize);
+        const countMap = {};
+        const fiveUntilZeroList = {};
         
-        // Regular categories (exclusive)
-        if (countInLast60 >= 2 && countInLast60 <= 3 && !twoThreeOnlyNumbers.includes(num)) {
-          // Add to "Two and Three Only" if not already there
-          twoThreeOnlyNumbers.push(num);
-          // Remove from other categories if it's there (except Five until Zero)
-          const fourOnlyIndex = fourOnlyNumbers.indexOf(num);
-          if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
-          const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(num);
-          if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
-        } else if (countInLast60 === 4 && !fourOnlyNumbers.includes(num)) {
-          // Add to "Four Only" if not already there
-          fourOnlyNumbers.push(num);
-          // Remove from other categories if it's there (except Five until Zero)
-          const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(num);
-          if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
-          const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(num);
-          if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
-        } else if (countInLast60 >= 5 && !fiveOrMoreNumbers.includes(num)) {
-          // Add to "Five or More" if not already there
-          fiveOrMoreNumbers.push(num);
-          // Remove from other categories if it's there (except Five until Zero)
-          const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(num);
-          if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
-          const fourOnlyIndex = fourOnlyNumbers.indexOf(num);
-          if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
+        // Count occurrences in last N spins
+        lastSpins.forEach(n => {
+          countMap[n] = (countMap[n] || 0) + 1;
+        });
+        
+        // Find all numbers in fiveUntilZeroNumbers array
+        // Include them if they have at least 1 occurrence in last N spins
+        for (const num of fiveUntilZeroNumbers) {
+          const count = countMap[num] || 0;
+          if (count > 0) {
+            fiveUntilZeroList[num] = {
+              count: count,
+              group: getGroup(num)
+            };
+          }
         }
         
-        // Five until Zero category (can coexist with other categories)
-        // Add if count reaches 5+ for the first time
-        if (countInLast60 >= 5 && !fiveUntilZeroNumbers.includes(num)) {
-          fiveUntilZeroNumbers.push(num);
-        }
+        return fiveUntilZeroList;
       }
-    }
 
-    // Update the display with current data
-    function updateDisplay() {
-      const container = document.getElementById("recentSpins");
-      container.innerHTML = "";
-      
-      // Create 60 boxes total for horizontal scrolling (shows 20 visible)
-      for (let i = 0; i < 60; i++) {
-        const div = document.createElement("div");
+      // Get "Two and Three Only" numbers BEFORE the current spin (2-3 times)
+      function getPreviousTwoThreeOnlyNumbers() {
+        if (history.length === 0) return [];
         
-        // Get the spin number (newest first)
-        const spinIndex = history.length - 1 - i;
-        
-        if (spinIndex >= 0) {
-          const n = history[spinIndex];
-          const color = getColor(n);
-          div.className = `spin-box ${color}`;
-          div.textContent = n;
-        } else {
-          // Empty box for missing spins
-          div.className = "spin-box empty";
-          div.textContent = "";
-        }
-        
-        container.appendChild(div);
-      }
-      
-      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
-      
-      // Update Combined Total Misses display
-      document.getElementById("combinedTotalMissesValue").textContent = combinedTotalMisses;
-      
-      // Update displays for 60-spin window
-      updateCombinedDisplayForWindow(60, "60");
-    }
-
-    // Update combined displays
-    function updateCombinedDisplayForWindow(windowSize, suffix) {
-      // Update "Two and Three Only" display (2-3 times)
-      const twoThreeOnlyDisplay = document.getElementById(`twoThreeOnly${suffix}`);
-      const twoThreeOnlyMissesText = document.getElementById(`twoThreeOnlyMissesText${suffix}`);
-      
-      const twoThreeOnlyNumbersList = findTwoThreeOnlyNumbers(windowSize);
-      const twoThreeOnlyKeys = Object.keys(twoThreeOnlyNumbersList);
-      
-      if (twoThreeOnlyKeys.length === 0) {
-        twoThreeOnlyDisplay.innerHTML = `<div class="no-duplicates">No numbers with 2-3 appearances</div>`;
-      } else {
-        twoThreeOnlyDisplay.innerHTML = '';
-        for (const num of twoThreeOnlyKeys) {
-          const data = twoThreeOnlyNumbersList[num];
-          const color = getColor(num);
-          const item = document.createElement("div");
-          item.className = "duplicate-item";
-          
-          const numberDiv = document.createElement("div");
-          numberDiv.className = `duplicate-number ${color}`;
-          numberDiv.textContent = num;
-          
-          const countDiv = document.createElement("div");
-          countDiv.className = `duplicate-count two-three-count`;
-          countDiv.textContent = data.count;
-          
-          item.appendChild(numberDiv);
-          item.appendChild(countDiv);
-          twoThreeOnlyDisplay.appendChild(item);
-        }
-      }
-      
-      twoThreeOnlyMissesText.textContent = `Total misses: ${twoThreeOnlyMisses60}`;
-      
-      // Update "Four Only" display (exactly 4 times)
-      const fourOnlyDisplay = document.getElementById(`fourOnly${suffix}`);
-      const fourOnlyMissesText = document.getElementById(`fourOnlyMissesText${suffix}`);
-      
-      const fourOnlyNumbersList = findFourOnlyNumbers(windowSize);
-      const fourOnlyKeys = Object.keys(fourOnlyNumbersList);
-      
-      if (fourOnlyKeys.length === 0) {
-        fourOnlyDisplay.innerHTML = `<div class="no-duplicates">No numbers with exactly 4 appearances</div>`;
-      } else {
-        fourOnlyDisplay.innerHTML = '';
-        for (const num of fourOnlyKeys) {
-          const data = fourOnlyNumbersList[num];
-          const color = getColor(num);
-          const item = document.createElement("div");
-          item.className = "duplicate-item";
-          
-          const numberDiv = document.createElement("div");
-          numberDiv.className = `duplicate-number ${color}`;
-          numberDiv.textContent = num;
-          
-          const countDiv = document.createElement("div");
-          countDiv.className = `duplicate-count four-only-count`;
-          countDiv.textContent = data.count;
-          
-          item.appendChild(numberDiv);
-          item.appendChild(countDiv);
-          fourOnlyDisplay.appendChild(item);
-        }
-      }
-      
-      fourOnlyMissesText.textContent = `Total misses: ${fourOnlyMisses60}`;
-      
-      // Update "Five or More" display (5+ times)
-      const fiveOrMoreDisplay = document.getElementById(`fiveOrMore${suffix}`);
-      const fiveOrMoreMissesText = document.getElementById(`fiveOrMoreMissesText${suffix}`);
-      
-      const fiveOrMoreNumbersList = findFiveOrMoreNumbers(windowSize);
-      const fiveOrMoreKeys = Object.keys(fiveOrMoreNumbersList);
-      
-      if (fiveOrMoreKeys.length === 0) {
-        fiveOrMoreDisplay.innerHTML = `<div class="no-duplicates">No numbers with 5+ appearances</div>`;
-      } else {
-        fiveOrMoreDisplay.innerHTML = '';
-        for (const num of fiveOrMoreKeys) {
-          const data = fiveOrMoreNumbersList[num];
-          const color = getColor(num);
-          const item = document.createElement("div");
-          item.className = "duplicate-item";
-          
-          const numberDiv = document.createElement("div");
-          numberDiv.className = `duplicate-number ${color}`;
-          numberDiv.textContent = num;
-          
-          const countDiv = document.createElement("div");
-          countDiv.className = `duplicate-count five-or-more-count`;
-          countDiv.textContent = data.count;
-          
-          item.appendChild(numberDiv);
-          item.appendChild(countDiv);
-          fiveOrMoreDisplay.appendChild(item);
-        }
-      }
-      
-      fiveOrMoreMissesText.textContent = `Total misses: ${fiveOrMoreMisses60}`;
-      
-      // Update "Five until Zero" display
-      const fiveUntilZeroDisplay = document.getElementById(`fiveUntilZero${suffix}`);
-      const fiveUntilZeroMissesText = document.getElementById(`fiveUntilZeroMissesText${suffix}`);
-      
-      const fiveUntilZeroNumbersList = findFiveUntilZeroNumbers(windowSize);
-      const fiveUntilZeroKeys = Object.keys(fiveUntilZeroNumbersList);
-      
-      if (fiveUntilZeroKeys.length === 0) {
-        fiveUntilZeroDisplay.innerHTML = `<div class="no-duplicates">No numbers with 5+ hits (stays until zero)</div>`;
-      } else {
-        fiveUntilZeroDisplay.innerHTML = '';
-        for (const num of fiveUntilZeroKeys) {
-          const data = fiveUntilZeroNumbersList[num];
-          const color = getColor(num);
-          const item = document.createElement("div");
-          item.className = "duplicate-item";
-          
-          const numberDiv = document.createElement("div");
-          numberDiv.className = `duplicate-number ${color}`;
-          numberDiv.textContent = num;
-          
-          const countDiv = document.createElement("div");
-          countDiv.className = `duplicate-count five-until-zero-count`;
-          countDiv.textContent = data.count;
-          
-          item.appendChild(numberDiv);
-          item.appendChild(countDiv);
-          fiveUntilZeroDisplay.appendChild(item);
-        }
-      }
-      
-      fiveUntilZeroMissesText.textContent = `Total misses: ${fiveUntilZeroMisses60}`;
-    }
-
-    // Save all data to localStorage
-    function saveAllToLocalStorage() {
-      localStorage.setItem("history", JSON.stringify(history));
-      localStorage.setItem("twoThreeOnlyMisses60", twoThreeOnlyMisses60);
-      localStorage.setItem("fourOnlyMisses60", fourOnlyMisses60);
-      localStorage.setItem("fiveOrMoreMisses60", fiveOrMoreMisses60);
-      localStorage.setItem("fiveUntilZeroMisses60", fiveUntilZeroMisses60);
-      localStorage.setItem("combinedTotalMisses", combinedTotalMisses); // NEW: Save combined total
-      localStorage.setItem("twoThreeOnlyNumbers", JSON.stringify(twoThreeOnlyNumbers));
-      localStorage.setItem("fourOnlyNumbers", JSON.stringify(fourOnlyNumbers));
-      localStorage.setItem("fiveOrMoreNumbers", JSON.stringify(fiveOrMoreNumbers));
-      localStorage.setItem("fiveUntilZeroNumbers", JSON.stringify(fiveUntilZeroNumbers));
-      localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
-    }
-
-    // Add a new number to the history with proper validation
-    function addNumber() {
-      const input = document.getElementById("numberInput");
-      const status = document.getElementById("inputStatus");
-      let val = input.value.trim();
-      
-      // Clear previous status
-      status.textContent = "";
-      
-      // Validate input
-      if (!val) {
-        status.textContent = "Please enter a number";
-        return;
-      }
-      
-      // Handle "00" specially
-      if (val === "00") {
-        // Valid, continue
-      } else if (val === "0") {
-        // Valid, continue
-      } else {
-        const num = parseInt(val, 10);
-        if (isNaN(num) || num < 0 || num > 36) {
-          status.textContent = "Invalid number (0-36 or 00)";
-          return;
-        }
-        val = num.toString(); // Normalize to string
-      }
-      
-      // Save current state before adding new spin
-      saveState();
-      
-      // Add to history
-      history.push(val);
-      
-      // Calculate misses for all windows
-      calculateMissesAll();
-      
-      // Reset input and save
-      input.value = "";
-      saveAllToLocalStorage();
-      updateDisplay();
-      
-      // Show status with group info
-      const group = getGroup(val);
-      const color = getColor(val);
-      status.textContent = `Added spin: ${val} (Group ${group}, ${color})`;
-    }
-
-    // Undo the last action
-    function undo() {
-      const status = document.getElementById("inputStatus");
-      if (history.length === 0) {
-        status.textContent = "Nothing to undo";
-        return;
-      }
-      
-      // Restore previous state from history
-      if (restorePreviousState()) {
-        updateDisplay();
-        status.textContent = "Last spin undone. State restored.";
-      } else {
-        // Fallback: manually remove last spin and recalculate
-        history.pop();
-        recalculateFromScratch();
-        saveAllToLocalStorage();
-        updateDisplay();
-        status.textContent = "Last spin undone. All data recalculated.";
-      }
-    }
-
-    // Recalculate everything from scratch (fallback for undo)
-    function recalculateFromScratch() {
-      // Reset all state
-      twoThreeOnlyMisses60 = 0;
-      fourOnlyMisses60 = 0;
-      fiveOrMoreMisses60 = 0;
-      fiveUntilZeroMisses60 = 0;
-      combinedTotalMisses = 0; // NEW: Reset combined total
-      twoThreeOnlyNumbers = [];
-      fourOnlyNumbers = [];
-      fiveOrMoreNumbers = [];
-      fiveUntilZeroNumbers = [];
-      
-      if (history.length === 0) {
-        return;
-      }
-      
-      // Process each spin in order to rebuild state
-      for (let i = 0; i < history.length; i++) {
-        const currentSpin = history[i];
-        const previousSpins = history.slice(0, i);
-        
-        // Process for 60-spin window
+        const previousSpins = history.slice(0, -1);
         const previousLast60 = previousSpins.slice(-60);
-        
-        // Count occurrences before this spin
         const prevCountMap = {};
+        
+        // Count occurrences in previous 60 spins (before this spin)
         previousLast60.forEach(n => {
           prevCountMap[n] = (prevCountMap[n] || 0) + 1;
         });
         
-        // Find all categories in previous spins
         const prevTwoThreeOnlyNumbers = [];
-        const prevFourOnlyNumbers = [];
-        const prevFiveOrMoreNumbers = [];
-        const prevFiveUntilZeroNumbers = [];
         
-        // Check "Two and Three Only" numbers
+        // Find numbers with 2-3 occurrences BEFORE this spin AND are in twoThreeOnlyNumbers array
         for (const num of twoThreeOnlyNumbers) {
           const count = prevCountMap[num] || 0;
           if (count >= 2 && count <= 3) {
@@ -1773,7 +1240,25 @@
           }
         }
         
-        // Check "Four Only" numbers
+        return prevTwoThreeOnlyNumbers;
+      }
+
+      // Get "Four Only" numbers BEFORE the current spin (Exactly 4 times)
+      function getPreviousFourOnlyNumbers() {
+        if (history.length === 0) return [];
+        
+        const previousSpins = history.slice(0, -1);
+        const previousLast60 = previousSpins.slice(-60);
+        const prevCountMap = {};
+        
+        // Count occurrences in previous 60 spins (before this spin)
+        previousLast60.forEach(n => {
+          prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+        });
+        
+        const prevFourOnlyNumbers = [];
+        
+        // Find numbers with exactly 4 occurrences BEFORE this spin AND are in fourOnlyNumbers array
         for (const num of fourOnlyNumbers) {
           const count = prevCountMap[num] || 0;
           if (count === 4) {
@@ -1781,7 +1266,25 @@
           }
         }
         
-        // Check "Five or More" numbers
+        return prevFourOnlyNumbers;
+      }
+
+      // Get "Five or More" numbers BEFORE the current spin (5+ times)
+      function getPreviousFiveOrMoreNumbers() {
+        if (history.length === 0) return [];
+        
+        const previousSpins = history.slice(0, -1);
+        const previousLast60 = previousSpins.slice(-60);
+        const prevCountMap = {};
+        
+        // Count occurrences in previous 60 spins (before this spin)
+        previousLast60.forEach(n => {
+          prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+        });
+        
+        const prevFiveOrMoreNumbers = [];
+        
+        // Find numbers with 5+ occurrences BEFORE this spin AND are in fiveOrMoreNumbers array
         for (const num of fiveOrMoreNumbers) {
           const count = prevCountMap[num] || 0;
           if (count >= 5) {
@@ -1789,7 +1292,25 @@
           }
         }
         
-        // Check "Five until Zero" numbers
+        return prevFiveOrMoreNumbers;
+      }
+
+      // Get "Five until Zero" numbers BEFORE the current spin
+      function getPreviousFiveUntilZeroNumbers() {
+        if (history.length === 0) return [];
+        
+        const previousSpins = history.slice(0, -1);
+        const previousLast60 = previousSpins.slice(-60);
+        const prevCountMap = {};
+        
+        // Count occurrences in previous 60 spins (before this spin)
+        previousLast60.forEach(n => {
+          prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+        });
+        
+        const prevFiveUntilZeroNumbers = [];
+        
+        // Find numbers in fiveUntilZeroNumbers array that have at least 1 occurrence
         for (const num of fiveUntilZeroNumbers) {
           const count = prevCountMap[num] || 0;
           if (count > 0) {
@@ -1797,53 +1318,182 @@
           }
         }
         
-        // Track if any category had a hit in this spin (for combined total)
+        return prevFiveUntilZeroNumbers;
+      }
+
+      // Check if a number should be removed from "Two and Three Only" state
+      function checkRemoveFromTwoThreeOnlyNumbers(num) {
+        const lastSpins = history.slice(-60);
+        const count = lastSpins.filter(n => n === num).length;
+        
+        // Remove from "Two and Three Only" state if count is not 2-3
+        if ((count < 2 || count > 3) && twoThreeOnlyNumbers.includes(num)) {
+          const index = twoThreeOnlyNumbers.indexOf(num);
+          if (index > -1) {
+            twoThreeOnlyNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        // Also check if the number has fallen out of the 60-spin window completely
+        const inLast60 = lastSpins.includes(num);
+        if (!inLast60 && twoThreeOnlyNumbers.includes(num)) {
+          const index = twoThreeOnlyNumbers.indexOf(num);
+          if (index > -1) {
+            twoThreeOnlyNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        return false; // Not removed
+      }
+
+      // Check if a number should be removed from "Four Only" state
+      function checkRemoveFromFourOnlyNumbers(num) {
+        const lastSpins = history.slice(-60);
+        const count = lastSpins.filter(n => n === num).length;
+        
+        // Remove from "Four Only" state if count is not exactly 4
+        if (count !== 4 && fourOnlyNumbers.includes(num)) {
+          const index = fourOnlyNumbers.indexOf(num);
+          if (index > -1) {
+            fourOnlyNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        // Also check if the number has fallen out of the 60-spin window completely
+        const inLast60 = lastSpins.includes(num);
+        if (!inLast60 && fourOnlyNumbers.includes(num)) {
+          const index = fourOnlyNumbers.indexOf(num);
+          if (index > -1) {
+            fourOnlyNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        return false; // Not removed
+      }
+
+      // Check if a number should be removed from "Five or More" state
+      function checkRemoveFromFiveOrMoreNumbers(num) {
+        const lastSpins = history.slice(-60);
+        const count = lastSpins.filter(n => n === num).length;
+        
+        // Remove from "Five or More" state if count drops below 5
+        if (count < 5 && fiveOrMoreNumbers.includes(num)) {
+          const index = fiveOrMoreNumbers.indexOf(num);
+          if (index > -1) {
+            fiveOrMoreNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        // Also check if the number has fallen out of the 60-spin window completely
+        const inLast60 = lastSpins.includes(num);
+        if (!inLast60 && fiveOrMoreNumbers.includes(num)) {
+          const index = fiveOrMoreNumbers.indexOf(num);
+          if (index > -1) {
+            fiveOrMoreNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        return false; // Not removed
+      }
+
+      // Check if a number should be removed from "Five until Zero" state
+      function checkRemoveFromFiveUntilZeroNumbers(num) {
+        const lastSpins = history.slice(-60);
+        const count = lastSpins.filter(n => n === num).length;
+        
+        // Remove from "Five until Zero" state only if count is 0
+        if (count === 0 && fiveUntilZeroNumbers.includes(num)) {
+          const index = fiveUntilZeroNumbers.indexOf(num);
+          if (index > -1) {
+            fiveUntilZeroNumbers.splice(index, 1);
+            return true; // Removed
+          }
+        }
+        
+        return false; // Not removed
+      }
+
+      // Main function to calculate all misses
+      function calculateMissesAll() {
+        if (history.length === 0) return;
+        
+        // Store the current spin
+        const lastSpin = history[history.length - 1];
+        
+        // Get all previous categories BEFORE making any changes to state arrays
+        const prevTwoThreeOnlyNumbers = getPreviousTwoThreeOnlyNumbers();
+        const prevFourOnlyNumbers = getPreviousFourOnlyNumbers();
+        const prevFiveOrMoreNumbers = getPreviousFiveOrMoreNumbers();
+        const prevFiveUntilZeroNumbers = getPreviousFiveUntilZeroNumbers();
+        
+        // Track if any category had a hit (for combined total reset)
         let hadHit = false;
         
-        // Calculate "Two and Three Only" misses
+        // Calculate "Two and Three Only" misses (2-3 times)
         if (prevTwoThreeOnlyNumbers.length > 0) {
-          if (prevTwoThreeOnlyNumbers.includes(currentSpin)) {
+          if (prevTwoThreeOnlyNumbers.includes(lastSpin)) {
+            // HIT: "Two and Three Only" number hit - reset misses to 0
             twoThreeOnlyMisses60 = 0;
             hadHit = true;
+            clearAlertForCategory("Two and Three Only");
           } else {
+            // MISS: Add misses for each "Two and Three Only" number
             twoThreeOnlyMisses60 += prevTwoThreeOnlyNumbers.length;
           }
         }
         
-        // Calculate "Four Only" misses
+        // Calculate "Four Only" misses (exactly 4 times)
         if (prevFourOnlyNumbers.length > 0) {
-          if (prevFourOnlyNumbers.includes(currentSpin)) {
+          if (prevFourOnlyNumbers.includes(lastSpin)) {
+            // HIT: "Four Only" number hit - reset misses to 0
             fourOnlyMisses60 = 0;
             hadHit = true;
+            clearAlertForCategory("Four Only");
           } else {
+            // MISS: Add misses for each "Four Only" number
             fourOnlyMisses60 += prevFourOnlyNumbers.length;
           }
         }
         
-        // Calculate "Five or More" misses
+        // Calculate "Five or More" misses (5+ times)
         if (prevFiveOrMoreNumbers.length > 0) {
-          if (prevFiveOrMoreNumbers.includes(currentSpin)) {
+          if (prevFiveOrMoreNumbers.includes(lastSpin)) {
+            // HIT: "Five or More" number hit - reset misses to 0
             fiveOrMoreMisses60 = 0;
             hadHit = true;
+            clearAlertForCategory("Five or More");
           } else {
+            // MISS: Add misses for each "Five or More" number
             fiveOrMoreMisses60 += prevFiveOrMoreNumbers.length;
           }
         }
         
         // Calculate "Five until Zero" misses
         if (prevFiveUntilZeroNumbers.length > 0) {
-          if (prevFiveUntilZeroNumbers.includes(currentSpin)) {
+          if (prevFiveUntilZeroNumbers.includes(lastSpin)) {
+            // HIT: "Five until Zero" number hit - reset misses to 0
             fiveUntilZeroMisses60 = 0;
             hadHit = true;
+            clearAlertForCategory("Five until Zero");
           } else {
+            // MISS: Add misses for each "Five until Zero" number
             fiveUntilZeroMisses60 += prevFiveUntilZeroNumbers.length;
           }
         }
         
         // NEW: Update Combined Total Misses
         if (hadHit) {
+          // Reset Combined Total Misses to 0 if any category had a hit
           combinedTotalMisses = 0;
+          clearAlertForCategory("Combined Total");
         } else {
+          // Add to Combined Total Misses: sum of all misses added in this spin
           let totalMissesThisSpin = 0;
           if (prevTwoThreeOnlyNumbers.length > 0) totalMissesThisSpin += prevTwoThreeOnlyNumbers.length;
           if (prevFourOnlyNumbers.length > 0) totalMissesThisSpin += prevFourOnlyNumbers.length;
@@ -1853,42 +1503,62 @@
           combinedTotalMisses += totalMissesThisSpin;
         }
         
-        // Update categories based on current count
-        const currentSpins = history.slice(0, i+1);
-        const currentLast60 = currentSpins.slice(-60);
-        const currentCount = currentLast60.filter(n => n === currentSpin).length;
+        // NOW update the state arrays AFTER all calculations are done
         
-        // Update "Two and Three Only" state
-        if (currentCount >= 2 && currentCount <= 3 && !twoThreeOnlyNumbers.includes(currentSpin)) {
-          twoThreeOnlyNumbers.push(currentSpin);
+        // Check if last spin should be added to categories
+        const lastSpins = history.slice(-60);
+        const count = lastSpins.filter(n => n === lastSpin).length;
+        
+        // Update "Two and Three Only" numbers (2-3 times)
+        if (count >= 2 && count <= 3) {
+          if (!twoThreeOnlyNumbers.includes(lastSpin)) {
+            twoThreeOnlyNumbers.push(lastSpin);
+          }
           // Remove from other categories if it's there (except Five until Zero)
-          const fourOnlyIndex = fourOnlyNumbers.indexOf(currentSpin);
-          if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
-          const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(currentSpin);
-          if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          const fourOnlyIndex = fourOnlyNumbers.indexOf(lastSpin);
+          if (fourOnlyIndex > -1) {
+            fourOnlyNumbers.splice(fourOnlyIndex, 1);
+          }
+          const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(lastSpin);
+          if (fiveOrMoreIndex > -1) {
+            fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          }
         }
-        // Update "Four Only" state
-        else if (currentCount === 4 && !fourOnlyNumbers.includes(currentSpin)) {
-          fourOnlyNumbers.push(currentSpin);
+        // Update "Four Only" numbers (exactly 4 times)
+        else if (count === 4) {
+          if (!fourOnlyNumbers.includes(lastSpin)) {
+            fourOnlyNumbers.push(lastSpin);
+          }
           // Remove from other categories if it's there (except Five until Zero)
-          const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(currentSpin);
-          if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
-          const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(currentSpin);
-          if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(lastSpin);
+          if (twoThreeOnlyIndex > -1) {
+            twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
+          }
+          const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(lastSpin);
+          if (fiveOrMoreIndex > -1) {
+            fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          }
         }
-        // Update "Five or More" state
-        else if (currentCount >= 5 && !fiveOrMoreNumbers.includes(currentSpin)) {
-          fiveOrMoreNumbers.push(currentSpin);
+        // Update "Five or More" numbers (5+ times)
+        else if (count >= 5) {
+          if (!fiveOrMoreNumbers.includes(lastSpin)) {
+            fiveOrMoreNumbers.push(lastSpin);
+          }
           // Remove from other categories if it's there (except Five until Zero)
-          const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(currentSpin);
-          if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
-          const fourOnlyIndex = fourOnlyNumbers.indexOf(currentSpin);
-          if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
+          const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(lastSpin);
+          if (twoThreeOnlyIndex > -1) {
+            twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
+          }
+          const fourOnlyIndex = fourOnlyNumbers.indexOf(lastSpin);
+          if (fourOnlyIndex > -1) {
+            fourOnlyNumbers.splice(fourOnlyIndex, 1);
+          }
         }
         
-        // Update "Five until Zero" state - add if count reaches 5+ for the first time
-        if (currentCount >= 5 && !fiveUntilZeroNumbers.includes(currentSpin)) {
-          fiveUntilZeroNumbers.push(currentSpin);
+        // Check for "Five until Zero" - add if count reaches 5+ for the first time
+        // This ensures a number enters the category only when it first reaches 5 hits
+        if (count >= 5 && !fiveUntilZeroNumbers.includes(lastSpin)) {
+          fiveUntilZeroNumbers.push(lastSpin);
         }
         
         // Check if any numbers should be removed from categories
@@ -1899,13 +1569,315 @@
           checkRemoveFromFiveOrMoreNumbers(num);
           checkRemoveFromFiveUntilZeroNumbers(num);
         });
+        
+        // Update all numbers that might have changed categories
+        // Check all possible roulette numbers
+        const allNumbers = [...Array(37).keys()].map(n => n.toString()).concat(["00"]);
+        
+        for (const num of allNumbers) {
+          const countInLast60 = lastSpins.filter(n => n === num).length;
+          
+          // Regular categories (exclusive)
+          if (countInLast60 >= 2 && countInLast60 <= 3 && !twoThreeOnlyNumbers.includes(num)) {
+            // Add to "Two and Three Only" if not already there
+            twoThreeOnlyNumbers.push(num);
+            // Remove from other categories if it's there (except Five until Zero)
+            const fourOnlyIndex = fourOnlyNumbers.indexOf(num);
+            if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
+            const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(num);
+            if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          } else if (countInLast60 === 4 && !fourOnlyNumbers.includes(num)) {
+            // Add to "Four Only" if not already there
+            fourOnlyNumbers.push(num);
+            // Remove from other categories if it's there (except Five until Zero)
+            const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(num);
+            if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
+            const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(num);
+            if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          } else if (countInLast60 >= 5 && !fiveOrMoreNumbers.includes(num)) {
+            // Add to "Five or More" if not already there
+            fiveOrMoreNumbers.push(num);
+            // Remove from other categories if it's there (except Five until Zero)
+            const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(num);
+            if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
+            const fourOnlyIndex = fourOnlyNumbers.indexOf(num);
+            if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
+          }
+          
+          // Five until Zero category (can coexist with other categories)
+          // Add if count reaches 5+ for the first time
+          if (countInLast60 >= 5 && !fiveUntilZeroNumbers.includes(num)) {
+            fiveUntilZeroNumbers.push(num);
+          }
+        }
+        
+        // Check for 100+ misses after calculation
+        checkFor100PlusMisses();
       }
-    }
 
-    // Reset all data
-    function resetAll() {
-      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
-        history = [];
+      // Update the display with current data
+      function updateDisplay() {
+        const container = document.getElementById("recentSpins");
+        container.innerHTML = "";
+        
+        // Create 60 boxes total for horizontal scrolling (shows 20 visible)
+        for (let i = 0; i < 60; i++) {
+          const div = document.createElement("div");
+          
+          // Get the spin number (newest first)
+          const spinIndex = history.length - 1 - i;
+          
+          if (spinIndex >= 0) {
+            const n = history[spinIndex];
+            const color = getColor(n);
+            div.className = `spin-box ${color}`;
+            div.textContent = n;
+          } else {
+            // Empty box for missing spins
+            div.className = "spin-box empty";
+            div.textContent = "";
+          }
+          
+          container.appendChild(div);
+        }
+        
+        document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+        
+        // Update Combined Total Misses display
+        document.getElementById("combinedTotalMissesValue").textContent = combinedTotalMisses;
+        
+        // Update displays for 60-spin window
+        updateCombinedDisplayForWindow(60, "60");
+      }
+
+      // Update combined displays
+      function updateCombinedDisplayForWindow(windowSize, suffix) {
+        // Update "Two and Three Only" display (2-3 times)
+        const twoThreeOnlyDisplay = document.getElementById(`twoThreeOnly${suffix}`);
+        const twoThreeOnlyMissesText = document.getElementById(`twoThreeOnlyMissesText${suffix}`);
+        
+        const twoThreeOnlyNumbersList = findTwoThreeOnlyNumbers(windowSize);
+        const twoThreeOnlyKeys = Object.keys(twoThreeOnlyNumbersList);
+        
+        if (twoThreeOnlyKeys.length === 0) {
+          twoThreeOnlyDisplay.innerHTML = `<div class="no-duplicates">No numbers with 2-3 appearances</div>`;
+        } else {
+          twoThreeOnlyDisplay.innerHTML = '';
+          for (const num of twoThreeOnlyKeys) {
+            const data = twoThreeOnlyNumbersList[num];
+            const color = getColor(num);
+            const item = document.createElement("div");
+            item.className = "duplicate-item";
+            
+            const numberDiv = document.createElement("div");
+            numberDiv.className = `duplicate-number ${color}`;
+            numberDiv.textContent = num;
+            
+            const countDiv = document.createElement("div");
+            countDiv.className = `duplicate-count two-three-count`;
+            countDiv.textContent = data.count;
+            
+            item.appendChild(numberDiv);
+            item.appendChild(countDiv);
+            twoThreeOnlyDisplay.appendChild(item);
+          }
+        }
+        
+        twoThreeOnlyMissesText.textContent = `Total misses: ${twoThreeOnlyMisses60}`;
+        
+        // Update "Four Only" display (exactly 4 times)
+        const fourOnlyDisplay = document.getElementById(`fourOnly${suffix}`);
+        const fourOnlyMissesText = document.getElementById(`fourOnlyMissesText${suffix}`);
+        
+        const fourOnlyNumbersList = findFourOnlyNumbers(windowSize);
+        const fourOnlyKeys = Object.keys(fourOnlyNumbersList);
+        
+        if (fourOnlyKeys.length === 0) {
+          fourOnlyDisplay.innerHTML = `<div class="no-duplicates">No numbers with exactly 4 appearances</div>`;
+        } else {
+          fourOnlyDisplay.innerHTML = '';
+          for (const num of fourOnlyKeys) {
+            const data = fourOnlyNumbersList[num];
+            const color = getColor(num);
+            const item = document.createElement("div");
+            item.className = "duplicate-item";
+            
+            const numberDiv = document.createElement("div");
+            numberDiv.className = `duplicate-number ${color}`;
+            numberDiv.textContent = num;
+            
+            const countDiv = document.createElement("div");
+            countDiv.className = `duplicate-count four-only-count`;
+            countDiv.textContent = data.count;
+            
+            item.appendChild(numberDiv);
+            item.appendChild(countDiv);
+            fourOnlyDisplay.appendChild(item);
+          }
+        }
+        
+        fourOnlyMissesText.textContent = `Total misses: ${fourOnlyMisses60}`;
+        
+        // Update "Five or More" display (5+ times)
+        const fiveOrMoreDisplay = document.getElementById(`fiveOrMore${suffix}`);
+        const fiveOrMoreMissesText = document.getElementById(`fiveOrMoreMissesText${suffix}`);
+        
+        const fiveOrMoreNumbersList = findFiveOrMoreNumbers(windowSize);
+        const fiveOrMoreKeys = Object.keys(fiveOrMoreNumbersList);
+        
+        if (fiveOrMoreKeys.length === 0) {
+          fiveOrMoreDisplay.innerHTML = `<div class="no-duplicates">No numbers with 5+ appearances</div>`;
+        } else {
+          fiveOrMoreDisplay.innerHTML = '';
+          for (const num of fiveOrMoreKeys) {
+            const data = fiveOrMoreNumbersList[num];
+            const color = getColor(num);
+            const item = document.createElement("div");
+            item.className = "duplicate-item";
+            
+            const numberDiv = document.createElement("div");
+            numberDiv.className = `duplicate-number ${color}`;
+            numberDiv.textContent = num;
+            
+            const countDiv = document.createElement("div");
+            countDiv.className = `duplicate-count five-or-more-count`;
+            countDiv.textContent = data.count;
+            
+            item.appendChild(numberDiv);
+            item.appendChild(countDiv);
+            fiveOrMoreDisplay.appendChild(item);
+          }
+        }
+        
+        fiveOrMoreMissesText.textContent = `Total misses: ${fiveOrMoreMisses60}`;
+        
+        // Update "Five until Zero" display
+        const fiveUntilZeroDisplay = document.getElementById(`fiveUntilZero${suffix}`);
+        const fiveUntilZeroMissesText = document.getElementById(`fiveUntilZeroMissesText${suffix}`);
+        
+        const fiveUntilZeroNumbersList = findFiveUntilZeroNumbers(windowSize);
+        const fiveUntilZeroKeys = Object.keys(fiveUntilZeroNumbersList);
+        
+        if (fiveUntilZeroKeys.length === 0) {
+          fiveUntilZeroDisplay.innerHTML = `<div class="no-duplicates">No numbers with 5+ hits (stays until zero)</div>`;
+        } else {
+          fiveUntilZeroDisplay.innerHTML = '';
+          for (const num of fiveUntilZeroKeys) {
+            const data = fiveUntilZeroNumbersList[num];
+            const color = getColor(num);
+            const item = document.createElement("div");
+            item.className = "duplicate-item";
+            
+            const numberDiv = document.createElement("div");
+            numberDiv.className = `duplicate-number ${color}`;
+            numberDiv.textContent = num;
+            
+            const countDiv = document.createElement("div");
+            countDiv.className = `duplicate-count five-until-zero-count`;
+            countDiv.textContent = data.count;
+            
+            item.appendChild(numberDiv);
+            item.appendChild(countDiv);
+            fiveUntilZeroDisplay.appendChild(item);
+          }
+        }
+        
+        fiveUntilZeroMissesText.textContent = `Total misses: ${fiveUntilZeroMisses60}`;
+      }
+
+      // Save all data to localStorage
+      function saveAllToLocalStorage() {
+        localStorage.setItem("history", JSON.stringify(history));
+        localStorage.setItem("twoThreeOnlyMisses60", twoThreeOnlyMisses60);
+        localStorage.setItem("fourOnlyMisses60", fourOnlyMisses60);
+        localStorage.setItem("fiveOrMoreMisses60", fiveOrMoreMisses60);
+        localStorage.setItem("fiveUntilZeroMisses60", fiveUntilZeroMisses60);
+        localStorage.setItem("combinedTotalMisses", combinedTotalMisses); // NEW: Save combined total
+        localStorage.setItem("twoThreeOnlyNumbers", JSON.stringify(twoThreeOnlyNumbers));
+        localStorage.setItem("fourOnlyNumbers", JSON.stringify(fourOnlyNumbers));
+        localStorage.setItem("fiveOrMoreNumbers", JSON.stringify(fiveOrMoreNumbers));
+        localStorage.setItem("fiveUntilZeroNumbers", JSON.stringify(fiveUntilZeroNumbers));
+        localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+        localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
+      }
+
+      // Add a new number to the history with proper validation
+      function addNumber() {
+        const input = document.getElementById("numberInput");
+        const status = document.getElementById("inputStatus");
+        let val = input.value.trim();
+        
+        // Clear previous status
+        status.textContent = "";
+        
+        // Validate input
+        if (!val) {
+          status.textContent = "Please enter a number";
+          return;
+        }
+        
+        // Handle "00" specially
+        if (val === "00") {
+          // Valid, continue
+        } else if (val === "0") {
+          // Valid, continue
+        } else {
+          const num = parseInt(val, 10);
+          if (isNaN(num) || num < 0 || num > 36) {
+            status.textContent = "Invalid number (0-36 or 00)";
+            return;
+          }
+          val = num.toString(); // Normalize to string
+        }
+        
+        // Save current state before adding new spin
+        saveState();
+        
+        // Add to history
+        history.push(val);
+        
+        // Calculate misses for all windows
+        calculateMissesAll();
+        
+        // Reset input and save
+        input.value = "";
+        saveAllToLocalStorage();
+        updateDisplay();
+        
+        // Show status with group info
+        const group = getGroup(val);
+        const color = getColor(val);
+        status.textContent = `Added spin: ${val} (Group ${group}, ${color})`;
+      }
+
+      // Undo the last action
+      function undo() {
+        const status = document.getElementById("inputStatus");
+        if (history.length === 0) {
+          status.textContent = "Nothing to undo";
+          return;
+        }
+        
+        // Restore previous state from history
+        if (restorePreviousState()) {
+          updateDisplay();
+          status.textContent = "Last spin undone. State restored.";
+        } else {
+          // Fallback: manually remove last spin and recalculate
+          history.pop();
+          recalculateFromScratch();
+          saveAllToLocalStorage();
+          updateDisplay();
+          status.textContent = "Last spin undone. All data recalculated.";
+        }
+        
+        // Check alerts after undo
+        checkFor100PlusMisses();
+      }
+
+      // Recalculate everything from scratch (fallback for undo)
+      function recalculateFromScratch() {
+        // Reset all state
         twoThreeOnlyMisses60 = 0;
         fourOnlyMisses60 = 0;
         fiveOrMoreMisses60 = 0;
@@ -1915,130 +1887,319 @@
         fourOnlyNumbers = [];
         fiveOrMoreNumbers = [];
         fiveUntilZeroNumbers = [];
-        stateHistory = [];
-        localStorage.clear();
-        updateDisplay();
-        document.getElementById("inputStatus").textContent = "All data reset";
-      }
-    }
-
-    // Reset Combined Total Misses
-    function resetCombinedTotalMisses() {
-      if (confirm("Are you sure you want to reset Combined Total Misses to 0?")) {
-        saveState();
-        combinedTotalMisses = 0;
-        saveAllToLocalStorage();
-        updateDisplay();
-        document.getElementById("inputStatus").textContent = "Combined Total Misses reset to 0";
-      }
-    }
-
-    // Reset misses for specific group and window
-    function resetMisses(groupWithSuffix) {
-      let type, suffix;
-      
-      // Check which type it is
-      if (groupWithSuffix === 'TwoThreeOnly60') {
-        type = 'TwoThreeOnly';
-        suffix = '60';
-      } else if (groupWithSuffix === 'FourOnly60') {
-        type = 'FourOnly';
-        suffix = '60';
-      } else if (groupWithSuffix === 'FiveOrMore60') {
-        type = 'FiveOrMore';
-        suffix = '60';
-      } else if (groupWithSuffix === 'FiveUntilZero60') {
-        type = 'FiveUntilZero';
-        suffix = '60';
-      } else {
-        // Try alternative parsing for backward compatibility
-        if (groupWithSuffix.includes('TwoThreeOnly')) {
-          type = 'TwoThreeOnly';
-          suffix = groupWithSuffix.replace('TwoThreeOnly', '');
-        } else if (groupWithSuffix.includes('FourOnly')) {
-          type = 'FourOnly';
-          suffix = groupWithSuffix.replace('FourOnly', '');
-        } else if (groupWithSuffix.includes('FiveOrMore')) {
-          type = 'FiveOrMore';
-          suffix = groupWithSuffix.replace('FiveOrMore', '');
-        } else if (groupWithSuffix.includes('FiveUntilZero')) {
-          type = 'FiveUntilZero';
-          suffix = groupWithSuffix.replace('FiveUntilZero', '');
+        alertedCategories = {};
+        
+        if (history.length === 0) {
+          return;
+        }
+        
+        // Process each spin in order to rebuild state
+        for (let i = 0; i < history.length; i++) {
+          const currentSpin = history[i];
+          const previousSpins = history.slice(0, i);
+          
+          // Process for 60-spin window
+          const previousLast60 = previousSpins.slice(-60);
+          
+          // Count occurrences before this spin
+          const prevCountMap = {};
+          previousLast60.forEach(n => {
+            prevCountMap[n] = (prevCountMap[n] || 0) + 1;
+          });
+          
+          // Find all categories in previous spins
+          const prevTwoThreeOnlyNumbers = [];
+          const prevFourOnlyNumbers = [];
+          const prevFiveOrMoreNumbers = [];
+          const prevFiveUntilZeroNumbers = [];
+          
+          // Check "Two and Three Only" numbers
+          for (const num of twoThreeOnlyNumbers) {
+            const count = prevCountMap[num] || 0;
+            if (count >= 2 && count <= 3) {
+              prevTwoThreeOnlyNumbers.push(num);
+            }
+          }
+          
+          // Check "Four Only" numbers
+          for (const num of fourOnlyNumbers) {
+            const count = prevCountMap[num] || 0;
+            if (count === 4) {
+              prevFourOnlyNumbers.push(num);
+            }
+          }
+          
+          // Check "Five or More" numbers
+          for (const num of fiveOrMoreNumbers) {
+            const count = prevCountMap[num] || 0;
+            if (count >= 5) {
+              prevFiveOrMoreNumbers.push(num);
+            }
+          }
+          
+          // Check "Five until Zero" numbers
+          for (const num of fiveUntilZeroNumbers) {
+            const count = prevCountMap[num] || 0;
+            if (count > 0) {
+              prevFiveUntilZeroNumbers.push(num);
+            }
+          }
+          
+          // Track if any category had a hit in this spin (for combined total)
+          let hadHit = false;
+          
+          // Calculate "Two and Three Only" misses
+          if (prevTwoThreeOnlyNumbers.length > 0) {
+            if (prevTwoThreeOnlyNumbers.includes(currentSpin)) {
+              twoThreeOnlyMisses60 = 0;
+              hadHit = true;
+            } else {
+              twoThreeOnlyMisses60 += prevTwoThreeOnlyNumbers.length;
+            }
+          }
+          
+          // Calculate "Four Only" misses
+          if (prevFourOnlyNumbers.length > 0) {
+            if (prevFourOnlyNumbers.includes(currentSpin)) {
+              fourOnlyMisses60 = 0;
+              hadHit = true;
+            } else {
+              fourOnlyMisses60 += prevFourOnlyNumbers.length;
+            }
+          }
+          
+          // Calculate "Five or More" misses
+          if (prevFiveOrMoreNumbers.length > 0) {
+            if (prevFiveOrMoreNumbers.includes(currentSpin)) {
+              fiveOrMoreMisses60 = 0;
+              hadHit = true;
+            } else {
+              fiveOrMoreMisses60 += prevFiveOrMoreNumbers.length;
+            }
+          }
+          
+          // Calculate "Five until Zero" misses
+          if (prevFiveUntilZeroNumbers.length > 0) {
+            if (prevFiveUntilZeroNumbers.includes(currentSpin)) {
+              fiveUntilZeroMisses60 = 0;
+              hadHit = true;
+            } else {
+              fiveUntilZeroMisses60 += prevFiveUntilZeroNumbers.length;
+            }
+          }
+          
+          // NEW: Update Combined Total Misses
+          if (hadHit) {
+            combinedTotalMisses = 0;
+          } else {
+            let totalMissesThisSpin = 0;
+            if (prevTwoThreeOnlyNumbers.length > 0) totalMissesThisSpin += prevTwoThreeOnlyNumbers.length;
+            if (prevFourOnlyNumbers.length > 0) totalMissesThisSpin += prevFourOnlyNumbers.length;
+            if (prevFiveOrMoreNumbers.length > 0) totalMissesThisSpin += prevFiveOrMoreNumbers.length;
+            if (prevFiveUntilZeroNumbers.length > 0) totalMissesThisSpin += prevFiveUntilZeroNumbers.length;
+            
+            combinedTotalMisses += totalMissesThisSpin;
+          }
+          
+          // Update categories based on current count
+          const currentSpins = history.slice(0, i+1);
+          const currentLast60 = currentSpins.slice(-60);
+          const currentCount = currentLast60.filter(n => n === currentSpin).length;
+          
+          // Update "Two and Three Only" state
+          if (currentCount >= 2 && currentCount <= 3 && !twoThreeOnlyNumbers.includes(currentSpin)) {
+            twoThreeOnlyNumbers.push(currentSpin);
+            // Remove from other categories if it's there (except Five until Zero)
+            const fourOnlyIndex = fourOnlyNumbers.indexOf(currentSpin);
+            if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
+            const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(currentSpin);
+            if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          }
+          // Update "Four Only" state
+          else if (currentCount === 4 && !fourOnlyNumbers.includes(currentSpin)) {
+            fourOnlyNumbers.push(currentSpin);
+            // Remove from other categories if it's there (except Five until Zero)
+            const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(currentSpin);
+            if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
+            const fiveOrMoreIndex = fiveOrMoreNumbers.indexOf(currentSpin);
+            if (fiveOrMoreIndex > -1) fiveOrMoreNumbers.splice(fiveOrMoreIndex, 1);
+          }
+          // Update "Five or More" state
+          else if (currentCount >= 5 && !fiveOrMoreNumbers.includes(currentSpin)) {
+            fiveOrMoreNumbers.push(currentSpin);
+            // Remove from other categories if it's there (except Five until Zero)
+            const twoThreeOnlyIndex = twoThreeOnlyNumbers.indexOf(currentSpin);
+            if (twoThreeOnlyIndex > -1) twoThreeOnlyNumbers.splice(twoThreeOnlyIndex, 1);
+            const fourOnlyIndex = fourOnlyNumbers.indexOf(currentSpin);
+            if (fourOnlyIndex > -1) fourOnlyNumbers.splice(fourOnlyIndex, 1);
+          }
+          
+          // Update "Five until Zero" state - add if count reaches 5+ for the first time
+          if (currentCount >= 5 && !fiveUntilZeroNumbers.includes(currentSpin)) {
+            fiveUntilZeroNumbers.push(currentSpin);
+          }
+          
+          // Check if any numbers should be removed from categories
+          const numbersToCheck = [...twoThreeOnlyNumbers, ...fourOnlyNumbers, ...fiveOrMoreNumbers, ...fiveUntilZeroNumbers];
+          numbersToCheck.forEach(num => {
+            checkRemoveFromTwoThreeOnlyNumbers(num);
+            checkRemoveFromFourOnlyNumbers(num);
+            checkRemoveFromFiveOrMoreNumbers(num);
+            checkRemoveFromFiveUntilZeroNumbers(num);
+          });
         }
       }
-      
-      let typeText = '';
-      if (type === 'TwoThreeOnly') typeText = 'Two and Three Only';
-      else if (type === 'FourOnly') typeText = 'Four Only';
-      else if (type === 'FiveOrMore') typeText = 'Five or More';
-      else if (type === 'FiveUntilZero') typeText = 'Five until Zero';
-      
-      const suffixText = suffix ? ` (${suffix} spins)` : '';
-      
-      if (confirm(`Are you sure you want to reset ${typeText} misses${suffixText} to 0?`)) {
-        // Save current state before resetting
-        saveState();
-        
-        if (type === 'TwoThreeOnly' && suffix === '60') {
+
+      // Reset all data
+      function resetAll() {
+        if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+          history = [];
           twoThreeOnlyMisses60 = 0;
-        } else if (type === 'FourOnly' && suffix === '60') {
           fourOnlyMisses60 = 0;
-        } else if (type === 'FiveOrMore' && suffix === '60') {
           fiveOrMoreMisses60 = 0;
-        } else if (type === 'FiveUntilZero' && suffix === '60') {
           fiveUntilZeroMisses60 = 0;
+          combinedTotalMisses = 0; // NEW: Reset combined total
+          twoThreeOnlyNumbers = [];
+          fourOnlyNumbers = [];
+          fiveOrMoreNumbers = [];
+          fiveUntilZeroNumbers = [];
+          stateHistory = [];
+          alertedCategories = {};
+          localStorage.clear();
+          updateDisplay();
+          document.getElementById("inputStatus").textContent = "All data reset";
+          
+          // Clear any active alerts
+          document.getElementById("alertContainer").innerHTML = "";
+        }
+      }
+
+      // Reset Combined Total Misses
+      function resetCombinedTotalMisses() {
+        if (confirm("Are you sure you want to reset Combined Total Misses to 0?")) {
+          saveState();
+          combinedTotalMisses = 0;
+          clearAlertForCategory("Combined Total");
+          saveAllToLocalStorage();
+          updateDisplay();
+          document.getElementById("inputStatus").textContent = "Combined Total Misses reset to 0";
+        }
+      }
+
+      // Reset misses for specific group and window
+      function resetMisses(groupWithSuffix) {
+        let type, suffix;
+        
+        // Check which type it is
+        if (groupWithSuffix === 'TwoThreeOnly60') {
+          type = 'TwoThreeOnly';
+          suffix = '60';
+        } else if (groupWithSuffix === 'FourOnly60') {
+          type = 'FourOnly';
+          suffix = '60';
+        } else if (groupWithSuffix === 'FiveOrMore60') {
+          type = 'FiveOrMore';
+          suffix = '60';
+        } else if (groupWithSuffix === 'FiveUntilZero60') {
+          type = 'FiveUntilZero';
+          suffix = '60';
+        } else {
+          // Try alternative parsing for backward compatibility
+          if (groupWithSuffix.includes('TwoThreeOnly')) {
+            type = 'TwoThreeOnly';
+            suffix = groupWithSuffix.replace('TwoThreeOnly', '');
+          } else if (groupWithSuffix.includes('FourOnly')) {
+            type = 'FourOnly';
+            suffix = groupWithSuffix.replace('FourOnly', '');
+          } else if (groupWithSuffix.includes('FiveOrMore')) {
+            type = 'FiveOrMore';
+            suffix = groupWithSuffix.replace('FiveOrMore', '');
+          } else if (groupWithSuffix.includes('FiveUntilZero')) {
+            type = 'FiveUntilZero';
+            suffix = groupWithSuffix.replace('FiveUntilZero', '');
+          }
         }
         
-        saveAllToLocalStorage();
+        let typeText = '';
+        if (type === 'TwoThreeOnly') typeText = 'Two and Three Only';
+        else if (type === 'FourOnly') typeText = 'Four Only';
+        else if (type === 'FiveOrMore') typeText = 'Five or More';
+        else if (type === 'FiveUntilZero') typeText = 'Five until Zero';
+        
+        const suffixText = suffix ? ` (${suffix} spins)` : '';
+        
+        if (confirm(`Are you sure you want to reset ${typeText} misses${suffixText} to 0?`)) {
+          // Save current state before resetting
+          saveState();
+          
+          if (type === 'TwoThreeOnly' && suffix === '60') {
+            twoThreeOnlyMisses60 = 0;
+            clearAlertForCategory("Two and Three Only");
+          } else if (type === 'FourOnly' && suffix === '60') {
+            fourOnlyMisses60 = 0;
+            clearAlertForCategory("Four Only");
+          } else if (type === 'FiveOrMore' && suffix === '60') {
+            fiveOrMoreMisses60 = 0;
+            clearAlertForCategory("Five or More");
+          } else if (type === 'FiveUntilZero' && suffix === '60') {
+            fiveUntilZeroMisses60 = 0;
+            clearAlertForCategory("Five until Zero");
+          }
+          
+          saveAllToLocalStorage();
+          updateDisplay();
+          document.getElementById("inputStatus").textContent = `${typeText}${suffixText} misses reset to 0`;
+        }
+      }
+
+      // Handle numpad clicks
+      function numpadClick(n) {
+        const input = document.getElementById("numberInput");
+        const status = document.getElementById("inputStatus");
+        status.textContent = "";
+        
+        if (n === '00') {
+          input.value = '00';
+        } else {
+          if (input.value.length < 2) {
+            input.value += n;
+          }
+        }
+      }
+
+      // Handle backspace
+      function backspace() {
+        const input = document.getElementById("numberInput");
+        input.value = input.value.slice(0, -1);
+      }
+
+      // Initialize on load
+      document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("numberInput").addEventListener("keydown", function(e) {
+          if (e.key === "Enter") addNumber();
+        });
+        
+        // Auto-focus input when clicking anywhere on the page
+        document.addEventListener('click', function(e) {
+          if (e.target.tagName !== 'BUTTON' && e.target.className !== 'spin-box') {
+            document.getElementById('numberInput').focus();
+          }
+        });
+        
+        // Focus input on load
+        document.getElementById('numberInput').focus();
+        
+        // Initialize state history with current state if empty
+        if (stateHistory.length === 0 && history.length > 0) {
+          saveState();
+        }
+        
         updateDisplay();
-        document.getElementById("inputStatus").textContent = `${typeText}${suffixText} misses reset to 0`;
-      }
-    }
-
-    // Handle numpad clicks
-    function numpadClick(n) {
-      const input = document.getElementById("numberInput");
-      const status = document.getElementById("inputStatus");
-      status.textContent = "";
-      
-      if (n === '00') {
-        input.value = '00';
-      } else {
-        if (input.value.length < 2) {
-          input.value += n;
-        }
-      }
-    }
-
-    // Handle backspace
-    function backspace() {
-      const input = document.getElementById("numberInput");
-      input.value = input.value.slice(0, -1);
-    }
-
-    // Initialize on load
-    document.addEventListener("DOMContentLoaded", function() {
-      document.getElementById("numberInput").addEventListener("keydown", function(e) {
-        if (e.key === "Enter") addNumber();
+        
+        // Check for 100+ misses on page load
+        checkFor100PlusMisses();
       });
-      
-      // Auto-focus input when clicking anywhere on the page
-      document.addEventListener('click', function(e) {
-        if (e.target.tagName !== 'BUTTON' && e.target.className !== 'spin-box') {
-          document.getElementById('numberInput').focus();
-        }
-      });
-      
-      // Focus input on load
-      document.getElementById('numberInput').focus();
-      
-      // Initialize state history with current state if empty
-      if (stateHistory.length === 0 && history.length > 0) {
-        saveState();
-      }
-      
-      updateDisplay();
-    });
-  </script>
+    </script>
+  </div>
 </body>
 </html>

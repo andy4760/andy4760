@@ -1,0 +1,3619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue Roulette Tracker Pro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 65px;
+      width: 1052px;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 10px;
+    }
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 5px;
+    }
+    .spin-box {
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    .red { 
+      background: linear-gradient(145deg, #e53935, #c62828); 
+      color: white; 
+      border-color: #b71c1c;
+    }
+    .black { 
+      background: linear-gradient(145deg, #212121, #000000); 
+      color: white; 
+      border-color: #111;
+    }
+    .green { 
+      background: linear-gradient(145deg, #43a047, #2e7d32); 
+      color: white; 
+      border-color: #1b5e20;
+    }
+    .empty {
+      background: rgba(60, 60, 80, 0.5);
+      border-color: #444;
+      color: transparent;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    /* Pattern display styles */
+    .pattern-tracks-container {
+      padding: 15px;
+      background: rgba(20, 20, 35, 0.8);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .pattern-display {
+      padding: 15px;
+      background: rgba(30, 30, 46, 0.7);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-bottom: 15px;
+    }
+    .pattern-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #ff8a65;
+    }
+    .pattern-sequence {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 50px;
+      overflow-x: auto;
+      padding: 5px;
+      scrollbar-width: thin;
+      scrollbar-color: #ff4b2b #1a1a2e;
+    }
+    .pattern-sequence::-webkit-scrollbar {
+      height: 8px;
+    }
+    .pattern-sequence::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+    .pattern-sequence::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 4px;
+    }
+    .pattern-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+    .pattern-miss {
+      background: linear-gradient(145deg, #42a5f5, #1976d2);
+      color: white;
+    }
+    .pattern-hit {
+      background: linear-gradient(145deg, #ffd700, #ffa000);
+      color: #333;
+    }
+    .pattern-label {
+      font-weight: bold;
+      margin-right: 5px;
+      color: #ff8a65;
+      flex-shrink: 0;
+    }
+    
+    .number-sets {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 1rem 0;
+    }
+    .number-set {
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(30, 30, 46, 0.7);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .horizontal-layout {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .number-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 40px;
+    }
+    .number-display {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 3px;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .number-display.red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+      color: white;
+    }
+    .number-display.black {
+      background: linear-gradient(145deg, #212121, #000000);
+      color: white;
+    }
+    .number-display.green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+      color: white;
+    }
+    .miss-count {
+      font-weight: bold;
+      color: #42a5f5;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+    .miss-count.gold {
+      color: #FFD700 !important;
+      font-weight: bold;
+      text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+    }
+    
+    /* Change hits numbers to green in pattern stats */
+    #hit4, #hit6, #hit9, #hit12, #hit18, #hit24 {
+      color: #00cc00;
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(0, 204, 0, 0.4);
+    }
+    
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 100;
+      border-top: 2px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+      max-height: 90px;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 65px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      background: rgba(50, 50, 70, 0.9);
+      color: white;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    .numpad button:hover {
+      background: rgba(70, 70, 90, 0.9);
+    }
+    .numpad .enter { 
+      background: linear-gradient(145deg, #4caf50, #2e7d32); 
+    }
+    .numpad .enter:hover { 
+      background: linear-gradient(145deg, #66bb6a, #388e3c); 
+    }
+    .numpad .backspace { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .numpad .backspace:hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      border-color: #ff4b2b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      background: rgba(80, 80, 100, 0.9);
+      transform: translateY(-2px);
+    }
+    .controls button:nth-child(2) { 
+      background: linear-gradient(145deg, #2196f3, #1976d2); 
+    }
+    .controls button:nth-child(2):hover { 
+      background: linear-gradient(145deg, #42a5f5, #1e88e5); 
+    }
+    .controls button:nth-child(3) { 
+      background: linear-gradient(145deg, #ff9800, #f57c00); 
+    }
+    .controls button:nth-child(3):hover { 
+      background: linear-gradient(145deg, #ffa726, #fb8c00); 
+    }
+    .controls button:nth-child(4) { 
+      background: linear-gradient(145deg, #f44336, #d32f2f); 
+    }
+    .controls button:nth-child(4):hover { 
+      background: linear-gradient(145deg, #ef5350, #e53935); 
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .legend-red {
+      background: linear-gradient(145deg, #e53935, #c62828);
+    }
+    .legend-black {
+      background: linear-gradient(145deg, #212121, #000);
+    }
+    .legend-green {
+      background: linear-gradient(145deg, #43a047, #2e7d32);
+    }
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+    .spacer {
+      width: 30px;
+      height: 1px;
+    }
+    
+    /* Combined scrollable container */
+    .scrollable-container {
+      max-height: calc(100vh - 250px);
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    
+    .scrollable-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scrollable-container::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+    
+    .scrollable-container::-webkit-scrollbar-thumb {
+      background: #ff4b2b;
+      border-radius: 4px;
+    }
+    
+    /* Pattern stats styles */
+    .pattern-stats {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .pattern-stat-box {
+      border: 1px solid #444;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.7);
+      min-width: 120px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .pattern-stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(255, 75, 43, 0.3);
+      border-color: #ff4b2b;
+    }
+    .pattern-stat-box h3 {
+      margin: 0 0 5px;
+      text-align: center;
+      color: #ff8a65;
+      font-size: 1rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    
+    /* New excluded numbers display */
+    .excluded-numbers-display {
+      padding: 15px;
+      background: rgba(30, 30, 46, 0.7);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-bottom: 15px;
+    }
+    .excluded-numbers-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #ff8a65;
+    }
+    .excluded-numbers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+      padding: 5px;
+    }
+    .excluded-number-item {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Track 24 numbers display under Track 18 */
+    .track24-numbers-display {
+      padding: 15px;
+      background: rgba(30, 30, 46, 0.7);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-bottom: 15px;
+    }
+    .track24-numbers-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #ff8a65;
+    }
+    .track24-numbers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+      padding: 5px;
+    }
+    .track24-number-item {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* NEW: Cold numbers display */
+    .cold-numbers-display {
+      padding: 15px;
+      background: rgba(30, 30, 46, 0.7);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-bottom: 15px;
+    }
+    .cold-numbers-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #ff8a65;
+    }
+    .cold-numbers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+      padding: 5px;
+    }
+    .cold-number-item {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .cold-number {
+      font-size: 1.2rem;
+    }
+    .cold-miss-count {
+      font-size: 0.8rem;
+      margin-top: 2px;
+      color: #42a5f5;
+      font-weight: bold;
+    }
+    
+    /* NEW: Track 18 numbers display */
+    .track18-numbers-display {
+      padding: 15px;
+      background: rgba(30, 30, 46, 0.7);
+      border-radius: 12px;
+      border: 1px solid #444;
+      margin-bottom: 15px;
+    }
+    .track18-numbers-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #ff8a65;
+    }
+    .track18-numbers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+      padding: 5px;
+    }
+    .track18-number-item {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* NEW: Ball Location Tracking Styles - REMOVED VERTICAL SCROLL */
+    .ball-location-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 1rem 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+    }
+    
+    .location-tracker {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      min-height: 200px;
+    }
+    
+    .location-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .location-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #ffab91;
+    }
+    
+    .misses-count {
+      font-size: 1.1rem;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    
+    .misses-normal {
+      color: #4caf50;
+    }
+    
+    .misses-warning {
+      color: #ff9800;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .misses-critical {
+      color: #f44336;
+      animation: pulse 0.8s infinite;
+    }
+    
+    .location-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    
+    .location-number {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+      background: rgba(60, 60, 80, 0.7);
+      border: 1px solid #444;
+    }
+    
+    .location-middle {
+      background: linear-gradient(145deg, #ff9800, #f57c00);
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+    }
+    
+    .location-hit {
+      background: linear-gradient(145deg, #4caf50, #2e7d32);
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    }
+    
+    /* Pattern sequence styles with horizontal scroll */
+    .pattern-sequence-container {
+      margin-top: 15px;
+    }
+    
+    .pattern-sequence-title {
+      font-size: 0.9rem;
+      color: #ffab91;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .pattern-sequence {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 5px;
+      min-height: 50px;
+      align-items: center;
+      scrollbar-width: thin;
+      scrollbar-color: #2196f3 #1a1a2e;
+    }
+    
+    .pattern-sequence::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    .pattern-sequence::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    
+    .pattern-sequence::-webkit-scrollbar-thumb {
+      background: #2196f3;
+      border-radius: 5px;
+    }
+    
+    .pattern-miss {
+      background: linear-gradient(145deg, #2196f3, #1976d2);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      min-width: 50px;
+      text-align: center;
+    }
+    
+    .pattern-hit {
+      background: linear-gradient(145deg, #ffd700, #daa520);
+      color: #333;
+      padding: 8px 12px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      min-width: 70px;
+      text-align: center;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    .alert-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(244, 67, 54, 0.95);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(244, 67, 54, 0.7);
+      z-index: 1000;
+      text-align: center;
+      max-width: 80%;
+      animation: alert-pulse 1s infinite;
+    }
+    
+    @keyframes alert-pulse {
+      0% { box-shadow: 0 0 20px rgba(244, 67, 54, 0.7); }
+      50% { box-shadow: 0 0 30px rgba(244, 67, 54, 0.9); }
+      100% { box-shadow: 0 0 20px rgba(244, 67, 54, 0.7); }
+    }
+    
+    .alert-box h3 {
+      margin-bottom: 10px;
+      font-size: 1.3rem;
+    }
+    
+    .alert-box button {
+      margin-top: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 15px;
+    }
+    
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+    }
+    
+    @media (max-width: 1100px) {
+      #recentSpins {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 80px;
+      }
+      
+      .numpad {
+        padding: 12px;
+        max-height: 80px;
+      }
+      
+      .numpad button {
+        padding: 12px 0;
+        font-size: 1.1rem;
+        min-width: 55px;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .controls button {
+        width: 180px;
+      }
+      
+      .number-column {
+        min-width: 35px;
+      }
+      
+      .spacer {
+        width: 20px;
+      }
+      
+      .scrollable-container {
+        max-height: calc(100vh - 230px);
+      }
+      
+      .pattern-stats {
+        gap: 5px;
+      }
+      
+      .pattern-stat-box {
+        min-width: 100px;
+        padding: 8px;
+      }
+      
+      /* Mobile adjustments for recent spins */
+      .spin-box {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      #recentSpins {
+        min-height: 60px;
+      }
+
+      /* Mobile adjustments for cold numbers */
+      .cold-number-item {
+        width: 45px;
+        height: 45px;
+      }
+      .cold-number {
+        font-size: 1.1rem;
+      }
+      .cold-miss-count {
+        font-size: 0.7rem;
+      }
+      
+      /* Mobile adjustments for ball location tracking */
+      .ball-location-container {
+        flex-direction: column;
+      }
+      
+      .location-numbers {
+        justify-content: center;
+      }
+      
+      .pattern-sequence {
+        gap: 6px;
+        padding: 8px 3px;
+        min-height: 45px;
+      }
+      
+      .pattern-miss, .pattern-hit {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        min-width: 45px;
+      }
+      
+      .pattern-hit {
+        min-width: 60px;
+      }
+      
+      .location-tracker {
+        min-height: 180px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .location-tracker {
+        min-height: 160px;
+        padding: 12px;
+      }
+      
+      .pattern-sequence {
+        min-height: 40px;
+      }
+      
+      .pattern-miss, .pattern-hit {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+        min-width: 40px;
+      }
+      
+      .pattern-hit {
+        min-width: 55px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Blue Roulette Tracker Pro</h1>
+      <div class="tagline">Track spins, patterns, and individual number misses</div>
+    </header>
+    
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color legend-red"></div>
+        <span>Red</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-black"></div>
+        <span>Black</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color legend-green"></div>
+        <span>Green</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #FFD700;"></div>
+        <span>Gold (20+ misses in set)</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+    
+    <!-- Pattern Stats Section -->
+    <div class="pattern-stats">
+      <div class="pattern-stat-box">
+        <h3>Track 4</h3>
+        Misses: <span id="miss4" class="miss-count">0</span><br>
+        Hits: <span id="hit4">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 6</h3>
+        Misses: <span id="miss6" class="miss-count">0</span><br>
+        Hits: <span id="hit6">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 9</h3>
+        Misses: <span id="miss9" class="miss-count">0</span><br>
+        Hits: <span id="hit9">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 12</h3>
+        Misses: <span id="miss12" class="miss-count">0</span><br>
+        Hits: <span id="hit12">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 18</h3>
+        Misses: <span id="miss18" class="miss-count">0</span><br>
+        Hits: <span id="hit18">0</span>
+      </div>
+      <div class="pattern-stat-box">
+        <h3>Track 24</h3>
+        Misses: <span id="miss24" class="miss-count">0</span><br>
+        Hits: <span id="hit24">0</span>
+      </div>
+    </div>
+
+    <!-- Combined Scrollable Container for Pattern Tracks and Number Sets -->
+    <div class="scrollable-container">
+      <!-- Pattern Tracks Container -->
+      <div class="pattern-tracks-container">
+        <!-- Track 4 Pattern Display Section -->
+        <div class="pattern-display">
+          <div class="pattern-title">Track 4 Pattern Sequence</div>
+          <div class="pattern-sequence" id="patternSequence4">
+            <span class="pattern-label">Track 4:</span>
+            <!-- Pattern items will be added here dynamically -->
+          </div>
+        </div>
+        
+        <!-- Track 6 Pattern Display Section -->
+        <div class="pattern-display">
+          <div class="pattern-title">Track 6 Pattern Sequence</div>
+          <div class="pattern-sequence" id="patternSequence6">
+            <span class="pattern-label">Track 6:</span>
+            <!-- Pattern items will be added here dynamically -->
+          </div>
+        </div>
+        
+        <!-- Track 9 Pattern Display Section -->
+        <div class="pattern-display">
+          <div class="pattern-title">Track 9 Pattern Sequence</div>
+          <div class="pattern-sequence" id="patternSequence9">
+            <span class="pattern-label">Track 9:</span>
+            <!-- Pattern items will be added here dynamically -->
+          </div>
+        </div>
+        
+        <!-- Track 12 Pattern Display Section -->
+        <div class="pattern-display">
+          <div class="pattern-title">Track 12 Pattern Sequence</div>
+          <div class="pattern-sequence" id="patternSequence12">
+            <span class="pattern-label">Track 12:</span>
+            <!-- Pattern items will be added here dynamically -->
+          </div>
+        </div>
+        
+        <!-- NEW: Track 18 Numbers Display -->
+        <div class="track18-numbers-display">
+          <div class="track18-numbers-title">Track 18 Numbers</div>
+          <div class="track18-numbers-container" id="track18Numbers">
+            <!-- 18 numbers from Track 18 will be displayed here -->
+          </div>
+        </div>
+        
+        <!-- Track 18 Pattern Display Section -->
+        <div class="pattern-display">
+          <div class="pattern-title">Track 18 Pattern Sequence</div>
+          <div class="pattern-sequence" id="patternSequence18">
+            <span class="pattern-label">Track 18:</span>
+            <!-- Pattern items will be added here dynamically -->
+          </div>
+        </div>
+        
+        <!-- NEW: Excluded Numbers for Track 18 Display -->
+        <div class="excluded-numbers-display">
+          <div class="excluded-numbers-title">Numbers Not in Track 18</div>
+          <div class="excluded-numbers-container" id="excludedNumbers18">
+            <!-- 20 numbers not in Track 18 will be displayed here -->
+          </div>
+        </div>
+        
+        <!-- NEW: Track 24 Numbers Display under Track 18 -->
+        <div class="track24-numbers-display">
+          <div class="track24-numbers-title">Track 24 Numbers</div>
+          <div class="track24-numbers-container" id="track24Numbers">
+            <!-- 24 numbers from Track 24 will be displayed here -->
+          </div>
+        </div>
+        
+        <!-- Track 24 Pattern Display Section -->
+        <div class="pattern-display">
+          <div class="pattern-title">Track 24 Pattern Sequence</div>
+          <div class="pattern-sequence" id="patternSequence24">
+            <span class="pattern-label">Track 24:</span>
+            <!-- Pattern items will be added here dynamically -->
+          </div>
+        </div>
+        
+        <!-- Excluded Numbers for Track 24 Display -->
+        <div class="excluded-numbers-display">
+          <div class="excluded-numbers-title">Numbers Not in Track 24</div>
+          <div class="excluded-numbers-container" id="excludedNumbers24">
+            <!-- 14 numbers not in Track 24 will be displayed here -->
+          </div>
+        </div>
+        
+        <!-- NEW: Ball Location Tracking Section - REMOVED VERTICAL SCROLL -->
+        <div class="ball-location-container">
+          <!-- Original 7-number tracking -->
+          <div class="location-tracker">
+            <div class="location-header">
+              <div class="location-title">Same Ball Location (7 numbers)</div>
+              <div id="sblMisses" class="misses-count misses-normal">0 misses</div>
+            </div>
+            <div id="sblNumbers" class="location-numbers">
+              <!-- Numbers will be populated by JavaScript -->
+            </div>
+            <div class="pattern-sequence-container">
+              <div class="pattern-sequence-title">Pattern Sequence</div>
+              <div id="sblPattern" class="pattern-sequence">
+                <!-- Pattern sequence will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="location-tracker">
+            <div class="location-header">
+              <div class="location-title">Opposite Ball Location (7 numbers)</div>
+              <div id="oblMisses" class="misses-count misses-normal">0 misses</div>
+            </div>
+            <div id="oblNumbers" class="location-numbers">
+              <!-- Numbers will be populated by JavaScript -->
+            </div>
+            <div class="pattern-sequence-container">
+              <div class="pattern-sequence-title">Pattern Sequence</div>
+              <div id="oblPattern" class="pattern-sequence">
+                <!-- Pattern sequence will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <div class="location-tracker">
+            <div class="location-header">
+              <div class="location-title">All Locations 14 numbers</div>
+              <div id="cblMisses" class="misses-count misses-normal">0 misses</div>
+            </div>
+            <div id="cblNumbers" class="location-numbers">
+              <!-- Numbers will be populated by JavaScript -->
+            </div>
+            <div class="pattern-sequence-container">
+              <div class="pattern-sequence-title">Pattern Sequence</div>
+              <div id="cblPattern" class="pattern-sequence">
+                <!-- Pattern sequence will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- NEW: 9-number Ball Location Tracking -->
+          <div class="location-tracker">
+            <div class="location-header">
+              <div class="location-title">Same Ball Location (9 numbers)</div>
+              <div id="sbl9Misses" class="misses-count misses-normal">0 misses</div>
+            </div>
+            <div id="sbl9Numbers" class="location-numbers">
+              <!-- 9 numbers will be populated by JavaScript -->
+            </div>
+            <div class="pattern-sequence-container">
+              <div class="pattern-sequence-title">Pattern Sequence</div>
+              <div id="sbl9Pattern" class="pattern-sequence">
+                <!-- Pattern sequence will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <div class="location-tracker">
+            <div class="location-header">
+              <div class="location-title">Opposite Ball Location (9 numbers)</div>
+              <div id="obl9Misses" class="misses-count misses-normal">0 misses</div>
+            </div>
+            <div id="obl9Numbers" class="location-numbers">
+              <!-- 9 numbers will be populated by JavaScript -->
+            </div>
+            <div class="pattern-sequence-container">
+              <div class="pattern-sequence-title">Pattern Sequence</div>
+              <div id="obl9Pattern" class="pattern-sequence">
+                <!-- Pattern sequence will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <div class="location-tracker">
+            <div class="location-header">
+              <div class="location-title">All Locations 18 numbers</div>
+              <div id="cbl18Misses" class="misses-count misses-normal">0 misses</div>
+            </div>
+            <div id="cbl18Numbers" class="location-numbers">
+              <!-- 18 numbers will be populated by JavaScript -->
+            </div>
+            <div class="pattern-sequence-container">
+              <div class="pattern-sequence-title">Pattern Sequence</div>
+              <div id="cbl18Pattern" class="pattern-sequence">
+                <!-- Pattern sequence will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- NEW: Cold Numbers Display -->
+        <div class="cold-numbers-display">
+          <div class="cold-numbers-title">Cold Numbers (38+ Misses)</div>
+          <div class="cold-numbers-container" id="coldNumbers">
+            <!-- Cold numbers with 38+ misses will be displayed here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Number Sets -->
+      <div class="number-sets">
+        <!-- Top 19 Numbers -->
+        <div class="number-set">
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display red">3</div>
+              <div class="miss-count"><span id="top-3">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">13</div>
+              <div class="miss-count"><span id="top-13">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">23</div>
+              <div class="miss-count"><span id="top-23">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">33</div>
+              <div class="miss-count"><span id="top-33">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">4</div>
+              <div class="miss-count"><span id="top-4">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">14</div>
+              <div class="miss-count"><span id="top-14">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">24</div>
+              <div class="miss-count"><span id="top-24">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">34</div>
+              <div class="miss-count"><span id="top-34">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">5</div>
+              <div class="miss-count"><span id="top-5">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">15</div>
+              <div class="miss-count"><span id="top-15">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">25</div>
+              <div class="miss-count"><span id="top-25">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">35</div>
+              <div class="miss-count"><span id="top-35">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">6</div>
+              <div class="miss-count"><span id="top-6">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">16</div>
+              <div class="miss-count"><span id="top-16">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">26</div>
+              <div class="miss-count"><span id="top-26">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">36</div>
+              <div class="miss-count"><span id="top-36">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">7</div>
+              <div class="miss-count"><span id="top-7">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">17</div>
+              <div class="miss-count"><span id="top-17">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">27</div>
+              <div class="miss-count"><span id="top-27">0</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bottom 19 Numbers -->
+        <div class="number-set">
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display green">0</div>
+              <div class="miss-count"><span id="bottom-0">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display green">00</div>
+              <div class="miss-count"><span id="bottom-00">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">10</div>
+              <div class="miss-count"><span id="bottom-10">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">20</div>
+              <div class="miss-count"><span id="bottom-20">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">30</div>
+              <div class="miss-count"><span id="bottom-30">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">1</div>
+              <div class="miss-count"><span id="bottom-1">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">11</div>
+              <div class="miss-count"><span id="bottom-11">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">21</div>
+              <div class="miss-count"><span id="bottom-21">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">31</div>
+              <div class="miss-count"><span id="bottom-31">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">2</div>
+              <div class="miss-count"><span id="bottom-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">12</div>
+              <div class="miss-count"><span id="bottom-12">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">22</div>
+              <div class="miss-count"><span id="bottom-22">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">32</div>
+              <div class="miss-count"><span id="bottom-32">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">8</div>
+              <div class="miss-count"><span id="bottom-8">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">18</div>
+              <div class="miss-count"><span id="bottom-18">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">28</div>
+              <div class="miss-count"><span id="bottom-28">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">9</div>
+              <div class="miss-count"><span id="bottom-9">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">19</div>
+              <div class="miss-count"><span id="bottom-19">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">29</div>
+              <div class="miss-count"><span id="bottom-29">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New 20 Numbers Set -->
+        <div class="number-set">
+          <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">20 Numbers Set</div>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display black">13</div>
+              <div class="miss-count"><span id="set20-13">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">18</div>
+              <div class="miss-count"><span id="set20-18">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">8</div>
+              <div class="miss-count"><span id="set20-8">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">19</div>
+              <div class="miss-count"><span id="set20-19">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">26</div>
+              <div class="miss-count"><span id="set20-26">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">34</div>
+              <div class="miss-count"><span id="set20-34">0</span></div>
+              </div>
+              
+              <div class="spacer"></div>
+              
+              <div class="number-column">
+              <div class="number-display green">00</div>
+              <div class="miss-count"><span id="set20-00">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">17</div>
+              <div class="miss-count"><span id="set20-17">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">30</div>
+              <div class="miss-count"><span id="set20-30">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">31</div>
+              <div class="miss-count"><span id="set20-31">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">23</div>
+              <div class="miss-count"><span id="set20-23">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">28</div>
+              <div class="miss-count"><span id="set20-28">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">10</div>
+              <div class="miss-count"><span id="set20-10">0</span></div>
+              </div>
+              
+              <div class="spacer"></div>
+              
+              <div class="number-column">
+              <div class="number-display red">7</div>
+              <div class="miss-count"><span id="set20-7">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">9</div>
+              <div class="miss-count"><span id="set20-9">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">16</div>
+              <div class="miss-count"><span id="set20-16">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">20</div>
+              <div class="miss-count"><span id="set20-20">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display green">0</div>
+              <div class="miss-count"><span id="set20-0">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">1</div>
+              <div class="miss-count"><span id="set20-1">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">4</div>
+              <div class="miss-count"><span id="set20-4">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New 18 Numbers Set -->
+        <div class="number-set">
+          <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">18 Numbers Set</div>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display red">21</div>
+              <div class="miss-count"><span id="set18-21">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">33</div>
+              <div class="miss-count"><span id="set18-33">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">36</div>
+              <div class="miss-count"><span id="set18-36">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">15</div>
+              <div class="miss-count"><span id="set18-15">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">24</div>
+              <div class="miss-count"><span id="set18-24">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">32</div>
+              <div class="miss-count"><span id="set18-32">0</span></div>
+              </div>
+              
+              <div class="spacer"></div>
+              
+              <div class="number-column">
+              <div class="number-display red">5</div>
+              <div class="miss-count"><span id="set18-5">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">6</div>
+              <div class="miss-count"><span id="set18-6">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">11</div>
+              <div class="miss-count"><span id="set18-11">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">3</div>
+              <div class="miss-count"><span id="set18-3">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">22</div>
+              <div class="miss-count"><span id="set18-22">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">29</div>
+              <div class="miss-count"><span id="set18-29">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">35</div>
+              <div class="miss-count"><span id="set18-35">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">2</div>
+              <div class="miss-count"><span id="set18-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">27</div>
+              <div class="miss-count"><span id="set18-27">0</span></div>
+              </div>
+              
+              <div class="spacer"></div>
+              
+              <div class="number-column">
+              <div class="number-display red">25</div>
+              <div class="miss-count"><span id="set18-25">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">12</div>
+              <div class="miss-count"><span id="set18-12">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">14</div>
+              <div class="miss-count"><span id="set18-14">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New 15 Numbers Set A -->
+        <div class="number-set">
+          <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">15 Numbers Set A</div>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display black">8</div>
+              <div class="miss-count"><span id="set15A-8">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">19</div>
+              <div class="miss-count"><span id="set15A-19">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">26</div>
+              <div class="miss-count"><span id="set15A-26">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">34</div>
+              <div class="miss-count"><span id="set15A-34">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display green">00</div>
+              <div class="miss-count"><span id="set15A-00">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">17</div>
+              <div class="miss-count"><span id="set15A-17">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">30</div>
+              <div class="miss-count"><span id="set15A-30">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">31</div>
+              <div class="miss-count"><span id="set15A-31">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">23</div>
+              <div class="miss-count"><span id="set15A-23">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">28</div>
+              <div class="miss-count"><span id="set15A-28">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">10</div>
+              <div class="miss-count"><span id="set15A-10">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">7</div>
+              <div class="miss-count"><span id="set15A-7">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">9</div>
+              <div class="miss-count"><span id="set15A-9">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">16</div>
+              <div class="miss-count"><span id="set15A-16">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">20</div>
+              <div class="miss-count"><span id="set15A-20">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New 15 Numbers Set B -->
+        <div class="number-set">
+          <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">15 Numbers Set B</div>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display red">21</div>
+              <div class="miss-count"><span id="set15B-21">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">33</div>
+              <div class="miss-count"><span id="set15B-33">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">36</div>
+              <div class="miss-count"><span id="set15B-36">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">15</div>
+              <div class="miss-count"><span id="set15B-15">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">24</div>
+              <div class="miss-count"><span id="set15B-24">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display red">32</div>
+              <div class="miss-count"><span id="set15B-32">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">5</div>
+              <div class="miss-count"><span id="set15B-5">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">6</div>
+              <div class="miss-count"><span id="set15B-6">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">11</div>
+              <div class="miss-count"><span id="set15B-11">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">3</div>
+              <div class="miss-count"><span id="set15B-3">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">22</div>
+              <div class="miss-count"><span id="set15B-22">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">29</div>
+              <div class="miss-count"><span id="set15B-29">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">35</div>
+              <div class="miss-count"><span id="set15B-35">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">2</div>
+              <div class="miss-count"><span id="set15B-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">27</div>
+              <div class="miss-count"><span id="set15B-27">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New 15 Numbers Set C -->
+        <div class="number-set">
+          <div style="text-align: center; margin-bottom: 10px; color: #ff8a65; font-weight: bold;">15 Numbers Set C</div>
+          <div class="horizontal-layout">
+            <div class="number-column">
+              <div class="number-display black">15</div>
+              <div class="miss-count"><span id="set15C-15">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">24</div>
+              <div class="miss-count"><span id="set15C-24">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">32</div>
+              <div class="miss-count"><span id="set15C-32">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">5</div>
+              <div class="miss-count"><span id="set15C-5">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">6</div>
+              <div class="miss-count"><span id="set15C-6">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">11</div>
+              <div class="miss-count"><span id="set15C-11">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">3</div>
+              <div class="miss-count"><span id="set15C-3">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">22</div>
+              <div class="miss-count"><span id="set15C-22">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">29</div>
+              <div class="miss-count"><span id="set15C-29">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display black">35</div>
+              <div class="miss-count"><span id="set15C-35">0</span></div>
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <div class="number-column">
+              <div class="number-display black">2</div>
+              <div class="miss-count"><span id="set15C-2">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">27</div>
+              <div class="miss-count"><span id="set15C-27">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">25</div>
+              <div class="miss-count"><span id="set15C-25">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">12</div>
+              <div class="miss-count"><span id="set15C-12">0</span></div>
+            </div>
+            <div class="number-column">
+              <div class="number-display red">14</div>
+              <div class="miss-count"><span id="set15C-14">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- End of combined scrollable container -->
+  </div>
+
+  <div class="numpad">
+    <button class="backspace" onclick="backspace()">?</button>
+    <button onclick="numpadClick('1')">1</button>
+    <button onclick="numpadClick('2')">2</button>
+    <button onclick="numpadClick('3')">3</button>
+    <button onclick="numpadClick('4')">4</button>
+    <button onclick="numpadClick('5')">5</button>
+    <button onclick="numpadClick('6')">6</button>
+    <button onclick="numpadClick('7')">7</button>
+    <button onclick="numpadClick('8')">8</button>
+    <button onclick="numpadClick('9')">9</button>
+    <button onclick="numpadClick('0')">0</button>
+    <button class="enter" onclick="addNumber()">Enter</button>
+  </div>
+
+  <script>
+    // Define color mappings
+    const colors = {
+      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+      green: ["0", "00"]
+    };
+
+    // Define number sets with the new numbers
+    const topNumbers = ['3','13','23','33','4','14','24','34','5','15','25','35','6','16','26','36','7','17','27'];
+    const bottomNumbers = ['0','00','10','20','30','1','11','21','31','2','12','22','32','8','18','28','9','19','29'];
+
+    // Define the new number sets
+    const set20Numbers = ['13','18','8','19','26','34','00','17','30','31','23','28','10','7','9','16','20','0','1','4'];
+    const set18Numbers = ['21','33','36','15','24','32','5','6','11','3','22','29','35','2','27','25','12','14'];
+
+    // Define the new 15 number sets
+    const set15ANumbers = ['8','19','26','34','00','17','30','31','23','28','10','7','9','16','20'];
+    const set15BNumbers = ['21','33','36','15','24','32','5','6','11','3','22','29','35','2','27'];
+    const set15CNumbers = ['15','24','32','5','6','11','3','22','29','35','2','27','25','12','14'];
+
+    // Define number sets for the gold color feature
+    const numberSets = {
+      set0: ['0', '00', '10', '20', '30'],
+      set1: ['1', '11', '21', '31'],
+      set2: ['2', '12', '22', '32'],
+      set3: ['3', '13', '23', '33'],
+      set4: ['4', '14', '24', '34'],
+      set5: ['5', '15', '25', '35'],
+      set6: ['6', '16', '26', '36'],
+      set7: ['7', '17', '27'],
+      set8: ['8', '18', '28'],
+      set9: ['9', '19', '29']
+    };
+
+    // Define the special 12 numbers set
+    const special12Numbers = ['00', '7', '8', '9', '16', '17', '19', '20', '26', '30', '31', '34'];
+
+    // NEW: Define the special number sets for alerts
+    const specialAlertSets = {
+      // Alert 1: 18 numbers with 15+ misses
+      alert1: {
+        numbers: ['5','6','11','3','22','29','35','2','27','25','12','14','21','33','36','15','24','32'],
+        threshold: 15,
+        message: "18 Fast Numbers: All 18 numbers have 15+ misses!"
+      },
+      // Alert 2:  9 numbers with 35+ misses
+      alert2: {
+        numbers: ['5','6','11','3','22','29','35','33','36'],
+        threshold: 35,
+        message: "9 Numbers: 5 6 11 3 22 29 35 33 36 : All 9 numbers have 35+ misses!"
+      },
+      // Alert 3: 5 6 11 3 22 29 35 2 27 :9 numbers with 35+ misses
+      alert3: {
+        numbers: ['5','6','11','3','22','29','35','2','27'],
+        threshold: 35,
+        message: "9 Numbers: 5 6 11 3 22 29 35 2 27 : All 9 numbers have 35+ misses!"
+      },
+      // Alert 4: 9 numbers with 35+ misses
+      alert4: {
+        numbers: ['00','17','30','31','12','25','14','23','28'],
+        threshold: 35,
+        message: "9 Numbers: 00 17 30 31 12 25 14 23 28 : All 9 numbers have 35+ misses!"
+      },
+      // Alert 5: 9 numbers with 35+ misses
+      alert5: {
+        numbers: ['00','17','30','31','12','25','2','10','27'],
+        threshold: 35,
+        message: "9 Numbers: 00 17 30 31 12 25 2 10 27 :All 9 numbers have 35+ misses!"
+      },
+      // Alert 6: 12 numbers with 30+ misses
+      alert6: {
+        numbers: ['00','17','30','31','12','25','14','23','28','2','10','27'],
+        threshold: 30,
+        message: "12 Numbers: 00 17 30 31 12 25 14 23 28 2 10 27 :All 12 numbers have 30+ misses!"
+      },
+      // Alert 7: 16 numbers with 20+ misses
+      alert7: {
+        numbers: ['8','19','26','34','21','33','36','14','23','28','00','17','30','31','12','25'],
+        threshold: 20,
+        message: "16 Numbers: 8 19 26 34 21 33 36 14 23 28 00 17 30 31 12 25 : All 16 numbers have 20+ misses!"
+      }
+    };
+
+    // NEW: Define wheel layout for ball location tracking
+    const wheelLayout = [
+      "0", "28", "9", "26", "30", "11", "7", "20", "32", "17", 
+      "5", "22", "34", "15", "3", "24", "36", "13", "1", "00", 
+      "27", "10", "25", "29", "12", "8", "19", "31", "18", "6", 
+      "21", "33", "16", "4", "23", "35", "14", "2"
+    ];
+
+    // Initialize data from localStorage or defaults
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({
+      // Top numbers
+      top: Object.fromEntries(topNumbers.map(num => [num, 0])),
+      // Bottom numbers
+      bottom: Object.fromEntries(bottomNumbers.map(num => [num, 0])),
+      // New number sets
+      set20: Object.fromEntries(set20Numbers.map(num => [num, 0])),
+      set18: Object.fromEntries(set18Numbers.map(num => [num, 0])),
+      // New 15 number sets
+      set15A: Object.fromEntries(set15ANumbers.map(num => [num, 0])),
+      set15B: Object.fromEntries(set15BNumbers.map(num => [num, 0])),
+      set15C: Object.fromEntries(set15CNumbers.map(num => [num, 0]))
+    }));
+
+    // Pattern tracking variables
+    let patternStats = JSON.parse(localStorage.getItem("patternStats") || JSON.stringify({
+      4: { m:0, h:0 },
+      6: { m:0, h:0 },
+      9: { m:0, h:0 },
+      12: { m:0, h:0 },
+      18: { m:0, h:0 },
+      24: { m:0, h:0 }
+    }));
+    
+    let patternHistory = JSON.parse(localStorage.getItem("patternHistory") || JSON.stringify({
+      track4: [],
+      track6: [],
+      track9: [],
+      track12: [],
+      track18: [],
+      track24: []
+    }));
+
+    // NEW: Ball Location Tracking Variables
+    let sblMisses = parseInt(localStorage.getItem("sblMisses") || "0");
+    let oblMisses = parseInt(localStorage.getItem("oblMisses") || "0");
+    let cblMisses = parseInt(localStorage.getItem("cblMisses") || "0");
+    
+    // Pattern sequences for ball locations
+    let sblPattern = JSON.parse(localStorage.getItem("sblPattern") || "[]");
+    let oblPattern = JSON.parse(localStorage.getItem("oblPattern") || "[]");
+    let cblPattern = JSON.parse(localStorage.getItem("cblPattern") || "[]");
+    
+    // Always calculate current ball locations based on the most recent spin
+    let currentSBL = [];
+    let currentOBL = [];
+    let currentCBL = [];
+    
+    // Store previous ball locations to properly track misses
+    let previousSBL = JSON.parse(localStorage.getItem("previousSBL") || "[]");
+    let previousOBL = JSON.parse(localStorage.getItem("previousOBL") || "[]");
+    let previousCBL = JSON.parse(localStorage.getItem("previousCBL") || "[]");
+    
+    // NEW: 9-number Ball Location Tracking Variables
+    let sbl9Misses = parseInt(localStorage.getItem("sbl9Misses") || "0");
+    let obl9Misses = parseInt(localStorage.getItem("obl9Misses") || "0");
+    let cbl18Misses = parseInt(localStorage.getItem("cbl18Misses") || "0");
+    
+    // Pattern sequences for 9-number ball locations
+    let sbl9Pattern = JSON.parse(localStorage.getItem("sbl9Pattern") || "[]");
+    let obl9Pattern = JSON.parse(localStorage.getItem("obl9Pattern") || "[]");
+    let cbl18Pattern = JSON.parse(localStorage.getItem("cbl18Pattern") || "[]");
+    
+    // Store previous 9-number ball locations
+    let previousSBL9 = JSON.parse(localStorage.getItem("previousSBL9") || "[]");
+    let previousOBL9 = JSON.parse(localStorage.getItem("previousOBL9") || "[]");
+    let previousCBL18 = JSON.parse(localStorage.getItem("previousCBL18") || "[]");
+    
+    // Initialize current ball locations if we have history
+    if (history.length > 0) {
+      const lastSpin = history[history.length - 1];
+      const ballLocations = getBallLocations(lastSpin);
+      currentSBL = ballLocations.sbl;
+      currentOBL = ballLocations.obl;
+      currentCBL = ballLocations.cbl;
+      currentSBL9 = ballLocations.sbl9;
+      currentOBL9 = ballLocations.obl9;
+      currentCBL18 = ballLocations.cbl18;
+    }
+
+    // If stats is a string (old format), parse it
+    if (typeof stats === 'string') {
+      stats = JSON.parse(stats);
+    }
+    
+    if (typeof patternStats === 'string') {
+      patternStats = JSON.parse(patternStats);
+    }
+
+    // Initialize stats if they don't exist
+    if (!stats.top) {
+      stats.top = Object.fromEntries(topNumbers.map(num => [num, 0]));
+    }
+    if (!stats.bottom) {
+      stats.bottom = Object.fromEntries(bottomNumbers.map(num => [num, 0]));
+    }
+    // Initialize new sets if they don't exist
+    if (!stats.set20) {
+      stats.set20 = Object.fromEntries(set20Numbers.map(num => [num, 0]));
+    }
+    if (!stats.set18) {
+      stats.set18 = Object.fromEntries(set18Numbers.map(num => [num, 0]));
+    }
+    // Initialize new 15 number sets if they don't exist
+    if (!stats.set15A) {
+      stats.set15A = Object.fromEntries(set15ANumbers.map(num => [num, 0]));
+    }
+    if (!stats.set15B) {
+      stats.set15B = Object.fromEntries(set15BNumbers.map(num => [num, 0]));
+    }
+    if (!stats.set15C) {
+      stats.set15C = Object.fromEntries(set15CNumbers.map(num => [num, 0]));
+    }
+    
+    // Initialize pattern stats if they don't exist
+    if (!patternStats[4]) {
+      patternStats[4] = { m:0, h:0 };
+    }
+    if (!patternStats[6]) {
+      patternStats[6] = { m:0, h:0 };
+    }
+    if (!patternStats[9]) {
+      patternStats[9] = { m:0, h:0 };
+    }
+    if (!patternStats[12]) {
+      patternStats[12] = { m:0, h:0 };
+    }
+    if (!patternStats[18]) {
+      patternStats[18] = { m:0, h:0 };
+    }
+    if (!patternStats[24]) {
+      patternStats[24] = { m:0, h:0 };
+    }
+
+    // NEW: Get ball locations based on wheel layout with 9 numbers
+    function getBallLocations(number) {
+      const index = wheelLayout.indexOf(number);
+      if (index === -1) return { sbl: [], obl: [], cbl: [], sbl9: [], obl9: [], cbl18: [] };
+      
+      // Same ball location - get 4 numbers on each side (9 total)
+      let sbl9 = [];
+      for (let i = index - 4; i <= index + 4; i++) {
+        let adjustedIndex = i;
+        if (adjustedIndex < 0) adjustedIndex += wheelLayout.length;
+        if (adjustedIndex >= wheelLayout.length) adjustedIndex -= wheelLayout.length;
+        sbl9.push(wheelLayout[adjustedIndex]);
+      }
+      
+      // Opposite ball location - get 4 numbers on each side of opposite (9 total)
+      const oppositeIndex = (index + 19) % wheelLayout.length;
+      
+      let obl9 = [];
+      for (let i = oppositeIndex - 4; i <= oppositeIndex + 4; i++) {
+        let adjustedIndex = i;
+        if (adjustedIndex < 0) adjustedIndex += wheelLayout.length;
+        if (adjustedIndex >= wheelLayout.length) adjustedIndex -= wheelLayout.length;
+        obl9.push(wheelLayout[adjustedIndex]);
+      }
+      
+      // Combined ball locations - all 18 numbers
+      const cbl18 = [...sbl9, ...obl9];
+      
+      // Keep original 7-number versions for backward compatibility
+      let sbl = [];
+      for (let i = index - 3; i <= index + 3; i++) {
+        let adjustedIndex = i;
+        if (adjustedIndex < 0) adjustedIndex += wheelLayout.length;
+        if (adjustedIndex >= wheelLayout.length) adjustedIndex -= wheelLayout.length;
+        sbl.push(wheelLayout[adjustedIndex]);
+      }
+      
+      let obl = [];
+      for (let i = oppositeIndex - 3; i <= oppositeIndex + 3; i++) {
+        let adjustedIndex = i;
+        if (adjustedIndex < 0) adjustedIndex += wheelLayout.length;
+        if (adjustedIndex >= wheelLayout.length) adjustedIndex -= wheelLayout.length;
+        obl.push(wheelLayout[adjustedIndex]);
+      }
+      
+      const cbl = [...sbl, ...obl];
+      
+      return { sbl, obl, cbl, sbl9, obl9, cbl18 };
+    }
+
+    // Get color for a number
+    function getColor(n) {
+      if (colors.green.includes(n)) return "green";
+      if (colors.red.includes(Number(n))) return "red";
+      if (colors.black.includes(Number(n))) return "black";
+      return "";
+    }
+
+    // Function to check if all numbers in a set have miss counts >= 20
+    function checkSetForGold(setNumbers) {
+      return setNumbers.every(num => {
+        // Check if number exists in top or bottom stats and has miss count >= 20
+        if (stats.top.hasOwnProperty(num)) {
+          return stats.top[num] >= 20;
+        } else if (stats.bottom.hasOwnProperty(num)) {
+          return stats.bottom[num] >= 20;
+        }
+        return false;
+      });
+    }
+
+    // Function to check if all numbers in a 15-number set have reached 20 misses
+    function check15NumberSet(setName, setNumbers) {
+      const allNumbersHave20Plus = setNumbers.every(num => {
+        if (stats.set15A.hasOwnProperty(num)) {
+          return stats.set15A[num] >= 20;
+        } else if (stats.set15B.hasOwnProperty(num)) {
+          return stats.set15B[num] >= 20;
+        } else if (stats.set15C.hasOwnProperty(num)) {
+          return stats.set15C[num] >= 20;
+        }
+        return false;
+      });
+      
+      if (allNumbersHave20Plus) {
+        alert(`${setName}: All 15 numbers have reached 20+ misses!`);
+      }
+    }
+
+    // Function to check if all 12 special numbers have reached 20 misses
+    function checkSpecial12Numbers() {
+      const allSpecialNumbersHave20Plus = special12Numbers.every(num => {
+        if (stats.top.hasOwnProperty(num)) {
+          return stats.top[num] >= 20;
+        } else if (stats.bottom.hasOwnProperty(num)) {
+          return stats.bottom[num] >= 20;
+        }
+        return false;
+      });
+      
+      if (allSpecialNumbersHave20Plus) {
+        alert("Special 12 Numbers: All 12 numbers (00, 17, 30, 31, 7, 9, 16, 20, 8 , 19 , 26 , 34) have reached 20+ misses!");
+      }
+    }
+
+    // NEW: Function to check for 60+ misses in specific number sets
+    function check60MissesForSets() {
+      // Check set1: 1, 11, 21, 31
+      if (stats.bottom['1'] >= 60 && stats.bottom['11'] >= 60 && stats.bottom['21'] >= 60 && stats.bottom['31'] >= 60) {
+        alert("All numbers in set (1, 11, 21, 31) have reached 60+ misses!");
+      }
+      
+      // Check set2: 2, 12, 22, 32
+      if (stats.bottom['2'] >= 60 && stats.bottom['12'] >= 60 && stats.bottom['22'] >= 60 && stats.bottom['32'] >= 60) {
+        alert("All numbers in set (2, 12, 22, 32) have reached 60+ misses!");
+      }
+      
+      // Check set3: 3, 13, 23, 33
+      if (stats.top['3'] >= 60 && stats.top['13'] >= 60 && stats.top['23'] >= 60 && stats.top['33'] >= 60) {
+        alert("All numbers in set (3, 13, 23, 33) have reached 60+ misses!");
+      }
+      
+      // Check set4: 4, 14, 24, 34
+      if (stats.top['4'] >= 60 && stats.top['14'] >= 60 && stats.top['24'] >= 60 && stats.top['34'] >= 60) {
+        alert("All numbers in set (4, 14, 24, 34) have reached 60+ misses!");
+      }
+      
+      // Check set5: 5, 15, 25, 35
+      if (stats.top['5'] >= 60 && stats.top['15'] >= 60 && stats.top['25'] >= 60 && stats.top['35'] >= 60) {
+        alert("All numbers in set (5, 15, 25, 35) have reached 60+ misses!");
+      }
+      
+      // Check set6: 6, 16, 26, 36
+      if (stats.top['6'] >= 60 && stats.top['16'] >= 60 && stats.top['26'] >= 60 && stats.top['36'] >= 60) {
+        alert("All numbers in set (6, 16, 26, 36) have reached 60+ misses!");
+      }
+    }
+
+    // NEW: Function to check for cold numbers with specific miss thresholds
+    function checkColdNumberThresholds() {
+      const coldNumbers80Plus = getColdNumbersWithThreshold(80);
+      const coldNumbers90Plus = getColdNumbersWithThreshold(90);
+      const coldNumbers100Plus = getColdNumbersWithThreshold(100);
+      
+      // Check for 12 or more cold numbers with 80+ misses
+      if (coldNumbers80Plus.length >= 12) {
+        alert(`There are ${coldNumbers80Plus.length} cold numbers with 80+ misses!`);
+      }
+      
+      // Check for 9 or more cold numbers with 90+ misses
+      if (coldNumbers90Plus.length >= 9) {
+        alert(`There are ${coldNumbers90Plus.length} cold numbers with 90+ misses!`);
+      }
+      
+      // Check for 6 or more cold numbers with 100+ misses
+      if (coldNumbers100Plus.length >= 6) {
+        alert(`There are ${coldNumbers100Plus.length} cold numbers with 100+ misses!`);
+      }
+    }
+
+    // NEW: Function to get cold numbers with specific threshold
+    function getColdNumbersWithThreshold(minMisses) {
+      const allNumbers = ['0','00','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'];
+      
+      // Create an array of objects with number and miss count
+      const numbersWithMisses = allNumbers.map(num => {
+        let missCount = 0;
+        
+        // Check if number is in top numbers
+        if (stats.top.hasOwnProperty(num)) {
+          missCount = stats.top[num];
+        }
+        // Check if number is in bottom numbers
+        else if (stats.bottom.hasOwnProperty(num)) {
+          missCount = stats.bottom[num];
+        }
+        
+        return {
+          number: num,
+          misses: missCount
+        };
+      });
+      
+      // Filter numbers with specified minimum misses and sort by misses (descending)
+      const coldNumbers = numbersWithMisses
+        .filter(item => item.misses >= minMisses)
+        .sort((a, b) => b.misses - a.misses);
+      
+      return coldNumbers;
+    }
+
+    // NEW: Function to check for 18+ cold numbers with 38+ misses
+    function check18ColdNumbers38Plus() {
+      const coldNumbers38Plus = getColdNumbersWithThreshold(38);
+      if (coldNumbers38Plus.length >= 18) {
+        alert(`There are ${coldNumbers38Plus.length} cold numbers with 38+ misses!`);
+      }
+    }
+
+    // NEW: Function to check for 15+ cold numbers with 50+ misses
+    function check15ColdNumbers50Plus() {
+      const coldNumbers50Plus = getColdNumbersWithThreshold(50);
+      if (coldNumbers50Plus.length >= 15) {
+        alert(`There are ${coldNumbers50Plus.length} cold numbers with 50+ misses!`);
+      }
+    }
+
+    // NEW: Function to check for 10+ consecutive hits in Track 18, Track 24
+    function checkConsecutiveHitsAlert() {
+      // Check Track 18 for 10+ consecutive hits
+      let consecutiveHits18 = 0;
+      for (let i = patternHistory.track18.length - 1; i >= 0; i--) {
+        if (patternHistory.track18[i].type === 'hit') {
+          consecutiveHits18++;
+        } else {
+          break;
+        }
+      }
+      
+      if (consecutiveHits18 >= 10) {
+        alert(`Track 18 has ${consecutiveHits18} consecutive hits!`);
+      }
+      
+      // Check Track 24 for 10+ consecutive hits
+      let consecutiveHits24 = 0;
+      for (let i = patternHistory.track24.length - 1; i >= 0; i--) {
+        if (patternHistory.track24[i].type === 'hit') {
+          consecutiveHits24++;
+        } else {
+          break;
+        }
+      }
+      
+      if (consecutiveHits24 >= 10) {
+        alert(`Track 24 has ${consecutiveHits24} consecutive hits!`);
+      }
+    }
+
+    // NEW: Function to check special alert sets
+    function checkSpecialAlertSets() {
+      for (const [key, alertSet] of Object.entries(specialAlertSets)) {
+        const allNumbersMeetThreshold = alertSet.numbers.every(num => {
+          // Check if number exists in top or bottom stats and has miss count >= threshold
+          if (stats.top.hasOwnProperty(num)) {
+            return stats.top[num] >= alertSet.threshold;
+          } else if (stats.bottom.hasOwnProperty(num)) {
+            return stats.bottom[num] >= alertSet.threshold;
+          }
+          return false;
+        });
+        
+        if (allNumbersMeetThreshold) {
+          alert(alertSet.message);
+        }
+      }
+    }
+
+    // NEW: Function to check for alerts when ball location misses reach thresholds
+    function checkBallLocationAlerts() {
+      if (sblMisses >= 25 || oblMisses >= 25 || cblMisses >= 10 || 
+          sbl9Misses >= 25 || obl9Misses >= 25 || cbl18Misses >= 10) {
+        showBallLocationAlert();
+      }
+    }
+
+    // NEW: Show alert when ball location misses are high
+    function showBallLocationAlert() {
+      // Remove any existing alert
+      const existingAlert = document.querySelector('.alert-overlay');
+      if (existingAlert) existingAlert.remove();
+      
+      const alertOverlay = document.createElement('div');
+      alertOverlay.className = 'alert-overlay';
+      
+      const alertBox = document.createElement('div');
+      alertBox.className = 'alert-box';
+      
+      let message = '';
+      const alerts = [];
+      
+      if (sblMisses >= 25) alerts.push('Same Ball Location (7) has 25+ misses');
+      if (oblMisses >= 25) alerts.push('Opposite Ball Location (7) has 25+ misses');
+      if (cblMisses >= 10) alerts.push('Combined Ball Locations (14) has 10+ misses');
+      if (sbl9Misses >= 25) alerts.push('Same Ball Location (9) has 25+ misses');
+      if (obl9Misses >= 25) alerts.push('Opposite Ball Location (9) has 25+ misses');
+      if (cbl18Misses >= 10) alerts.push('Combined Ball Locations (18) has 10+ misses');
+      
+      message = alerts.join(', ');
+      
+      alertBox.innerHTML = `
+        <h3>Ball Location High Misses Alert!</h3>
+        <p>${message}</p>
+        <button onclick="this.closest('.alert-overlay').remove()">OK</button>
+      `;
+      
+      alertOverlay.appendChild(alertBox);
+      document.body.appendChild(alertOverlay);
+    }
+
+    // NEW: Get CSS class for ball location misses count
+    function getBallLocationMissesClass(misses) {
+      if (misses < 5) return "misses-normal";
+      if (misses < 10) return "misses-warning";
+      return "misses-critical";
+    }
+
+    // NEW: Update ball location pattern sequence
+    function updateBallLocationPatternSequence(patternArray, isHit) {
+      if (patternArray.length === 0) {
+        // First entry in pattern
+        patternArray.push({
+          type: isHit ? 'hit' : 'miss',
+          count: 1
+        });
+      } else {
+        const lastPattern = patternArray[patternArray.length - 1];
+        
+        if (lastPattern.type === (isHit ? 'hit' : 'miss')) {
+          // Same type, increment count
+          lastPattern.count++;
+        } else {
+          // Different type, add new entry
+          patternArray.push({
+            type: isHit ? 'hit' : 'miss',
+            count: 1
+          });
+        }
+      }
+    }
+
+    // NEW: Update ball location displays
+    function updateBallLocationDisplay() {
+      const sblNumbers = document.getElementById("sblNumbers");
+      const oblNumbers = document.getElementById("oblNumbers");
+      const cblNumbers = document.getElementById("cblNumbers");
+      const sbl9Numbers = document.getElementById("sbl9Numbers");
+      const obl9Numbers = document.getElementById("obl9Numbers");
+      const cbl18Numbers = document.getElementById("cbl18Numbers");
+      
+      sblNumbers.innerHTML = "";
+      oblNumbers.innerHTML = "";
+      cblNumbers.innerHTML = "";
+      sbl9Numbers.innerHTML = "";
+      obl9Numbers.innerHTML = "";
+      cbl18Numbers.innerHTML = "";
+      
+      // Update SBL numbers (7 numbers)
+      if (currentSBL.length > 0) {
+        currentSBL.forEach((num, index) => {
+          const numDiv = document.createElement("div");
+          numDiv.className = `location-number ${getColor(num)}`;
+          
+          // Highlight the middle number (entered number)
+          if (index === 3) {
+            numDiv.classList.add("location-middle");
+          }
+          
+          // Highlight if this number was the last spin
+          if (history.length > 0 && num === history[history.length - 1]) {
+            numDiv.classList.add("location-hit");
+          }
+          
+          numDiv.textContent = num;
+          sblNumbers.appendChild(numDiv);
+        });
+      }
+      
+      // Update OBL numbers (7 numbers)
+      if (currentOBL.length > 0) {
+        currentOBL.forEach((num, index) => {
+          const numDiv = document.createElement("div");
+          numDiv.className = `location-number ${getColor(num)}`;
+          
+          // Highlight the middle number (opposite of entered number)
+          if (index === 3) {
+            numDiv.classList.add("location-middle");
+          }
+          
+          // Highlight if this number was the last spin
+          if (history.length > 0 && num === history[history.length - 1]) {
+            numDiv.classList.add("location-hit");
+          }
+          
+          numDiv.textContent = num;
+          oblNumbers.appendChild(numDiv);
+        });
+      }
+      
+      // Update CBL numbers (14 numbers)
+      if (currentCBL.length > 0) {
+        currentCBL.forEach((num) => {
+          const numDiv = document.createElement("div");
+          numDiv.className = `location-number ${getColor(num)}`;
+          
+          // Highlight if this number was the last spin
+          if (history.length > 0 && num === history[history.length - 1]) {
+            numDiv.classList.add("location-hit");
+          }
+          
+          numDiv.textContent = num;
+          cblNumbers.appendChild(numDiv);
+        });
+      }
+      
+      // Update SBL9 numbers (9 numbers)
+      if (currentSBL9.length > 0) {
+        currentSBL9.forEach((num, index) => {
+          const numDiv = document.createElement("div");
+          numDiv.className = `location-number ${getColor(num)}`;
+          
+          // Highlight the middle number (entered number)
+          if (index === 4) {
+            numDiv.classList.add("location-middle");
+          }
+          
+          // Highlight if this number was the last spin
+          if (history.length > 0 && num === history[history.length - 1]) {
+            numDiv.classList.add("location-hit");
+          }
+          
+          numDiv.textContent = num;
+          sbl9Numbers.appendChild(numDiv);
+        });
+      }
+      
+      // Update OBL9 numbers (9 numbers)
+      if (currentOBL9.length > 0) {
+        currentOBL9.forEach((num, index) => {
+          const numDiv = document.createElement("div");
+          numDiv.className = `location-number ${getColor(num)}`;
+          
+          // Highlight the middle number (opposite of entered number)
+          if (index === 4) {
+            numDiv.classList.add("location-middle");
+          }
+          
+          // Highlight if this number was the last spin
+          if (history.length > 0 && num === history[history.length - 1]) {
+            numDiv.classList.add("location-hit");
+          }
+          
+          numDiv.textContent = num;
+          obl9Numbers.appendChild(numDiv);
+        });
+      }
+      
+      // Update CBL18 numbers (18 numbers)
+      if (currentCBL18.length > 0) {
+        currentCBL18.forEach((num) => {
+          const numDiv = document.createElement("div");
+          numDiv.className = `location-number ${getColor(num)}`;
+          
+          // Highlight if this number was the last spin
+          if (history.length > 0 && num === history[history.length - 1]) {
+            numDiv.classList.add("location-hit");
+          }
+          
+          numDiv.textContent = num;
+          cbl18Numbers.appendChild(numDiv);
+        });
+      }
+      
+      // Update misses counters
+      const sblMissesElement = document.getElementById("sblMisses");
+      const oblMissesElement = document.getElementById("oblMisses");
+      const cblMissesElement = document.getElementById("cblMisses");
+      const sbl9MissesElement = document.getElementById("sbl9Misses");
+      const obl9MissesElement = document.getElementById("obl9Misses");
+      const cbl18MissesElement = document.getElementById("cbl18Misses");
+      
+      sblMissesElement.textContent = `${sblMisses} misses`;
+      oblMissesElement.textContent = `${oblMisses} misses`;
+      cblMissesElement.textContent = `${cblMisses} misses`;
+      sbl9MissesElement.textContent = `${sbl9Misses} misses`;
+      obl9MissesElement.textContent = `${obl9Misses} misses`;
+      cbl18MissesElement.textContent = `${cbl18Misses} misses`;
+      
+      // Update styling based on misses count
+      sblMissesElement.className = "misses-count " + getBallLocationMissesClass(sblMisses);
+      oblMissesElement.className = "misses-count " + getBallLocationMissesClass(oblMisses);
+      cblMissesElement.className = "misses-count " + getBallLocationMissesClass(cblMisses);
+      sbl9MissesElement.className = "misses-count " + getBallLocationMissesClass(sbl9Misses);
+      obl9MissesElement.className = "misses-count " + getBallLocationMissesClass(obl9Misses);
+      cbl18MissesElement.className = "misses-count " + getBallLocationMissesClass(cbl18Misses);
+      
+      // Update pattern sequences
+      updateBallLocationPatternDisplay("sblPattern", sblPattern);
+      updateBallLocationPatternDisplay("oblPattern", oblPattern);
+      updateBallLocationPatternDisplay("cblPattern", cblPattern);
+      updateBallLocationPatternDisplay("sbl9Pattern", sbl9Pattern);
+      updateBallLocationPatternDisplay("obl9Pattern", obl9Pattern);
+      updateBallLocationPatternDisplay("cbl18Pattern", cbl18Pattern);
+      
+      // Check for alerts
+      checkBallLocationAlerts();
+    }
+
+    // NEW: Update ball location pattern sequence display with horizontal scroll
+    function updateBallLocationPatternDisplay(patternElementId, patternArray) {
+      const patternElement = document.getElementById(patternElementId);
+      patternElement.innerHTML = "";
+      
+      if (patternArray.length === 0) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.textContent = "No pattern data";
+        emptyMsg.style.color = "#888";
+        emptyMsg.style.fontStyle = "italic";
+        emptyMsg.style.padding = "10px";
+        patternElement.appendChild(emptyMsg);
+        return;
+      }
+      
+      patternArray.forEach(item => {
+        const patternItem = document.createElement("div");
+        
+        if (item.type === 'miss') {
+          patternItem.className = "pattern-miss";
+          patternItem.textContent = item.count;
+        } else {
+          patternItem.className = "pattern-hit";
+          patternItem.textContent = `HIT ${item.count}`;
+        }
+        
+        patternElement.appendChild(patternItem);
+      });
+      
+      // Scroll to the end to show latest patterns
+      patternElement.scrollLeft = patternElement.scrollWidth;
+    }
+
+    // Function to update gold color for number sets
+    function updateGoldColors() {
+      console.log("Updating gold colors...");
+      
+      // First, reset ALL miss count colors to blue
+      document.querySelectorAll('.miss-count').forEach(element => {
+        element.style.color = '#42a5f5'; // Blue color
+        element.classList.remove('gold');
+      });
+
+      // Now check each set individually
+      for (const [setName, setNumbers] of Object.entries(numberSets)) {
+        const allNumbersHave20Plus = checkSetForGold(setNumbers);
+        console.log(`Set ${setName} (${setNumbers.join(',')}): allNumbersHave20Plus = ${allNumbersHave20Plus}`);
+        
+        if (allNumbersHave20Plus) {
+          // Apply gold to all numbers in this set
+          setNumbers.forEach(num => {
+            const topElement = document.getElementById(`top-${num}`);
+            const bottomElement = document.getElementById(`bottom-${num}`);
+            
+            if (topElement) {
+              console.log(`Setting top-${num} to gold`);
+              topElement.style.color = '#FFD700';
+              topElement.classList.add('gold');
+            }
+            if (bottomElement) {
+              console.log(`Setting bottom-${num} to gold`);
+              bottomElement.style.color = '#FFD700';
+              bottomElement.classList.add('gold');
+            }
+          });
+        } else {
+          // Ensure all numbers in this set are blue (this should already be true from the reset above)
+          setNumbers.forEach(num => {
+            const topElement = document.getElementById(`top-${num}`);
+            const bottomElement = document.getElementById(`bottom-${num}`);
+            
+            if (topElement) {
+              topElement.style.color = '#42a5f5';
+              topElement.classList.remove('gold');
+            }
+            if (bottomElement) {
+              bottomElement.style.color = '#42a5f5';
+              bottomElement.classList.remove('gold');
+            }
+          });
+        }
+      }
+    }
+
+    // NEW: Function to get cold numbers (38+ misses)
+    function getColdNumbers() {
+      return getColdNumbersWithThreshold(38);
+    }
+
+    // NEW: Function to update cold numbers display
+    function updateColdNumbersDisplay() {
+      const coldNumbers = getColdNumbers();
+      const container = document.getElementById("coldNumbers");
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Add cold numbers to display
+      coldNumbers.forEach(item => {
+        const numberElement = document.createElement('div');
+        numberElement.className = `cold-number-item ${getColor(item.number)}`;
+        
+        const numberSpan = document.createElement('span');
+        numberSpan.className = 'cold-number';
+        numberSpan.textContent = item.number;
+        
+        const missCountSpan = document.createElement('span');
+        missCountSpan.className = 'cold-miss-count';
+        missCountSpan.textContent = item.misses;
+        
+        numberElement.appendChild(numberSpan);
+        numberElement.appendChild(missCountSpan);
+        container.appendChild(numberElement);
+      });
+    }
+
+    // Function to check pattern miss thresholds and alert user
+    function checkPatternMissThresholds() {
+      if (patternStats[4].m === 70) {
+        alert("Track 4 has reached 70 misses!");
+      }
+      if (patternStats[6].m === 50) {
+        alert("Track 6 has reached 50 misses!");
+      }
+      if (patternStats[9].m === 40) {
+        alert("Track 9 has reached 40 misses!");
+      }
+      if (patternStats[12].m === 20) {
+        alert("Track 12 has reached 20 misses!");
+      }
+      if (patternStats[18].m === 14) {
+        alert("Track 18 has reached 14 misses!");
+      }
+      if (patternStats[24].m === 10) {
+        alert("Track 24 has reached 10 misses!");
+      }
+    }
+
+    // Function to get last 18 unique numbers for Track 18 (newest first)
+    function getLastUniqueNumbersForTrack18() {
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      // Go through history backwards (newest first, excluding current spin)
+      for (let i = history.length - 1; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          uniqueNumbers.push(num); // Add to end to maintain newest-first order
+          if (uniqueNumbers.length >= 18) break;
+        }
+      }
+      
+      return uniqueNumbers;
+    }
+
+    // Function to get last 24 unique numbers for Track 24 (newest first)
+    function getLastUniqueNumbersForTrack24() {
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      // Go through history backwards (newest first, excluding current spin)
+      for (let i = history.length - 1; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          uniqueNumbers.push(num); // Add to end to maintain newest-first order
+          if (uniqueNumbers.length >= 24) break;
+        }
+      }
+      
+      return uniqueNumbers;
+    }
+
+    // NEW: Function to get excluded numbers for Track 18 (20 numbers not in the Track 18 list)
+    function getExcludedNumbersForTrack18() {
+      const last18Unique = getLastUniqueNumbersForTrack18();
+      const allNumbers = ['0','00','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'];
+      
+      // Filter out numbers that are in the last 18 unique numbers
+      const excludedNumbers = allNumbers.filter(num => !last18Unique.includes(num));
+      
+      // Return the first 20 excluded numbers
+      return excludedNumbers.slice(0, 20);
+    }
+
+    // Function to get excluded numbers for Track 24 (14 numbers not in the Track 24 list)
+    function getExcludedNumbersForTrack24() {
+      const last24Unique = getLastUniqueNumbersForTrack24();
+      const allNumbers = ['0','00','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'];
+      
+      // Filter out numbers that are in the last 24 unique numbers
+      const excludedNumbers = allNumbers.filter(num => !last24Unique.includes(num));
+      
+      // Return the first 14 excluded numbers
+      return excludedNumbers.slice(0, 14);
+    }
+
+    // NEW: Function to update excluded numbers display for Track 18
+    function updateExcludedNumbersForTrack18() {
+      const excludedNumbers = getExcludedNumbersForTrack18();
+      const container = document.getElementById("excludedNumbers18");
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Add excluded numbers to display
+      excludedNumbers.forEach(num => {
+        const numberElement = document.createElement('div');
+        numberElement.className = `excluded-number-item ${getColor(num)}`;
+        numberElement.textContent = num;
+        container.appendChild(numberElement);
+      });
+    }
+
+    // Function to update excluded numbers display for Track 24
+    function updateExcludedNumbersForTrack24() {
+      const excludedNumbers = getExcludedNumbersForTrack24();
+      const container = document.getElementById("excludedNumbers24");
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Add excluded numbers to display
+      excludedNumbers.forEach(num => {
+        const numberElement = document.createElement('div');
+        numberElement.className = `excluded-number-item ${getColor(num)}`;
+        numberElement.textContent = num;
+        container.appendChild(numberElement);
+      });
+    }
+
+    // NEW: Function to update Track 18 numbers display
+    function updateTrack18NumbersDisplay() {
+      const track18Numbers = getLastUniqueNumbersForTrack18();
+      const container = document.getElementById("track18Numbers");
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Add Track 18 numbers to display (already in newest-first order)
+      track18Numbers.forEach(num => {
+        const numberElement = document.createElement('div');
+        numberElement.className = `track18-number-item ${getColor(num)}`;
+        numberElement.textContent = num;
+        container.appendChild(numberElement);
+      });
+    }
+
+    // NEW: Function to update Track 24 numbers display under Track 18
+    function updateTrack24NumbersDisplay() {
+      const track24Numbers = getLastUniqueNumbersForTrack24();
+      const container = document.getElementById("track24Numbers");
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Add Track 24 numbers to display (already in newest-first order)
+      track24Numbers.forEach(num => {
+        const numberElement = document.createElement('div');
+        numberElement.className = `track24-number-item ${getColor(num)}`;
+        numberElement.textContent = num;
+        container.appendChild(numberElement);
+      });
+    }
+
+    // Update the display with current data
+    function updateDisplay() {
+      const container = document.getElementById("recentSpins");
+      container.innerHTML = "";
+      
+      // Always show exactly 20 boxes
+      for (let i = 0; i < 20; i++) {
+        const div = document.createElement("div");
+        
+        // Get the spin number (newest first)
+        const spinIndex = history.length - 1 - i;
+        
+        if (spinIndex >= 0) {
+          const n = history[spinIndex];
+          div.className = `spin-box ${getColor(n)}`;
+          div.textContent = n;
+        } else {
+          // Empty box for missing spins
+          div.className = "spin-box empty";
+          div.textContent = "";
+        }
+        
+        container.appendChild(div);
+      }
+      
+      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+      
+      // Update top numbers
+      topNumbers.forEach(num => {
+        document.getElementById(`top-${num}`).textContent = stats.top[num];
+      });
+      
+      // Update bottom numbers
+      bottomNumbers.forEach(num => {
+        document.getElementById(`bottom-${num}`).textContent = stats.bottom[num];
+      });
+
+      // Update new number sets
+      set20Numbers.forEach(num => {
+        document.getElementById(`set20-${num}`).textContent = stats.set20[num];
+      });
+      
+      set18Numbers.forEach(num => {
+        document.getElementById(`set18-${num}`).textContent = stats.set18[num];
+      });
+
+      // Update new 15 number sets
+      set15ANumbers.forEach(num => {
+        document.getElementById(`set15A-${num}`).textContent = stats.set15A[num];
+      });
+      
+      set15BNumbers.forEach(num => {
+        document.getElementById(`set15B-${num}`).textContent = stats.set15B[num];
+      });
+      
+      set15CNumbers.forEach(num => {
+        document.getElementById(`set15C-${num}`).textContent = stats.set15C[num];
+      });
+
+      // Update gold colors for number sets
+      updateGoldColors();
+      
+      // Update pattern stats
+      document.getElementById(`miss4`).textContent = patternStats[4].m;
+      document.getElementById(`hit4`).textContent = patternStats[4].h;
+      document.getElementById(`miss6`).textContent = patternStats[6].m;
+      document.getElementById(`hit6`).textContent = patternStats[6].h;
+      document.getElementById(`miss9`).textContent = patternStats[9].m;
+      document.getElementById(`hit9`).textContent = patternStats[9].h;
+      document.getElementById(`miss12`).textContent = patternStats[12].m;
+      document.getElementById(`hit12`).textContent = patternStats[12].h;
+      document.getElementById(`miss18`).textContent = patternStats[18].m;
+      document.getElementById(`hit18`).textContent = patternStats[18].h;
+      document.getElementById(`miss24`).textContent = patternStats[24].m;
+      document.getElementById(`hit24`).textContent = patternStats[24].h;
+      
+      // Update pattern sequence displays
+      updatePatternDisplay('4');
+      updatePatternDisplay('6');
+      updatePatternDisplay('9');
+      updatePatternDisplay('12');
+      updatePatternDisplay('18');
+      updatePatternDisplay('24');
+      
+      // NEW: Update Track 18 numbers display
+      updateTrack18NumbersDisplay();
+      
+      // NEW: Update excluded numbers for Track 18
+      updateExcludedNumbersForTrack18();
+      
+      // Update excluded numbers for Track 24
+      updateExcludedNumbersForTrack24();
+      
+      // NEW: Update Track 24 numbers display under Track 18
+      updateTrack24NumbersDisplay();
+      
+      // NEW: Update cold numbers display
+      updateColdNumbersDisplay();
+      
+      // NEW: Update ball location displays
+      updateBallLocationDisplay();
+    }
+    
+    function updatePatternDisplay(track) {
+      const patternSequence = document.getElementById(`patternSequence${track}`);
+      
+      // Clear existing pattern items (keep the label)
+      const label = patternSequence.querySelector('.pattern-label');
+      patternSequence.innerHTML = '';
+      if (label) {
+        patternSequence.appendChild(label);
+      } else {
+        const newLabel = document.createElement('span');
+        newLabel.className = 'pattern-label';
+        newLabel.textContent = `Track ${track}:`;
+        patternSequence.appendChild(newLabel);
+      }
+      
+      // NEW: Group consecutive hits for cleaner display
+      const groupedHistory = [];
+      let currentHitCount = 0;
+      
+      patternHistory[`track${track}`].forEach(item => {
+        if (item.type === 'hit') {
+          currentHitCount++;
+        } else {
+          // If we were counting hits, add the hit group first
+          if (currentHitCount > 0) {
+            groupedHistory.push({ type: 'hit', value: `HIT ${currentHitCount}` });
+            currentHitCount = 0;
+          }
+          // Add the miss
+          groupedHistory.push(item);
+        }
+      });
+      
+      // Don't forget to add any remaining hits at the end
+      if (currentHitCount > 0) {
+        groupedHistory.push({ type: 'hit', value: `HIT ${currentHitCount}` });
+      }
+      
+      // Add pattern items from grouped history
+      groupedHistory.forEach(item => {
+        const patternItem = document.createElement('span');
+        patternItem.className = `pattern-item ${item.type === 'miss' ? 'pattern-miss' : 'pattern-hit'}`;
+        patternItem.textContent = item.value;
+        patternSequence.appendChild(patternItem);
+      });
+      
+      // Auto-scroll to the end (right side) to show the newest entries
+      scrollPatternToEnd(track);
+    }
+    
+    // New function to auto-scroll pattern sequence to the end
+    function scrollPatternToEnd(track) {
+      const patternSequence = document.getElementById(`patternSequence${track}`);
+      patternSequence.scrollLeft = patternSequence.scrollWidth;
+    }
+
+    // Save data to localStorage
+    function save() {
+      localStorage.setItem("history", JSON.stringify(history));
+      localStorage.setItem("stats", JSON.stringify(stats));
+      localStorage.setItem("patternStats", JSON.stringify(patternStats));
+      localStorage.setItem("patternHistory", JSON.stringify(patternHistory));
+      
+      // NEW: Save ball location data
+      localStorage.setItem("sblMisses", sblMisses.toString());
+      localStorage.setItem("oblMisses", oblMisses.toString());
+      localStorage.setItem("cblMisses", cblMisses.toString());
+      localStorage.setItem("sblPattern", JSON.stringify(sblPattern));
+      localStorage.setItem("oblPattern", JSON.stringify(oblPattern));
+      localStorage.setItem("cblPattern", JSON.stringify(cblPattern));
+      localStorage.setItem("currentSBL", JSON.stringify(currentSBL));
+      localStorage.setItem("currentOBL", JSON.stringify(currentOBL));
+      localStorage.setItem("currentCBL", JSON.stringify(currentCBL));
+      localStorage.setItem("previousSBL", JSON.stringify(previousSBL));
+      localStorage.setItem("previousOBL", JSON.stringify(previousOBL));
+      localStorage.setItem("previousCBL", JSON.stringify(previousCBL));
+      
+      // NEW: Save 9-number ball location data
+      localStorage.setItem("sbl9Misses", sbl9Misses.toString());
+      localStorage.setItem("obl9Misses", obl9Misses.toString());
+      localStorage.setItem("cbl18Misses", cbl18Misses.toString());
+      localStorage.setItem("sbl9Pattern", JSON.stringify(sbl9Pattern));
+      localStorage.setItem("obl9Pattern", JSON.stringify(obl9Pattern));
+      localStorage.setItem("cbl18Pattern", JSON.stringify(cbl18Pattern));
+      localStorage.setItem("currentSBL9", JSON.stringify(currentSBL9));
+      localStorage.setItem("currentOBL9", JSON.stringify(currentOBL9));
+      localStorage.setItem("currentCBL18", JSON.stringify(currentCBL18));
+      localStorage.setItem("previousSBL9", JSON.stringify(previousSBL9));
+      localStorage.setItem("previousOBL9", JSON.stringify(previousOBL9));
+      localStorage.setItem("previousCBL18", JSON.stringify(previousCBL18));
+    }
+
+    // Add a new number to the history
+    function addNumber() {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
+      if (!val) {
+        status.textContent = "Please enter a number";
+        return;
+      }
+      
+      // Handle "00" specially
+      if (val === "00") {
+        // Valid, continue
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          status.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        val = num.toString(); // Normalize to string
+      }
+      
+      // NEW: Store current ball locations as previous for miss tracking
+      previousSBL = [...currentSBL];
+      previousOBL = [...currentOBL];
+      previousCBL = [...currentCBL];
+      previousSBL9 = [...currentSBL9];
+      previousOBL9 = [...currentOBL9];
+      previousCBL18 = [...currentCBL18];
+      
+      // Get ball locations for this number
+      const ballLocations = getBallLocations(val);
+      currentSBL = ballLocations.sbl;
+      currentOBL = ballLocations.obl;
+      currentCBL = ballLocations.cbl;
+      currentSBL9 = ballLocations.sbl9;
+      currentOBL9 = ballLocations.obl9;
+      currentCBL18 = ballLocations.cbl18;
+      
+      // Check if this number hits any previous ball locations
+      if (history.length > 0) {
+        // Check SBL
+        if (previousSBL.includes(val)) {
+          updateBallLocationPatternSequence(sblPattern, true);
+          sblMisses = 0;
+          status.textContent += ` Hit SBL!`;
+        } else {
+          updateBallLocationPatternSequence(sblPattern, false);
+          sblMisses++;
+        }
+        
+        // Check OBL
+        if (previousOBL.includes(val)) {
+          updateBallLocationPatternSequence(oblPattern, true);
+          oblMisses = 0;
+          status.textContent += ` Hit OBL!`;
+        } else {
+          updateBallLocationPatternSequence(oblPattern, false);
+          oblMisses++;
+        }
+        
+        // Check CBL
+        if (previousCBL.includes(val)) {
+          updateBallLocationPatternSequence(cblPattern, true);
+          cblMisses = 0;
+          status.textContent += ` Hit CBL!`;
+        } else {
+          updateBallLocationPatternSequence(cblPattern, false);
+          cblMisses++;
+        }
+        
+        // NEW: Check SBL9
+        if (previousSBL9.includes(val)) {
+          updateBallLocationPatternSequence(sbl9Pattern, true);
+          sbl9Misses = 0;
+          status.textContent += ` Hit SBL9!`;
+        } else {
+          updateBallLocationPatternSequence(sbl9Pattern, false);
+          sbl9Misses++;
+        }
+        
+        // NEW: Check OBL9
+        if (previousOBL9.includes(val)) {
+          updateBallLocationPatternSequence(obl9Pattern, true);
+          obl9Misses = 0;
+          status.textContent += ` Hit OBL9!`;
+        } else {
+          updateBallLocationPatternSequence(obl9Pattern, false);
+          obl9Misses++;
+        }
+        
+        // NEW: Check CBL18
+        if (previousCBL18.includes(val)) {
+          updateBallLocationPatternSequence(cbl18Pattern, true);
+          cbl18Misses = 0;
+          status.textContent += ` Hit CBL18!`;
+        } else {
+          updateBallLocationPatternSequence(cbl18Pattern, false);
+          cbl18Misses++;
+        }
+      } else {
+        // First spin, initialize patterns with misses
+        updateBallLocationPatternSequence(sblPattern, false);
+        updateBallLocationPatternSequence(oblPattern, false);
+        updateBallLocationPatternSequence(cblPattern, false);
+        updateBallLocationPatternSequence(sbl9Pattern, false);
+        updateBallLocationPatternSequence(obl9Pattern, false);
+        updateBallLocationPatternSequence(cbl18Pattern, false);
+      }
+      
+      // Add to history
+      history.push(val);
+      
+      // Update top numbers
+      topNumbers.forEach(num => {
+        if (val === num) {
+          stats.top[num] = 0;
+        } else {
+          stats.top[num]++;
+        }
+      });
+      
+      // Update bottom numbers
+      bottomNumbers.forEach(num => {
+        if (val === num) {
+          stats.bottom[num] = 0;
+        } else {
+          stats.bottom[num]++;
+        }
+      });
+
+      // Update new number sets
+      set20Numbers.forEach(num => {
+        if (val === num) {
+          stats.set20[num] = 0;
+        } else {
+          stats.set20[num]++;
+        }
+      });
+      
+      set18Numbers.forEach(num => {
+        if (val === num) {
+          stats.set18[num] = 0;
+        } else {
+          stats.set18[num]++;
+        }
+      });
+
+      // Update new 15 number sets
+      set15ANumbers.forEach(num => {
+        if (val === num) {
+          stats.set15A[num] = 0;
+        } else {
+          stats.set15A[num]++;
+        }
+      });
+      
+      set15BNumbers.forEach(num => {
+        if (val === num) {
+          stats.set15B[num] = 0;
+        } else {
+          stats.set15B[num]++;
+        }
+      });
+      
+      set15CNumbers.forEach(num => {
+        if (val === num) {
+          stats.set15C[num] = 0;
+        } else {
+          stats.set15C[num]++;
+        }
+      });
+      
+      // Update pattern stats for all tracks - FIXED VERSION
+      updateTrackStats(4, val);
+      updateTrackStats(6, val);
+      updateTrackStats(9, val);
+      updateTrackStats(12, val);
+      updateTrackStats(18, val);
+      updateTrackStats(24, val);
+      
+      // NEW: Check for 10+ consecutive hits in Track 18 and Track 24
+      checkConsecutiveHitsAlert();
+      
+      // NEW: Check for 60+ misses in specific number sets
+      check60MissesForSets();
+      
+      // NEW: Check for cold number thresholds
+      checkColdNumberThresholds();
+      
+      // NEW: Check for 18+ cold numbers with 38+ misses
+      check18ColdNumbers38Plus();
+      
+      // NEW: Check for 15+ cold numbers with 50+ misses
+      check15ColdNumbers50Plus();
+      
+      // Check pattern miss thresholds
+      checkPatternMissThresholds();
+      
+      // Check if any 15-number sets have all numbers with 20+ misses
+      check15NumberSet("15 Numbers Set A", set15ANumbers);
+      check15NumberSet("15 Numbers Set B", set15BNumbers);
+      check15NumberSet("15 Numbers Set C", set15CNumbers);
+      
+      // Check if all 12 special numbers have 20+ misses
+      checkSpecial12Numbers();
+      
+      // NEW: Check special alert sets
+      checkSpecialAlertSets();
+      
+      // NEW: Check ball location alerts
+      checkBallLocationAlerts();
+      
+      // Reset input and save
+      input.value = "";
+      save();
+      updateDisplay();
+      status.textContent = `Added spin: ${val}` + status.textContent;
+    }
+
+    // FIXED: Function to update track stats - hits now increment by 1 and reset to 0 on misses
+    function updateTrackStats(track, val) {
+      // Get last N unique numbers (excluding current spin)
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      // Go through history backwards (newest first, excluding current spin)
+      for (let i = history.length - 2; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          uniqueNumbers.unshift(num); // Add to beginning to maintain order
+          if (uniqueNumbers.length >= track) break;
+        }
+      }
+      
+      if (uniqueNumbers.includes(val)) {
+        // Number hit within its track group
+        patternStats[track].h++; // Increment hit count by 1
+        patternStats[track].m = 0; // Reset miss count to 0
+        patternHistory[`track${track}`].push({ type: 'hit', value: 'HIT' });
+      } else {
+        // Number missed within its track group
+        patternStats[track].m++; // Increment miss count
+        patternStats[track].h = 0; // Reset hit count to 0
+        
+        // Add miss to pattern history only if it's the first miss or a hit just occurred
+        if (patternHistory[`track${track}`].length === 0 || patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].type === 'hit') {
+          patternHistory[`track${track}`].push({ type: 'miss', value: patternStats[track].m });
+        } else {
+          // Update the last miss with the current miss count
+          patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].value = patternStats[track].m;
+        }
+      }
+    }
+
+    // Undo the last action - FIXED VERSION
+    function undo() {
+      const status = document.getElementById("inputStatus");
+      if (history.length === 0) {
+        status.textContent = "Nothing to undo";
+        return;
+      }
+      
+      const lastVal = history.pop();
+      
+      // Reset all stats to recalculate from scratch
+      resetAllStats();
+      
+      // Recalculate all stats based on remaining history
+      history.forEach((val, i) => {
+        // Update top numbers
+        topNumbers.forEach(num => {
+          if (val === num) {
+            stats.top[num] = 0;
+          } else {
+            stats.top[num]++;
+          }
+        });
+        
+        // Update bottom numbers
+        bottomNumbers.forEach(num => {
+          if (val === num) {
+            stats.bottom[num] = 0;
+          } else {
+            stats.bottom[num]++;
+          }
+        });
+
+        // Update new number sets
+        set20Numbers.forEach(num => {
+          if (val === num) {
+            stats.set20[num] = 0;
+          } else {
+            stats.set20[num]++;
+          }
+        });
+        
+        set18Numbers.forEach(num => {
+          if (val === num) {
+            stats.set18[num] = 0;
+          } else {
+            stats.set18[num]++;
+          }
+        });
+
+        // Update new 15 number sets
+        set15ANumbers.forEach(num => {
+          if (val === num) {
+            stats.set15A[num] = 0;
+          } else {
+            stats.set15A[num]++;
+          }
+        });
+        
+        set15BNumbers.forEach(num => {
+          if (val === num) {
+            stats.set15B[num] = 0;
+          } else {
+            stats.set15B[num]++;
+          }
+        });
+        
+        set15CNumbers.forEach(num => {
+          if (val === num) {
+            stats.set15C[num] = 0;
+          } else {
+            stats.set15C[num]++;
+          }
+        });
+        
+        // Update pattern stats for all tracks
+        recalculateTrackStats(4, val, i);
+        recalculateTrackStats(6, val, i);
+        recalculateTrackStats(9, val, i);
+        recalculateTrackStats(12, val, i);
+        recalculateTrackStats(18, val, i);
+        recalculateTrackStats(24, val, i);
+        
+        // NEW: Recalculate ball location stats
+        if (i > 0) {
+          const currentSpin = val;
+          const previousSpin = history[i-1];
+          const ballLocations = getBallLocations(previousSpin);
+          
+          // Check SBL
+          if (ballLocations.sbl.includes(currentSpin)) {
+            updateBallLocationPatternSequence(sblPattern, true);
+            sblMisses = 0;
+          } else {
+            updateBallLocationPatternSequence(sblPattern, false);
+            sblMisses++;
+          }
+          
+          // Check OBL
+          if (ballLocations.obl.includes(currentSpin)) {
+            updateBallLocationPatternSequence(oblPattern, true);
+            oblMisses = 0;
+          } else {
+            updateBallLocationPatternSequence(oblPattern, false);
+            oblMisses++;
+          }
+          
+          // Check CBL
+          if (ballLocations.cbl.includes(currentSpin)) {
+            updateBallLocationPatternSequence(cblPattern, true);
+            cblMisses = 0;
+          } else {
+            updateBallLocationPatternSequence(cblPattern, false);
+            cblMisses++;
+          }
+          
+          // NEW: Check SBL9
+          if (ballLocations.sbl9.includes(currentSpin)) {
+            updateBallLocationPatternSequence(sbl9Pattern, true);
+            sbl9Misses = 0;
+          } else {
+            updateBallLocationPatternSequence(sbl9Pattern, false);
+            sbl9Misses++;
+          }
+          
+          // NEW: Check OBL9
+          if (ballLocations.obl9.includes(currentSpin)) {
+            updateBallLocationPatternSequence(obl9Pattern, true);
+            obl9Misses = 0;
+          } else {
+            updateBallLocationPatternSequence(obl9Pattern, false);
+            obl9Misses++;
+          }
+          
+          // NEW: Check CBL18
+          if (ballLocations.cbl18.includes(currentSpin)) {
+            updateBallLocationPatternSequence(cbl18Pattern, true);
+            cbl18Misses = 0;
+          } else {
+            updateBallLocationPatternSequence(cbl18Pattern, false);
+            cbl18Misses++;
+          }
+        }
+      });
+      
+      // Update current ball locations if we have history
+      if (history.length > 0) {
+        const lastSpin = history[history.length - 1];
+        const ballLocations = getBallLocations(lastSpin);
+        currentSBL = ballLocations.sbl;
+        currentOBL = ballLocations.obl;
+        currentCBL = ballLocations.cbl;
+        currentSBL9 = ballLocations.sbl9;
+        currentOBL9 = ballLocations.obl9;
+        currentCBL18 = ballLocations.cbl18;
+      } else {
+        currentSBL = [];
+        currentOBL = [];
+        currentCBL = [];
+        previousSBL = [];
+        previousOBL = [];
+        previousCBL = [];
+        sblMisses = 0;
+        oblMisses = 0;
+        cblMisses = 0;
+        sblPattern = [];
+        oblPattern = [];
+        cblPattern = [];
+        currentSBL9 = [];
+        currentOBL9 = [];
+        currentCBL18 = [];
+        previousSBL9 = [];
+        previousOBL9 = [];
+        previousCBL18 = [];
+        sbl9Misses = 0;
+        obl9Misses = 0;
+        cbl18Misses = 0;
+        sbl9Pattern = [];
+        obl9Pattern = [];
+        cbl18Pattern = [];
+      }
+      
+      save();
+      updateDisplay();
+      status.textContent = `Undo: ${lastVal} removed`;
+    }
+
+    // Reset all stats to zero
+    function resetAllStats() {
+      stats = {
+        // Top numbers
+        top: Object.fromEntries(topNumbers.map(num => [num, 0])),
+        // Bottom numbers
+        bottom: Object.fromEntries(bottomNumbers.map(num => [num, 0])),
+        // New number sets
+        set20: Object.fromEntries(set20Numbers.map(num => [num, 0])),
+        set18: Object.fromEntries(set18Numbers.map(num => [num, 0])),
+        // New 15 number sets
+        set15A: Object.fromEntries(set15ANumbers.map(num => [num, 0])),
+        set15B: Object.fromEntries(set15BNumbers.map(num => [num, 0])),
+        set15C: Object.fromEntries(set15CNumbers.map(num => [num, 0]))
+      };
+      
+      patternStats = {
+        4: { m:0, h:0 },
+        6: { m:0, h:0 },
+        9: { m:0, h:0 },
+        12: { m:0, h:0 },
+        18: { m:0, h:0 },
+        24: { m:0, h:0 }
+      };
+      
+      patternHistory = {
+        track4: [],
+        track6: [],
+        track9: [],
+        track12: [],
+        track18: [],
+        track24: []
+      };
+      
+      // NEW: Reset ball location stats
+      sblMisses = 0;
+      oblMisses = 0;
+      cblMisses = 0;
+      sblPattern = [];
+      oblPattern = [];
+      cblPattern = [];
+      currentSBL = [];
+      currentOBL = [];
+      currentCBL = [];
+      previousSBL = [];
+      previousOBL = [];
+      previousCBL = [];
+      
+      // NEW: Reset 9-number ball location stats
+      sbl9Misses = 0;
+      obl9Misses = 0;
+      cbl18Misses = 0;
+      sbl9Pattern = [];
+      obl9Pattern = [];
+      cbl18Pattern = [];
+      currentSBL9 = [];
+      currentOBL9 = [];
+      currentCBL18 = [];
+      previousSBL9 = [];
+      previousOBL9 = [];
+      previousCBL18 = [];
+    }
+
+    // FIXED: Recalculate track stats for undo functionality - hits increment by 1 and reset to 0 on misses
+    function recalculateTrackStats(track, val, index) {
+      // Get last N unique numbers (excluding current spin)
+      const uniqueNumbers = [];
+      const seen = new Set();
+      
+      // Go through history backwards (newest first, excluding current spin)
+      for (let i = index - 1; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          uniqueNumbers.unshift(num); // Add to beginning to maintain order
+          if (uniqueNumbers.length >= track) break;
+        }
+      }
+      
+      if (uniqueNumbers.includes(val)) {
+        // Number hit within its track group
+        patternStats[track].h++; // Increment hit count by 1
+        patternStats[track].m = 0; // Reset miss count to 0
+        patternHistory[`track${track}`].push({ type: 'hit', value: 'HIT' });
+      } else {
+        // Number missed within its track group
+        patternStats[track].m++; // Increment miss count
+        patternStats[track].h = 0; // Reset hit count to 0
+        
+        // Add miss to pattern history only if it's the first miss or a hit just occurred
+        if (patternHistory[`track${track}`].length === 0 || patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].type === 'hit') {
+          patternHistory[`track${track}`].push({ type: 'miss', value: patternStats[track].m });
+        } else {
+          // Update the last miss with the current miss count
+          patternHistory[`track${track}`][patternHistory[`track${track}`].length - 1].value = patternStats[track].m;
+        }
+      }
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+        history = [];
+        resetAllStats();
+        
+        localStorage.removeItem("history");
+        localStorage.removeItem("stats");
+        localStorage.removeItem("patternStats");
+        localStorage.removeItem("patternHistory");
+        
+        // NEW: Remove ball location data from localStorage
+        localStorage.removeItem("sblMisses");
+        localStorage.removeItem("oblMisses");
+        localStorage.removeItem("cblMisses");
+        localStorage.removeItem("sblPattern");
+        localStorage.removeItem("oblPattern");
+        localStorage.removeItem("cblPattern");
+        localStorage.removeItem("currentSBL");
+        localStorage.removeItem("currentOBL");
+        localStorage.removeItem("currentCBL");
+        localStorage.removeItem("previousSBL");
+        localStorage.removeItem("previousOBL");
+        localStorage.removeItem("previousCBL");
+        
+        // NEW: Remove 9-number ball location data from localStorage
+        localStorage.removeItem("sbl9Misses");
+        localStorage.removeItem("obl9Misses");
+        localStorage.removeItem("cbl18Misses");
+        localStorage.removeItem("sbl9Pattern");
+        localStorage.removeItem("obl9Pattern");
+        localStorage.removeItem("cbl18Pattern");
+        localStorage.removeItem("currentSBL9");
+        localStorage.removeItem("currentOBL9");
+        localStorage.removeItem("currentCBL18");
+        localStorage.removeItem("previousSBL9");
+        localStorage.removeItem("previousOBL9");
+        localStorage.removeItem("previousCBL18");
+        
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "All data reset";
+      }
+    }
+
+    // Handle numpad clicks
+    function numpadClick(n) {
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      status.textContent = "";
+      
+      if (n === '00') {
+        input.value = '00';
+      } else {
+        if (input.value.length < 2) {
+          input.value += n;
+        }
+      }
+    }
+
+    // Handle backspace
+    function backspace() {
+      const input = document.getElementById("numberInput");
+      input.value = input.value.slice(0, -1);
+    }
+
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
+      updateDisplay();
+    });
+  </script>
+</body>
+</html>

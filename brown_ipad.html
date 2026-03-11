@@ -1,696 +1,717 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Brown Roulette · iPad Mini fit</title>
+  <meta charset="UTF-8" />
+  <!-- iPad Mini friendly viewport: width=device-width, initial-scale=1, maximum-scale=1 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes" />
+  <title>Brown Roulette Tracker – iPad Mini refined</title>
   <style>
-    /* ---------------------------------------------
-       UNIFORM & FULL DISPLAY FOR IPAD MINI
-       - uses viewport & clean spacing
-       - no horizontal scroll on the main grid
-       - sections always visible, buttons comfortably tappable
-    --------------------------------------------- */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-      background: linear-gradient(145deg, #0f0f1a 0%, #1a1a2f 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 0.75rem;
+      padding-bottom: 80px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #f0f0f0;
       min-height: 100vh;
-      padding: 12px 12px 80px 12px;   /* bottom space for fixed numpad */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
     }
-
-    .full-frame {
-      max-width: 1024px;        /* comfortable for iPad Mini landscape/portrait */
-      width: 100%;
+    .container {
+      max-width: 1400px;
       margin: 0 auto;
-      background: rgba(10, 10, 20, 0.3);
-      border-radius: 32px;
-      backdrop-filter: blur(2px);
-      padding: 16px 16px 24px 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
-
-    /* header – compact yet readable */
-    .app-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 18px;
-      padding: 0 6px;
+    header {
+      text-align: center;
+      padding: 0.75rem 0;
+      margin-bottom: 0.75rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
-    .app-header h1 {
-      font-size: 2rem;
-      background: linear-gradient(145deg, #ff7b5c, #ff4b2b);
+    h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      letter-spacing: -0.5px;
-      font-weight: 700;
-      text-shadow: 0 2px 5px rgba(255, 75, 43, 0.3);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .badge {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(4px);
-      padding: 8px 16px;
-      border-radius: 60px;
-      font-size: 0.95rem;
-      border: 1px solid #ff4b2b40;
-      color: #ffc7b5;
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.9rem;
     }
-
-    /* RECENT SPINS: now shows up to 60 with internal scroll, but we keep row full */
-    .spin-strip {
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 28px;
-      padding: 16px 12px;
-      margin-bottom: 20px;
-      border: 1px solid #3a2a40;
-    }
-    .scroll-row {
+    /* recent spins scroll: shows 20 visible, can scroll to 60 */
+    #recentSpins {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       overflow-x: auto;
-      gap: 8px;
-      padding: 6px 2px 10px 2px;
+      gap: 6px;
+      margin: 1rem 0;
+      justify-content: flex-start;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
       scrollbar-width: thin;
-      scrollbar-color: #ff4b2b #2a1e30;
+      scrollbar-color: #ff4b2b #1a1a2e;
+      min-height: 62px;
+      width: 100%;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch; /* smooth scroll on iPad */
     }
-    .scroll-row::-webkit-scrollbar {
+    #recentSpins::-webkit-scrollbar {
       height: 8px;
     }
-    .scroll-row::-webkit-scrollbar-thumb {
+    #recentSpins::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+    #recentSpins::-webkit-scrollbar-thumb {
       background: #ff4b2b;
-      border-radius: 20px;
+      border-radius: 5px;
     }
-    .spin-chip {
-      min-width: 48px;
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
+    .spin-box {
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 1.3rem;
-      box-shadow: 0 5px 8px rgba(0,0,0,0.5);
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 20px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
       flex-shrink: 0;
-      border: 2px solid rgba(255,255,255,0.1);
     }
-    .spin-chip.red { background: linear-gradient(145deg, #d32f2f, #b71c1c); color: white; }
-    .spin-chip.black { background: linear-gradient(145deg, #212121, #000); color: #ddd; }
-    .spin-chip.green { background: linear-gradient(145deg, #2e7d32, #1b5e20); color: white; }
-    .spin-chip.empty { background: #2c2c42; border: 2px dashed #4a3f5a; color: transparent; }
-
-    .total-count {
-      text-align: right;
-      margin-top: 8px;
-      font-size: 0.9rem;
-      color: #ffb9a0;
-      padding-right: 8px;
+    .spin-box:hover {
+      transform: scale(1.1);
+      z-index: 10;
     }
+    .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; border-color: #b71c1c; }
+    .black { background: linear-gradient(145deg, #212121, #000000); color: white; border-color: #111; }
+    .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; border-color: #1b5e20; }
+    .empty { background: rgba(60, 60, 80, 0.5); border-color: #444; color: transparent; }
 
-    /* input row – compact and centered */
-    .input-panel {
+    .controls {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin: 20px 0 18px 0;
-    }
-    .input-panel input {
-      background: #1e1e30;
-      border: 2px solid #3f3f60;
-      border-radius: 40px;
-      padding: 16px 20px;
-      font-size: 1.8rem;
-      width: 160px;
-      text-align: center;
-      color: white;
-      font-weight: 600;
-      box-shadow: inset 0 4px 8px #00000055;
-    }
-    .input-panel input:focus {
-      border-color: #ff5722;
-      outline: none;
-    }
-    .action-btn {
-      background: #2d2b45;
-      border: none;
-      border-radius: 40px;
-      padding: 16px 28px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: white;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 8px 0 #0e0c1a;
-      transition: 0.1s ease;
-      cursor: pointer;
-    }
-    .action-btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 3px 0 #0e0c1a;
-    }
-    .action-btn.primary { background: linear-gradient(145deg, #ff5722, #e64a19); }
-    .action-btn.warning { background: linear-gradient(145deg, #f44336, #c62828); }
-    .action-btn.secondary { background: linear-gradient(145deg, #3f51b5, #303f9f); }
-
-    /* THE FOUR SECTIONS – side by side, full width */
-    .sections-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);  /* 4 equal columns on iPad */
-      gap: 16px;
-      margin: 24px 0 10px 0;
-    }
-
-    /* uniform cards */
-    .stat-card {
-      background: rgba(22, 22, 40, 0.75);
-      backdrop-filter: blur(3px);
-      border-radius: 32px;
-      padding: 18px 10px 16px 10px;
-      box-shadow: 0 15px 25px -8px black;
-      border: 1px solid rgba(255, 110, 64, 0.3);
-      display: flex;
-      flex-direction: column;
-      height: fit-content;
-    }
-    .card-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      text-align: center;
-      padding-bottom: 12px;
-      border-bottom: 2px solid;
-      margin-bottom: 14px;
-      letter-spacing: -0.3px;
-    }
-    .title-zero-one { color: #ce93d8; border-color: #aa6dc9; }
-    .title-two-three { color: #ffb74d; border-color: #ff9800; }
-    .title-three-more { color: #ff8a80; border-color: #f44336; }
-    .title-five-zero { color: #80deea; border-color: #26c6da; }
-
-    .number-pool {
-      display: flex;
-      flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      min-height: 110px;
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 4px 4px 8px 4px;
-      background: #0b0b15;
-      border-radius: 24px;
-      margin-bottom: 12px;
-      scrollbar-width: thin;
+      margin: 1rem 0;
+      flex-wrap: wrap;
     }
-    .number-pool::-webkit-scrollbar { width: 5px; }
-    .number-pool::-webkit-scrollbar-thumb { background: #ff5722; border-radius: 8px; }
+    #entryCount {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #ffab91;
+    }
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
+      outline: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    input:focus { border-color: #ff4b2b; }
+    button {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    button:hover { background: rgba(80, 80, 100, 0.9); transform: translateY(-2px); }
+    .controls button:nth-child(2) { background: linear-gradient(145deg, #2196f3, #1976d2); }
+    .controls button:nth-child(3) { background: linear-gradient(145deg, #ff9800, #f57c00); }
+    .controls button:nth-child(4) { background: linear-gradient(145deg, #f44336, #d32f2f); }
 
-    .num-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 18px;
+    .legend {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: #ccc; }
+    .legend-color { width: 15px; height: 15px; border-radius: 50%; }
+    .legend-red { background: linear-gradient(145deg, #e53935, #c62828); }
+    .legend-black { background: linear-gradient(145deg, #212121, #000); }
+    .legend-green { background: linear-gradient(145deg, #43a047, #2e7d32); }
+
+    .input-status {
+      text-align: center;
+      height: 20px;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #ffab91;
+    }
+
+    /* scrollable duplicate container */
+    .duplicate-sections-container {
+      max-height: 580px;
+      overflow-y: auto;
+      margin: 20px 0;
+      padding-right: 6px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.15);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+      -webkit-overflow-scrolling: touch;
+    }
+    .duplicate-sections-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    .duplicate-sections-container::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 5px; }
+    .duplicate-sections-container::-webkit-scrollbar-thumb { background: #ff4b2b; border-radius: 5px; }
+
+    /* four sections row - horizontal scroll if needed, but iPad mini fits 2 or 3, now we allow wrap */
+    .sections-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;        /* allow wrap on smaller width like iPad mini portrait */
+      justify-content: center;
+    }
+    .section {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 14px;
+      flex: 1 1 280px;        /* base width 280, grow/shrink */
+      min-width: 260px;
+      max-width: 350px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+    /* ensure at least 2 columns on iPad mini landscape */
+    @media (min-width: 820px) {
+      .section { flex: 1 1 calc(50% - 20px); max-width: none; }
+    }
+    @media (min-width: 1100px) {
+      .section { flex: 1 1 calc(25% - 20px); }
+    }
+
+    .duplicate-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid;
+    }
+    .zero-one-title { color: #9c27b0; border-color: #9c27b0; }
+    .two-three-title { color: #FF9800; border-color: #FF9800; }
+    .three-or-more-title { color: #F44336; border-color: #F44336; }
+    .five-until-zero-title { color: #00BCD4; border-color: #00BCD4; }
+
+    .duplicate-groups { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; justify-content: center; }
+    .group-box { flex: 1; min-width: 100%; }
+    .group-header { font-size: 0.95rem; font-weight: bold; margin-bottom: 8px; color: #ccc; border-bottom: 1px solid #444; padding-bottom: 4px; }
+    .duplicate-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      min-height: 45px;
+    }
+    .duplicate-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .duplicate-number {
+      width: 38px;
+      height: 38px;
+      display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 8px;
       font-weight: bold;
-      box-shadow: 0 3px 6px black;
-      flex-shrink: 0;
-      font-size: 1.1rem;
-      line-height: 1.1;
-      background: #2a2a40;
+      font-size: 16px;
+      border: 2px solid transparent;
     }
-    .num-badge.red { background: #c62828; }
-    .num-badge.black { background: #1f1f2e; color: #ccc; border: 1px solid #5a5a7a; }
-    .num-badge.green { background: #2e7d32; }
-    .small-count {
-      font-size: 0.7rem;
-      background: #00000070;
-      padding: 1px 6px;
-      border-radius: 30px;
-      margin-top: -3px;
-    }
+    .duplicate-count { font-size: 10px; font-weight: bold; background: rgba(0, 0, 0, 0.5); padding: 2px 5px; border-radius: 10px; }
+    .zero-one-count { color: #9c27b0; }
+    .two-three-count { color: #FF9800; }
+    .three-or-more-count { color: #F44336; }
+    .five-until-zero-count { color: #00BCD4; }
+    .no-duplicates { color: #888; font-style: italic; text-align: center; padding: 10px; width: 100%; }
 
-    .miss-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #0f0f1c;
-      padding: 10px 14px;
-      border-radius: 60px;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-top: 6px;
-    }
-    .miss-value { color: #ffbca3; }
-    .miss-reset {
-      background: #ff4b2b70;
-      border: none;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 40px;
+    .misses-counter {
+      margin-top: 12px;
       font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.15s;
+      font-weight: bold;
+      padding: 8px 5px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .miss-reset:hover { background: #ff5722; }
+    .misses-counter span { flex: 1; }
+    .misses-reset-btn {
+      padding: 5px 12px;
+      font-size: 0.7rem;
+      border-radius: 20px;
+      background: rgba(255, 87, 34, 0.8);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-left: 8px;
+    }
+    .misses-reset-btn:hover { background: #ff5722; transform: scale(1.05); }
 
-    /* NUMPAD – fixed at bottom, perfectly sized */
-    .fixed-numpad {
+    /* fixed numpad, iPad mini friendly */
+    .numpad {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(12, 12, 22, 0.98);
-      backdrop-filter: blur(12px);
-      border-top: 2px solid #ff5722;
-      padding: 12px 16px;
+      background: rgba(20, 20, 35, 0.98);
+      padding: 10px 6px;
       display: flex;
-      gap: 6px;
-      justify-content: center;
+      justify-content: space-between;
+      gap: 5px;
       flex-wrap: nowrap;
       overflow-x: auto;
-      z-index: 200;
-      box-shadow: 0 -8px 25px #000000aa;
+      z-index: 100;
+      border-top: 3px solid #ff4b2b;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
+      max-height: 85px;
+      -webkit-overflow-scrolling: touch;
     }
-    .numpad-key {
-      min-width: 68px;
-      height: 58px;
-      border-radius: 24px;
-      background: #292b44;
-      border: none;
+    .numpad button {
+      flex: 1 0 auto;
+      min-width: 60px;
+      padding: 12px 0;
+      font-size: 1.3rem;
+      background: rgba(60, 60, 85, 0.9);
+      border-radius: 40px;
+      box-shadow: 0 2px 8px black;
+    }
+    .numpad .enter { background: linear-gradient(145deg, #2e7d32, #1b5e20); }
+    .numpad .backspace { background: linear-gradient(145deg, #c62828, #8e0000); }
+
+    .alert-notification {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: linear-gradient(145deg, #f44336, #d32f2f);
       color: white;
-      font-size: 1.6rem;
-      font-weight: 700;
-      box-shadow: 0 6px 0 #12101f;
-      transition: 0.06s linear;
-      flex: 0 1 auto;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .numpad-key:active { transform: translateY(5px); box-shadow: 0 1px 0 #12101f; }
-    .numpad-key.enter { background: #2e7d32; min-width: 100px; }
-    .numpad-key.back { background: #b71c1c; }
-
-    .alert-area {
-      margin: 12px 0 0 0;
-    }
-    .alert-toast {
-      background: #e64a19;
-      padding: 16px 22px;
-      border-radius: 60px;
+      padding: 15px 20px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px black;
+      z-index: 1000;
       font-weight: bold;
-      box-shadow: 0 8px 20px black;
-      border-left: 8px solid #ffd700;
+      animation: slideIn 0.3s;
+      max-width: 320px;
+      border-left: 6px solid #ffcc00;
     }
-
-    /* ipad mini portrait fine-tuning */
-    @media (max-width: 800px) {
-      .sections-grid { grid-template-columns: repeat(2, 1fr); } /* fallback, but iPad mini 1024 → 4 works */
-      .full-frame { padding: 12px; }
-    }
-    @media (max-width: 600px) {
-      .sections-grid { grid-template-columns: 1fr; } /* never happens on mini */
-    }
-
-    /* no empty awkward spaces */
-    .no-numbers {
-      color: #777;
-      font-style: italic;
-      text-align: center;
-      width: 100%;
-      padding: 20px 0;
-    }
-
-    .legend-tag {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin: 12px 0 0;
-      font-size: 0.8rem;
-    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .close-alert { position: absolute; top: 5px; right: 10px; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+    @media (max-width: 600px) { .alert-notification { left: 10px; right: 10px; max-width: none; } }
   </style>
 </head>
 <body>
-<div class="full-frame">
-  <!-- header -->
-  <div class="app-header">
-    <h1>⌬ BROWN ROULETTE</h1>
-    <div class="badge">iPad · full fit</div>
-  </div>
+  <div class="container">
+    <header>
+      <h1>Brown Roulette Tracker</h1>
+      <div class="tagline">Last 20 shown – scroll right to see 60 total</div>
+    </header>
 
-  <!-- recent spins (max 60 visible in scroll) -->
-  <div class="spin-strip">
-    <div id="recentSpins" class="scroll-row"></div>
-    <div id="entryCount" class="total-count">Total spins: 0</div>
-  </div>
-
-  <!-- quick input + controls -->
-  <div class="input-panel">
-    <input id="numberInput" placeholder="0–36" maxlength="2" autofocus>
-    <button class="action-btn primary" onclick="addNumber()">➕ ADD</button>
-    <button class="action-btn secondary" onclick="undo()">↩ UNDO</button>
-    <button class="action-btn warning" onclick="resetAll()" id="resetButton">🗑 RESET</button>
-  </div>
-  <div id="inputStatus" style="text-align:center; min-height:24px; color:#ffb39b; margin-bottom:6px;"></div>
-
-  <!-- FOUR SECTION CARD grid (full width, uniform) -->
-  <div class="sections-grid">
-    <!-- ZERO AND ONE -->
-    <div class="stat-card">
-      <div class="card-title title-zero-one">❶⓿ zero & one</div>
-      <div id="zeroOneOnly60" class="number-pool"></div>
-      <div class="miss-row">
-        <span>misses <span id="zeroOneOnlyMissesText60" class="miss-value">0</span></span>
-        <button class="miss-reset" onclick="resetMisses('ZeroOneOnly60')">reset</button>
+    <div id="recentSpins"></div>
+    <div id="entryCount">Total spins: 0</div>
+    
+    <div class="controls">
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" inputmode="numeric" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+    
+    <div id="alertContainer"></div>
+    
+    <!-- four category sections (scrollable container) -->
+    <div class="duplicate-sections-container">
+      <div class="sections-row">
+        <!-- Zero and One -->
+        <div class="section">
+          <div class="duplicate-title zero-one-title">Zero and One</div>
+          <div class="duplicate-groups"><div class="group-box"><div id="zeroOneOnly60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
+          <div class="misses-counter"><span id="zeroOneOnlyMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('ZeroOneOnly60')">Reset</button></div></div></div>
+        </div>
+        <!-- Two and Three -->
+        <div class="section">
+          <div class="duplicate-title two-three-title">Two and Three</div>
+          <div class="duplicate-groups"><div class="group-box"><div id="twoThreeOnly60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
+          <div class="misses-counter"><span id="twoThreeOnlyMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('TwoThreeOnly60')">Reset</button></div></div></div>
+        </div>
+        <!-- Three or More -->
+        <div class="section">
+          <div class="duplicate-title three-or-more-title">Three or More</div>
+          <div class="duplicate-groups"><div class="group-box"><div id="threeOrMore60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
+          <div class="misses-counter"><span id="threeOrMoreMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('ThreeOrMore60')">Reset</button></div></div></div>
+        </div>
+        <!-- Five until Zero -->
+        <div class="section">
+          <div class="duplicate-title five-until-zero-title">Five until Zero</div>
+          <div class="duplicate-groups"><div class="group-box"><div id="fiveUntilZero60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
+          <div class="misses-counter"><span id="fiveUntilZeroMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('FiveUntilZero60')">Reset</button></div></div></div>
+        </div>
       </div>
     </div>
-    <!-- TWO AND THREE -->
-    <div class="stat-card">
-      <div class="card-title title-two-three">❷❸ two & three</div>
-      <div id="twoThreeOnly60" class="number-pool"></div>
-      <div class="miss-row">
-        <span>misses <span id="twoThreeOnlyMissesText60" class="miss-value">0</span></span>
-        <button class="miss-reset" onclick="resetMisses('TwoThreeOnly60')">reset</button>
-      </div>
+
+    <!-- Numpad fixed -->
+    <div class="numpad">
+      <button class="backspace" onclick="backspace()">⌫</button>
+      <button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button>
+      <button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button>
+      <button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button>
+      <button onclick="numpadClick('0')">0</button><button onclick="numpadClick('00')">00</button>
+      <button class="enter" onclick="addNumber()">⏎</button>
     </div>
-    <!-- THREE OR MORE -->
-    <div class="stat-card">
-      <div class="card-title title-three-more">❸⁺ three or more</div>
-      <div id="threeOrMore60" class="number-pool"></div>
-      <div class="miss-row">
-        <span>misses <span id="threeOrMoreMissesText60" class="miss-value">0</span></span>
-        <button class="miss-reset" onclick="resetMisses('ThreeOrMore60')">reset</button>
-      </div>
-    </div>
-    <!-- FIVE UNTIL ZERO -->
-    <div class="stat-card">
-      <div class="card-title title-five-zero">🔄 five until 0</div>
-      <div id="fiveUntilZero60" class="number-pool"></div>
-      <div class="miss-row">
-        <span>misses <span id="fiveUntilZeroMissesText60" class="miss-value">0</span></span>
-        <button class="miss-reset" onclick="resetMisses('FiveUntilZero60')">reset</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- alert container (inline, no overflow) -->
-  <div id="alertContainer" class="alert-area"></div>
-  <div class="legend-tag">
-    <span>🔴 red</span> <span>⚫ black</span> <span>🟢 green</span> <span>group A/B</span>
-  </div>
-</div>
+    <script>
+      (function() {
+        // ----- constants and helper functions -----
+        const colors = {
+          red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
+          black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
+          green: ["0", "00"]
+        };
+        const groupA = [0,2,3,5,6,11,12,14,15,21,22,24,25,27,29,32,33,35,36];
+        const groupB = ["00",1,4,7,8,9,10,13,16,17,18,19,20,23,26,28,30,31,34];
 
-<!-- fixed numpad (big friendly buttons) -->
-<div class="fixed-numpad">
-  <button class="numpad-key back" onclick="backspace()">⌫</button>
-  <button class="numpad-key" onclick="numpadClick('1')">1</button>
-  <button class="numpad-key" onclick="numpadClick('2')">2</button>
-  <button class="numpad-key" onclick="numpadClick('3')">3</button>
-  <button class="numpad-key" onclick="numpadClick('4')">4</button>
-  <button class="numpad-key" onclick="numpadClick('5')">5</button>
-  <button class="numpad-key" onclick="numpadClick('6')">6</button>
-  <button class="numpad-key" onclick="numpadClick('7')">7</button>
-  <button class="numpad-key" onclick="numpadClick('8')">8</button>
-  <button class="numpad-key" onclick="numpadClick('9')">9</button>
-  <button class="numpad-key" onclick="numpadClick('0')">0</button>
-  <button class="numpad-key enter" onclick="addNumber()">⏎</button>
-</div>
+        // data from localStorage
+        let history = JSON.parse(localStorage.getItem("history") || "[]");
+        let zeroOneOnlyMisses60 = parseInt(localStorage.getItem("zeroOneOnlyMisses60") || "0");
+        let twoThreeOnlyMisses60 = parseInt(localStorage.getItem("twoThreeOnlyMisses60") || "0");
+        let threeOrMoreMisses60 = parseInt(localStorage.getItem("threeOrMoreMisses60") || "0");
+        let fiveUntilZeroMisses60 = parseInt(localStorage.getItem("fiveUntilZeroMisses60") || "0");
+        let zeroOneOnlyNumbers = JSON.parse(localStorage.getItem("zeroOneOnlyNumbers") || "[]");
+        let twoThreeOnlyNumbers = JSON.parse(localStorage.getItem("twoThreeOnlyNumbers") || "[]");
+        let threeOrMoreNumbers = JSON.parse(localStorage.getItem("threeOrMoreNumbers") || "[]");
+        let fiveUntilZeroNumbers = JSON.parse(localStorage.getItem("fiveUntilZeroNumbers") || "[]");
+        let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
+        let alertedCategories = JSON.parse(localStorage.getItem("alertedCategories") || "{}");
 
-<script>
-  (function() {
-    // ---------- core data (copied from original with full logic) ----------
-    const colors = {
-      red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
-      black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
-      green: ["0", "00"]
-    };
-    const groupA = [0,2,3,5,6,11,12,14,15,21,22,24,25,27,29,32,33,35,36];
-    const groupB = ["00",1,4,7,8,9,10,13,16,17,18,19,20,23,26,28,30,31,34];
-
-    let history = JSON.parse(localStorage.getItem("history") || "[]");
-    let zeroOneOnlyMisses60 = parseInt(localStorage.getItem("zeroOneOnlyMisses60") || "0");
-    let twoThreeOnlyMisses60 = parseInt(localStorage.getItem("twoThreeOnlyMisses60") || "0");
-    let threeOrMoreMisses60 = parseInt(localStorage.getItem("threeOrMoreMisses60") || "0");
-    let fiveUntilZeroMisses60 = parseInt(localStorage.getItem("fiveUntilZeroMisses60") || "0");
-    let zeroOneOnlyNumbers = JSON.parse(localStorage.getItem("zeroOneOnlyNumbers") || "[]");
-    let twoThreeOnlyNumbers = JSON.parse(localStorage.getItem("twoThreeOnlyNumbers") || "[]");
-    let threeOrMoreNumbers = JSON.parse(localStorage.getItem("threeOrMoreNumbers") || "[]");
-    let fiveUntilZeroNumbers = JSON.parse(localStorage.getItem("fiveUntilZeroNumbers") || "[]");
-    let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
-    let alertedCategories = JSON.parse(localStorage.getItem("alertedCategories") || "{}");
-
-    function getColor(n) {
-      if (colors.green.includes(n)) return "green";
-      const num = parseInt(n, 10);
-      if (colors.red.includes(num)) return "red";
-      if (colors.black.includes(num)) return "black";
-      return "";
-    }
-    function getGroup(n) {
-      const num = (typeof n === 'string' && n !== "00") ? parseInt(n) : n;
-      if (groupA.includes(num)) return "A";
-      if (groupB.includes(num)) return "B";
-      return null;
-    }
-
-    // --- alert
-    function showAlertFor100Plus(categoryName, missesCount, colorHex) {
-      if (alertedCategories[categoryName]) return;
-      alertedCategories[categoryName] = true;
-      localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
-      const alertContainer = document.getElementById("alertContainer");
-      const alertDiv = document.createElement("div");
-      alertDiv.className = "alert-toast";
-      alertDiv.style.borderLeftColor = colorHex;
-      alertDiv.innerHTML = `<strong>⚠️ 100+ MISSES</strong> ${categoryName}: ${missesCount} <span style="cursor:pointer; margin-left:20px;" onclick="this.parentElement.remove()">✕</span>`;
-      alertContainer.appendChild(alertDiv);
-      setTimeout(() => { if (alertDiv.parentElement) alertDiv.remove(); }, 8000);
-    }
-
-    function clearAlertForCategory(name) {
-      if (alertedCategories[name]) {
-        delete alertedCategories[name];
-        localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
-      }
-    }
-
-    function checkFor100PlusMisses() {
-      const cats = [
-        { name: "Zero and One Only", misses: zeroOneOnlyMisses60, color: "#9c27b0" },
-        { name: "Two and Three Only", misses: twoThreeOnlyMisses60, color: "#FF9800" },
-        { name: "Three or More", misses: threeOrMoreMisses60, color: "#F44336" },
-        { name: "Five until Zero", misses: fiveUntilZeroMisses60, color: "#00BCD4" }
-      ];
-      cats.forEach(c => { if (c.misses >= 100) showAlertFor100Plus(c.name, c.misses, c.color); });
-    }
-
-    // ----- helpers for counts (60-spin) -----
-    function findZeroOneOnlyNumbers() {
-      const last = history.slice(-60); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
-      const res = {};
-      [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
-        let cnt = map[num]||0;
-        if (cnt === 0 || cnt === 1) res[num] = { count: cnt, group: getGroup(num) };
-      }); return res;
-    }
-    function findTwoThreeOnlyNumbers() {
-      const last = history.slice(-60); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
-      const res = {};
-      [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
-        let cnt = map[num]||0;
-        if (cnt >=2 && cnt <=3) res[num] = { count: cnt, group: getGroup(num) };
-      }); return res;
-    }
-    function findThreeOrMoreNumbers() {
-      const last = history.slice(-60); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
-      const res = {};
-      [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
-        let cnt = map[num]||0;
-        if (cnt >=3) res[num] = { count: cnt, group: getGroup(num) };
-      }); return res;
-    }
-    function findFiveUntilZeroNumbers() {
-      const last = history.slice(-60); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
-      const res = {};
-      fiveUntilZeroNumbers.forEach(num => {
-        if (map[num] > 0) res[num] = { count: map[num], group: getGroup(num) };
-      }); return res;
-    }
-
-    function getPreviousArray(arrName) {
-      if (history.length === 0) return [];
-      const prevSpins = history.slice(0, -1).slice(-60);
-      const count = {}; prevSpins.forEach(n => count[n] = (count[n]||0)+1);
-      if (arrName === 'zeroOne') return zeroOneOnlyNumbers.filter(num => (count[num]||0) === 0 || (count[num]||0) === 1);
-      if (arrName === 'twoThree') return twoThreeOnlyNumbers.filter(num => { let c = count[num]||0; return c>=2 && c<=3; });
-      if (arrName === 'threeMore') return threeOrMoreNumbers.filter(num => (count[num]||0) >= 3);
-      if (arrName === 'five') return fiveUntilZeroNumbers.filter(num => (count[num]||0) > 0);
-      return [];
-    }
-
-    function removeStale() {
-      const last60 = history.slice(-60); const cnt = {}; last60.forEach(n => cnt[n] = (cnt[n]||0)+1);
-      [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
-        let c = cnt[num]||0;
-        if ((c !==0 && c!==1) && zeroOneOnlyNumbers.includes(num)) zeroOneOnlyNumbers = zeroOneOnlyNumbers.filter(x => x!== num);
-        if ((c<2 || c>3) && twoThreeOnlyNumbers.includes(num)) twoThreeOnlyNumbers = twoThreeOnlyNumbers.filter(x => x!== num);
-        if (c<3 && threeOrMoreNumbers.includes(num)) threeOrMoreNumbers = threeOrMoreNumbers.filter(x => x!== num);
-        if (c===0 && fiveUntilZeroNumbers.includes(num)) fiveUntilZeroNumbers = fiveUntilZeroNumbers.filter(x => x!== num);
-      });
-    }
-
-    function calculateMissesAll() {
-      if (history.length === 0) return;
-      const lastSpin = history[history.length-1];
-      const prevZero = getPreviousArray('zeroOne');
-      const prevTwo = getPreviousArray('twoThree');
-      const prevThree = getPreviousArray('threeMore');
-      const prevFive = getPreviousArray('five');
-
-      if (prevZero.length) { if (prevZero.includes(lastSpin)) { zeroOneOnlyMisses60 = 0; clearAlertForCategory("Zero and One Only"); } else zeroOneOnlyMisses60 += prevZero.length; }
-      if (prevTwo.length) { if (prevTwo.includes(lastSpin)) { twoThreeOnlyMisses60 = 0; clearAlertForCategory("Two and Three Only"); } else twoThreeOnlyMisses60 += prevTwo.length; }
-      if (prevThree.length) { if (prevThree.includes(lastSpin)) { threeOrMoreMisses60 = 0; clearAlertForCategory("Three or More"); } else threeOrMoreMisses60 += prevThree.length; }
-      if (prevFive.length) { if (prevFive.includes(lastSpin)) { fiveUntilZeroMisses60 = 0; clearAlertForCategory("Five until Zero"); } else fiveUntilZeroMisses60 += prevFive.length; }
-
-      const last60 = history.slice(-60); const cnt = {}; last60.forEach(n => cnt[n] = (cnt[n]||0)+1);
-      [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
-        let c = cnt[num]||0;
-        if ((c===0||c===1) && !zeroOneOnlyNumbers.includes(num)) zeroOneOnlyNumbers.push(num);
-        if (c>=2 && c<=3 && !twoThreeOnlyNumbers.includes(num)) twoThreeOnlyNumbers.push(num);
-        if (c>=3 && !threeOrMoreNumbers.includes(num)) threeOrMoreNumbers.push(num);
-        if (c>=5 && !fiveUntilZeroNumbers.includes(num)) fiveUntilZeroNumbers.push(num);
-      });
-      removeStale();
-      checkFor100PlusMisses();
-    }
-
-    function saveState() {
-      const state = { history: [...history], zeroOneOnlyMisses60, twoThreeOnlyMisses60, threeOrMoreMisses60, fiveUntilZeroMisses60, zeroOneOnlyNumbers: [...zeroOneOnlyNumbers], twoThreeOnlyNumbers: [...twoThreeOnlyNumbers], threeOrMoreNumbers: [...threeOrMoreNumbers], fiveUntilZeroNumbers: [...fiveUntilZeroNumbers] };
-      stateHistory.push(state); if (stateHistory.length > 50) stateHistory = stateHistory.slice(-50);
-      localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
-    }
-
-    function saveAll() {
-      localStorage.setItem("history", JSON.stringify(history));
-      localStorage.setItem("zeroOneOnlyMisses60", zeroOneOnlyMisses60);
-      localStorage.setItem("twoThreeOnlyMisses60", twoThreeOnlyMisses60);
-      localStorage.setItem("threeOrMoreMisses60", threeOrMoreMisses60);
-      localStorage.setItem("fiveUntilZeroMisses60", fiveUntilZeroMisses60);
-      localStorage.setItem("zeroOneOnlyNumbers", JSON.stringify(zeroOneOnlyNumbers));
-      localStorage.setItem("twoThreeOnlyNumbers", JSON.stringify(twoThreeOnlyNumbers));
-      localStorage.setItem("threeOrMoreNumbers", JSON.stringify(threeOrMoreNumbers));
-      localStorage.setItem("fiveUntilZeroNumbers", JSON.stringify(fiveUntilZeroNumbers));
-      localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
-    }
-
-    function updateDisplay() {
-      const container = document.getElementById("recentSpins");
-      container.innerHTML = "";
-      for (let i = 0; i < 60; i++) {
-        const idx = history.length - 1 - i;
-        const div = document.createElement("div");
-        if (idx >= 0) { const n = history[idx]; div.className = `spin-chip ${getColor(n)}`; div.textContent = n; }
-        else { div.className = "spin-chip empty"; div.textContent = ''; }
-        container.appendChild(div);
-      }
-      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
-
-      function fillCategory(baseId, dataObj, missesVal, missSpanId) {
-        const el = document.getElementById(baseId); el.innerHTML = '';
-        const keys = Object.keys(dataObj);
-        if (!keys.length) { el.innerHTML = '<div class="no-numbers">— none —</div>'; }
-        else {
-          keys.forEach(num => {
-            const d = dataObj[num];
-            const wrap = document.createElement('div');
-            wrap.className = `num-badge ${getColor(num)}`;
-            wrap.innerHTML = `${num}<span class="small-count">${d.count}</span>`;
-            el.appendChild(wrap);
-          });
+        function getColor(n) {
+          if (colors.green.includes(n)) return "green";
+          const num = parseInt(n, 10);
+          if (colors.red.includes(num)) return "red";
+          if (colors.black.includes(num)) return "black";
+          return "";
         }
-        document.getElementById(missSpanId).innerText = missesVal;
-      }
+        function getGroup(n) {
+          const num = (typeof n === 'string' && n !== "00") ? parseInt(n) : n;
+          if (groupA.includes(num)) return "A";
+          if (groupB.includes(num)) return "B";
+          return null;
+        }
 
-      fillCategory("zeroOneOnly60", findZeroOneOnlyNumbers(), zeroOneOnlyMisses60, "zeroOneOnlyMissesText60");
-      fillCategory("twoThreeOnly60", findTwoThreeOnlyNumbers(), twoThreeOnlyMisses60, "twoThreeOnlyMissesText60");
-      fillCategory("threeOrMore60", findThreeOrMoreNumbers(), threeOrMoreMisses60, "threeOrMoreMissesText60");
-      fillCategory("fiveUntilZero60", findFiveUntilZeroNumbers(), fiveUntilZeroMisses60, "fiveUntilZeroMissesText60");
-    }
+        // ----- alerts for 100+ -----
+        function showAlertFor100Plus(categoryName, missesCount, colorHex) {
+          if (alertedCategories[categoryName]) return;
+          alertedCategories[categoryName] = true;
+          localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
+          const alertContainer = document.getElementById("alertContainer");
+          const alertDiv = document.createElement("div");
+          alertDiv.className = "alert-notification";
+          alertDiv.style.borderLeftColor = colorHex;
+          alertDiv.innerHTML = `
+            <button class="close-alert" onclick="this.parentElement.remove();">×</button>
+            <div class="alert-title">🚨 100+ MISSES!</div>
+            <div class="alert-content"><strong>${categoryName}</strong> now ${missesCount} misses. Consider reset.</div>
+          `;
+          alertContainer.appendChild(alertDiv);
+          setTimeout(() => { if (alertDiv.parentElement) alertDiv.remove(); }, 10000);
+        }
+        function checkFor100PlusMisses() {
+          const cats = [
+            { name: "Zero and One Only", misses: zeroOneOnlyMisses60, color: "#9c27b0" },
+            { name: "Two and Three Only", misses: twoThreeOnlyMisses60, color: "#FF9800" },
+            { name: "Three or More", misses: threeOrMoreMisses60, color: "#F44336" },
+            { name: "Five until Zero", misses: fiveUntilZeroMisses60, color: "#00BCD4" }
+          ];
+          cats.forEach(c => { if (c.misses >= 100) showAlertFor100Plus(c.name, c.misses, c.color); });
+        }
+        function clearAlertForCategory(name) {
+          if (alertedCategories[name]) { delete alertedCategories[name]; localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories)); }
+        }
 
-    window.addNumber = function() {
-      const inp = document.getElementById("numberInput");
-      const status = document.getElementById("inputStatus");
-      let val = inp.value.trim();
-      if (!val) { status.textContent = "enter a number"; return; }
-      if (val !== "00" && val !== "0") {
-        const num = parseInt(val,10); if (isNaN(num) || num<0 || num>36) { status.textContent = "0-36 or 00"; return; }
-        val = num.toString();
-      }
-      saveState();
-      history.push(val);
-      calculateMissesAll();
-      inp.value = "";
-      saveAll(); updateDisplay();
-      status.textContent = `added ${val} (${getGroup(val)} • ${getColor(val)})`;
-    };
+        // ----- state persistence -----
+        function saveState() {
+          const state = {
+            history: [...history],
+            zeroOneOnlyMisses60, twoThreeOnlyMisses60, threeOrMoreMisses60, fiveUntilZeroMisses60,
+            zeroOneOnlyNumbers: [...zeroOneOnlyNumbers],
+            twoThreeOnlyNumbers: [...twoThreeOnlyNumbers],
+            threeOrMoreNumbers: [...threeOrMoreNumbers],
+            fiveUntilZeroNumbers: [...fiveUntilZeroNumbers]
+          };
+          stateHistory.push(state);
+          if (stateHistory.length > 50) stateHistory = stateHistory.slice(-50);
+          localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+        }
 
-    window.undo = function() {
-      if (stateHistory.length === 0 && history.length>0) { /* crude */ history.pop(); zeroOneOnlyMisses60=0; twoThreeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0; zeroOneOnlyNumbers=[]; twoThreeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[]; alertedCategories={}; const old=[...history]; history=[]; old.forEach(s=>{ history.push(s); calculateMissesAll(); }); saveAll(); updateDisplay(); document.getElementById("inputStatus").textContent="undo (recalc)"; return; }
-      if (stateHistory.length===0) { document.getElementById("inputStatus").textContent="nothing"; return; }
-      const prev = stateHistory.pop();
-      history = prev.history; zeroOneOnlyMisses60=prev.zeroOneOnlyMisses60; twoThreeOnlyMisses60=prev.twoThreeOnlyMisses60; threeOrMoreMisses60=prev.threeOrMoreMisses60; fiveUntilZeroMisses60=prev.fiveUntilZeroMisses60; zeroOneOnlyNumbers=[...prev.zeroOneOnlyNumbers]; twoThreeOnlyNumbers=[...prev.twoThreeOnlyNumbers]; threeOrMoreNumbers=[...prev.threeOrMoreNumbers]; fiveUntilZeroNumbers=[...prev.fiveUntilZeroNumbers];
-      saveAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "undo ok";
-    };
+        function restorePreviousState() {
+          if (stateHistory.length === 0) return false;
+          const prev = stateHistory.pop();
+          history = prev.history;
+          zeroOneOnlyMisses60 = prev.zeroOneOnlyMisses60 || 0;
+          twoThreeOnlyMisses60 = prev.twoThreeOnlyMisses60 || 0;
+          threeOrMoreMisses60 = prev.threeOrMoreMisses60 || 0;
+          fiveUntilZeroMisses60 = prev.fiveUntilZeroMisses60 || 0;
+          zeroOneOnlyNumbers = prev.zeroOneOnlyNumbers || [];
+          twoThreeOnlyNumbers = prev.twoThreeOnlyNumbers || [];
+          threeOrMoreNumbers = prev.threeOrMoreNumbers || [];
+          fiveUntilZeroNumbers = prev.fiveUntilZeroNumbers || [];
+          saveAllToLocalStorage();
+          return true;
+        }
 
-    window.resetAll = function() {
-      if (!confirm("erase all spins?")) return;
-      history = []; zeroOneOnlyMisses60=0; twoThreeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0; zeroOneOnlyNumbers=[]; twoThreeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[]; stateHistory=[]; alertedCategories={};
-      localStorage.clear(); updateDisplay(); document.getElementById("inputStatus").textContent="all reset"; document.getElementById("alertContainer").innerHTML='';
-    };
+        // ----- category finders (60-spin) -----
+        function findZeroOneOnlyNumbers(windowSize) {
+          const last = history.slice(-windowSize); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
+          const res = {};
+          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c===0||c===1) res[num]={count:c, group:getGroup(num)}; }
+          let c00 = map["00"]||0; if (c00===0||c00===1) res["00"]={count:c00, group:getGroup("00")};
+          return res;
+        }
+        function findTwoThreeOnlyNumbers(windowSize) {
+          const last = history.slice(-windowSize); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
+          const res = {};
+          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c>=2&&c<=3) res[num]={count:c, group:getGroup(num)}; }
+          let c00 = map["00"]||0; if (c00>=2&&c00<=3) res["00"]={count:c00, group:getGroup("00")};
+          return res;
+        }
+        function findThreeOrMoreNumbers(windowSize) {
+          const last = history.slice(-windowSize); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
+          const res = {};
+          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c>=3) res[num]={count:c, group:getGroup(num)}; }
+          if ((map["00"]||0)>=3) res["00"]={count:map["00"], group:getGroup("00")};
+          return res;
+        }
+        function findFiveUntilZeroNumbers(windowSize) {
+          const last = history.slice(-windowSize); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
+          const res = {};
+          fiveUntilZeroNumbers.forEach(num => { let cnt = map[num]||0; if (cnt>0) res[num]={count:cnt, group:getGroup(num)}; });
+          return res;
+        }
 
-    window.resetMisses = function(s) {
-      if (s.includes('ZeroOneOnly')) { zeroOneOnlyMisses60=0; clearAlertForCategory("Zero and One Only"); }
-      if (s.includes('TwoThreeOnly')) { twoThreeOnlyMisses60=0; clearAlertForCategory("Two and Three Only"); }
-      if (s.includes('ThreeOrMore')) { threeOrMoreMisses60=0; clearAlertForCategory("Three or More"); }
-      if (s.includes('FiveUntilZero')) { fiveUntilZeroMisses60=0; clearAlertForCategory("Five until Zero"); }
-      saveAll(); updateDisplay();
-    };
+        // helpers for previous category members
+        function getPreviousZeroOneOnlyNumbers() {
+          if (history.length===0) return [];
+          const prev = history.slice(0,-1).slice(-60); const map = {}; prev.forEach(n=>map[n]=(map[n]||0)+1);
+          return zeroOneOnlyNumbers.filter(num => { let c=map[num]||0; return c===0||c===1; });
+        }
+        function getPreviousTwoThreeOnlyNumbers() {
+          if (history.length===0) return [];
+          const prev = history.slice(0,-1).slice(-60); const map = {}; prev.forEach(n=>map[n]=(map[n]||0)+1);
+          return twoThreeOnlyNumbers.filter(num => { let c=map[num]||0; return c>=2 && c<=3; });
+        }
+        function getPreviousThreeOrMoreNumbers() {
+          if (history.length===0) return [];
+          const prev = history.slice(0,-1).slice(-60); const map = {}; prev.forEach(n=>map[n]=(map[n]||0)+1);
+          return threeOrMoreNumbers.filter(num => (map[num]||0)>=3);
+        }
+        function getPreviousFiveUntilZeroNumbers() {
+          if (history.length===0) return [];
+          const prev = history.slice(0,-1).slice(-60); const map = {}; prev.forEach(n=>map[n]=(map[n]||0)+1);
+          return fiveUntilZeroNumbers.filter(num => (map[num]||0)>0);
+        }
 
-    window.numpadClick = function(d) {
-      const inp = document.getElementById("numberInput");
-      if (d === '00') inp.value = '00';
-      else if (inp.value.length < 2) inp.value += d;
-    };
-    window.backspace = function() {
-      const inp = document.getElementById("numberInput");
-      inp.value = inp.value.slice(0, -1);
-    };
+        // removal checks
+        function checkRemoveFromZeroOneOnlyNumbers(num) {
+          const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
+          if ((c!==0 && c!==1) && zeroOneOnlyNumbers.includes(num)) { zeroOneOnlyNumbers = zeroOneOnlyNumbers.filter(x=>x!==num); return true; } return false;
+        }
+        function checkRemoveFromTwoThreeOnlyNumbers(num) {
+          const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
+          if ((c<2||c>3) && twoThreeOnlyNumbers.includes(num)) { twoThreeOnlyNumbers = twoThreeOnlyNumbers.filter(x=>x!==num); return true; } return false;
+        }
+        function checkRemoveFromThreeOrMoreNumbers(num) {
+          const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
+          if (c<3 && threeOrMoreNumbers.includes(num)) { threeOrMoreNumbers = threeOrMoreNumbers.filter(x=>x!==num); return true; } return false;
+        }
+        function checkRemoveFromFiveUntilZeroNumbers(num) {
+          const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
+          if (c===0 && fiveUntilZeroNumbers.includes(num)) { fiveUntilZeroNumbers = fiveUntilZeroNumbers.filter(x=>x!==num); return true; } return false;
+        }
 
-    document.addEventListener("DOMContentLoaded", ()=>{
-      updateDisplay(); checkFor100PlusMisses();
-      document.getElementById("numberInput").addEventListener("keydown", (e) => { if(e.key === "Enter") addNumber(); });
-    });
-  })();
-</script>
+        function calculateMissesAll() {
+          if (history.length === 0) return;
+          const lastSpin = history[history.length-1];
+          const prevZero = getPreviousZeroOneOnlyNumbers();
+          const prevTwo = getPreviousTwoThreeOnlyNumbers();
+          const prevThree = getPreviousThreeOrMoreNumbers();
+          const prevFive = getPreviousFiveUntilZeroNumbers();
+
+          if (prevZero.length) { if (prevZero.includes(lastSpin)) { zeroOneOnlyMisses60=0; clearAlertForCategory("Zero and One Only"); } else zeroOneOnlyMisses60 += prevZero.length; }
+          if (prevTwo.length) { if (prevTwo.includes(lastSpin)) { twoThreeOnlyMisses60=0; clearAlertForCategory("Two and Three Only"); } else twoThreeOnlyMisses60 += prevTwo.length; }
+          if (prevThree.length) { if (prevThree.includes(lastSpin)) { threeOrMoreMisses60=0; clearAlertForCategory("Three or More"); } else threeOrMoreMisses60 += prevThree.length; }
+          if (prevFive.length) { if (prevFive.includes(lastSpin)) { fiveUntilZeroMisses60=0; clearAlertForCategory("Five until Zero"); } else fiveUntilZeroMisses60 += prevFive.length; }
+
+          const last60 = history.slice(-60);
+          const map = {}; last60.forEach(n => map[n]=(map[n]||0)+1);
+          // add numbers
+          for (let i=0;i<=36;i++) { let num=i.toString(); let cnt=map[num]||0; 
+            if (cnt===0||cnt===1) { if (!zeroOneOnlyNumbers.includes(num)) zeroOneOnlyNumbers.push(num); }
+            if (cnt>=2&&cnt<=3) { if (!twoThreeOnlyNumbers.includes(num)) twoThreeOnlyNumbers.push(num); }
+            if (cnt>=3) { if (!threeOrMoreNumbers.includes(num)) threeOrMoreNumbers.push(num); }
+            if (cnt>=5) { if (!fiveUntilZeroNumbers.includes(num)) fiveUntilZeroNumbers.push(num); }
+          }
+          let c00 = map["00"]||0;
+          if (c00===0||c00===1) { if (!zeroOneOnlyNumbers.includes("00")) zeroOneOnlyNumbers.push("00"); }
+          if (c00>=2&&c00<=3) { if (!twoThreeOnlyNumbers.includes("00")) twoThreeOnlyNumbers.push("00"); }
+          if (c00>=3) { if (!threeOrMoreNumbers.includes("00")) threeOrMoreNumbers.push("00"); }
+          if (c00>=5) { if (!fiveUntilZeroNumbers.includes("00")) fiveUntilZeroNumbers.push("00"); }
+
+          // remove stale
+          [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
+            checkRemoveFromZeroOneOnlyNumbers(num);
+            checkRemoveFromTwoThreeOnlyNumbers(num);
+            checkRemoveFromThreeOrMoreNumbers(num);
+            checkRemoveFromFiveUntilZeroNumbers(num);
+          });
+          checkFor100PlusMisses();
+        }
+
+        function updateDisplay() {
+          const container = document.getElementById("recentSpins");
+          container.innerHTML = "";
+          for (let i=0; i<60; i++) {
+            const div = document.createElement("div");
+            const idx = history.length-1-i;
+            if (idx>=0) { const n=history[idx]; div.className=`spin-box ${getColor(n)}`; div.textContent=n; }
+            else { div.className="spin-box empty"; }
+            container.appendChild(div);
+          }
+          document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+
+          function updateCat(baseId, numbersObj, missesVal, countClass, spanId) {
+            const disp = document.getElementById(baseId+"60");
+            const keys = Object.keys(numbersObj);
+            if (keys.length===0) { disp.innerHTML=`<div class="no-duplicates">No numbers</div>`; }
+            else {
+              disp.innerHTML = '';
+              keys.forEach(num => {
+                const data = numbersObj[num];
+                const item = document.createElement("div"); item.className="duplicate-item";
+                const nd = document.createElement("div"); nd.className=`duplicate-number ${getColor(num)}`; nd.textContent=num;
+                const cd = document.createElement("div"); cd.className=`duplicate-count ${countClass}`; cd.textContent=data.count;
+                item.appendChild(nd); item.appendChild(cd); disp.appendChild(item);
+              });
+            }
+            document.getElementById(spanId).textContent = `Total misses: ${missesVal}`;
+          }
+          updateCat("zeroOneOnly", findZeroOneOnlyNumbers(60), zeroOneOnlyMisses60, "zero-one-count", "zeroOneOnlyMissesText60");
+          updateCat("twoThreeOnly", findTwoThreeOnlyNumbers(60), twoThreeOnlyMisses60, "two-three-count", "twoThreeOnlyMissesText60");
+          updateCat("threeOrMore", findThreeOrMoreNumbers(60), threeOrMoreMisses60, "three-or-more-count", "threeOrMoreMissesText60");
+          updateCat("fiveUntilZero", findFiveUntilZeroNumbers(60), fiveUntilZeroMisses60, "five-until-zero-count", "fiveUntilZeroMissesText60");
+        }
+
+        function saveAllToLocalStorage() {
+          localStorage.setItem("history", JSON.stringify(history));
+          localStorage.setItem("zeroOneOnlyMisses60", zeroOneOnlyMisses60);
+          localStorage.setItem("twoThreeOnlyMisses60", twoThreeOnlyMisses60);
+          localStorage.setItem("threeOrMoreMisses60", threeOrMoreMisses60);
+          localStorage.setItem("fiveUntilZeroMisses60", fiveUntilZeroMisses60);
+          localStorage.setItem("zeroOneOnlyNumbers", JSON.stringify(zeroOneOnlyNumbers));
+          localStorage.setItem("twoThreeOnlyNumbers", JSON.stringify(twoThreeOnlyNumbers));
+          localStorage.setItem("threeOrMoreNumbers", JSON.stringify(threeOrMoreNumbers));
+          localStorage.setItem("fiveUntilZeroNumbers", JSON.stringify(fiveUntilZeroNumbers));
+          localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+          localStorage.setItem("alertedCategories", JSON.stringify(alertedCategories));
+        }
+
+        window.addNumber = function() {
+          const input = document.getElementById("numberInput");
+          const status = document.getElementById("inputStatus");
+          let val = input.value.trim();
+          status.textContent = "";
+          if (!val) { status.textContent = "Enter number"; return; }
+          if (val !== "00" && val !== "0") {
+            const num = parseInt(val,10);
+            if (isNaN(num) || num<0 || num>36) { status.textContent="0-36 or 00"; return; }
+            val = num.toString();
+          } else if (val==="0") val="0";
+          saveState();
+          history.push(val);
+          calculateMissesAll();
+          input.value="";
+          saveAllToLocalStorage();
+          updateDisplay();
+          status.textContent = `Added ${val} (${getGroup(val)} , ${getColor(val)})`;
+        };
+
+        window.undo = function() {
+          const status = document.getElementById("inputStatus");
+          if (history.length===0) { status.textContent="Nothing to undo"; return; }
+          if (restorePreviousState()) { updateDisplay(); status.textContent="Undo successful."; }
+          else {
+            history.pop();
+            zeroOneOnlyMisses60=0; twoThreeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0;
+            zeroOneOnlyNumbers=[]; twoThreeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[];
+            alertedCategories={};
+            const old = [...history];
+            history=[];
+            old.forEach(spin => { history.push(spin); calculateMissesAll(); });
+            saveAllToLocalStorage(); updateDisplay(); status.textContent="Undo (recalc).";
+          }
+          checkFor100PlusMisses();
+        };
+
+        window.resetAll = function() {
+          if (confirm("Reset all data?")) {
+            history=[]; zeroOneOnlyMisses60=0; twoThreeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0;
+            zeroOneOnlyNumbers=[]; twoThreeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[];
+            stateHistory=[]; alertedCategories={};
+            localStorage.clear();
+            updateDisplay(); document.getElementById("inputStatus").textContent="All data reset";
+            document.getElementById("alertContainer").innerHTML="";
+          }
+        };
+
+        window.resetMisses = function(groupWithSuffix) {
+          const type = groupWithSuffix.replace('60','');
+          if (type==='ZeroOneOnly') { zeroOneOnlyMisses60=0; clearAlertForCategory("Zero and One Only"); }
+          else if (type==='TwoThreeOnly') { twoThreeOnlyMisses60=0; clearAlertForCategory("Two and Three Only"); }
+          else if (type==='ThreeOrMore') { threeOrMoreMisses60=0; clearAlertForCategory("Three or More"); }
+          else if (type==='FiveUntilZero') { fiveUntilZeroMisses60=0; clearAlertForCategory("Five until Zero"); }
+          else return;
+          saveState(); saveAllToLocalStorage(); updateDisplay(); document.getElementById("inputStatus").textContent="Misses reset.";
+        };
+
+        window.numpadClick = function(n) {
+          const inp = document.getElementById("numberInput");
+          if (n==='00') inp.value='00';
+          else if (inp.value.length<2) inp.value += n;
+        };
+        window.backspace = function() {
+          const inp = document.getElementById("numberInput");
+          inp.value = inp.value.slice(0,-1);
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+          document.getElementById("numberInput").addEventListener("keydown", e => { if (e.key==="Enter") addNumber(); });
+          if (stateHistory.length===0 && history.length>0) saveState();
+          updateDisplay();
+          checkFor100PlusMisses();
+        });
+      })();
+    </script>
+  </div>
 </body>
 </html>

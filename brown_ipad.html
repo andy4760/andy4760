@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- iPad Mini friendly viewport: width=device-width, initial-scale=1, maximum-scale=1 -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes" />
-  <title>Brown Roulette Tracker – iPad Mini refined</title>
+  <title>Brown Roulette Tracker – iPad refined + Two Only</title>
   <style>
     * {
       box-sizing: border-box;
@@ -46,7 +45,6 @@
       margin-top: 5px;
       font-size: 0.9rem;
     }
-    /* recent spins scroll: shows 20 visible, can scroll to 60 */
     #recentSpins {
       display: flex;
       flex-direction: row;
@@ -62,8 +60,7 @@
       scrollbar-color: #ff4b2b #1a1a2e;
       min-height: 62px;
       width: 100%;
-      max-width: 100%;
-      -webkit-overflow-scrolling: touch; /* smooth scroll on iPad */
+      -webkit-overflow-scrolling: touch;
     }
     #recentSpins::-webkit-scrollbar {
       height: 8px;
@@ -162,9 +159,8 @@
       color: #ffab91;
     }
 
-    /* scrollable duplicate container */
     .duplicate-sections-container {
-      max-height: 580px;
+      max-height: 600px;
       overflow-y: auto;
       margin: 20px 0;
       padding-right: 6px;
@@ -179,25 +175,23 @@
     .duplicate-sections-container::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 5px; }
     .duplicate-sections-container::-webkit-scrollbar-thumb { background: #ff4b2b; border-radius: 5px; }
 
-    /* four sections row - horizontal scroll if needed, but iPad mini fits 2 or 3, now we allow wrap */
     .sections-row {
       display: flex;
       gap: 16px;
       margin-bottom: 10px;
-      flex-wrap: wrap;        /* allow wrap on smaller width like iPad mini portrait */
+      flex-wrap: wrap;
       justify-content: center;
     }
     .section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 16px;
       padding: 14px;
-      flex: 1 1 280px;        /* base width 280, grow/shrink */
+      flex: 1 1 280px;
       min-width: 260px;
       max-width: 350px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       text-align: center;
     }
-    /* ensure at least 2 columns on iPad mini landscape */
     @media (min-width: 820px) {
       .section { flex: 1 1 calc(50% - 20px); max-width: none; }
     }
@@ -212,8 +206,8 @@
       padding-bottom: 5px;
       border-bottom: 2px solid;
     }
-    .zero-one-title { color: #9c27b0; border-color: #9c27b0; }
-    .two-three-title { color: #FF9800; border-color: #FF9800; }
+    .two-only-title { color: #4CAF50; border-color: #4CAF50; }      /* new */
+    .three-only-title { color: #FF9800; border-color: #FF9800; }
     .three-or-more-title { color: #F44336; border-color: #F44336; }
     .five-until-zero-title { color: #00BCD4; border-color: #00BCD4; }
 
@@ -240,8 +234,8 @@
       border: 2px solid transparent;
     }
     .duplicate-count { font-size: 10px; font-weight: bold; background: rgba(0, 0, 0, 0.5); padding: 2px 5px; border-radius: 10px; }
-    .zero-one-count { color: #9c27b0; }
-    .two-three-count { color: #FF9800; }
+    .two-only-count { color: #4CAF50; }
+    .three-only-count { color: #FF9800; }
     .three-or-more-count { color: #F44336; }
     .five-until-zero-count { color: #00BCD4; }
     .no-duplicates { color: #888; font-style: italic; text-align: center; padding: 10px; width: 100%; }
@@ -271,7 +265,6 @@
     }
     .misses-reset-btn:hover { background: #ff5722; transform: scale(1.05); }
 
-    /* fixed numpad, iPad mini friendly */
     .numpad {
       position: fixed;
       bottom: 0;
@@ -342,20 +335,20 @@
     
     <div id="alertContainer"></div>
     
-    <!-- four category sections (scrollable container) -->
+    <!-- four sections: Two Only, Three Only, Three or More, Five until Zero -->
     <div class="duplicate-sections-container">
       <div class="sections-row">
-        <!-- Zero and One -->
+        <!-- Two Only (exactly 2) NEW -->
         <div class="section">
-          <div class="duplicate-title zero-one-title">Zero and One</div>
-          <div class="duplicate-groups"><div class="group-box"><div id="zeroOneOnly60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
-          <div class="misses-counter"><span id="zeroOneOnlyMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('ZeroOneOnly60')">Reset</button></div></div></div>
+          <div class="duplicate-title two-only-title">Two Only</div>
+          <div class="duplicate-groups"><div class="group-box"><div id="twoOnly60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
+          <div class="misses-counter"><span id="twoOnlyMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('TwoOnly60')">Reset</button></div></div></div>
         </div>
-        <!-- Two and Three -->
+        <!-- Three Only -->
         <div class="section">
-          <div class="duplicate-title two-three-title">Two and Three</div>
-          <div class="duplicate-groups"><div class="group-box"><div id="twoThreeOnly60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
-          <div class="misses-counter"><span id="twoThreeOnlyMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('TwoThreeOnly60')">Reset</button></div></div></div>
+          <div class="duplicate-title three-only-title">Three Only</div>
+          <div class="duplicate-groups"><div class="group-box"><div id="threeOnly60" class="duplicate-list"><div class="no-duplicates">No numbers</div></div>
+          <div class="misses-counter"><span id="threeOnlyMissesText60">Total misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('ThreeOnly60')">Reset</button></div></div></div>
         </div>
         <!-- Three or More -->
         <div class="section">
@@ -372,19 +365,20 @@
       </div>
     </div>
 
-    <!-- Numpad fixed -->
+ <!-- Numpad fixed -->
     <div class="numpad">
-      <button class="backspace" onclick="backspace()">⌫</button>
+      <button class="backspace" onclick="backspace()">Back</button>
       <button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button>
       <button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button>
       <button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button>
       <button onclick="numpadClick('0')">0</button>
-      <button class="enter" onclick="addNumber()">⏎</button>
+
+      <button class="enter" onclick="addNumber()">Enter</button>
     </div>
 
     <script>
       (function() {
-        // ----- constants and helper functions -----
+        // ----- constants -----
         const colors = {
           red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
           black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
@@ -395,12 +389,14 @@
 
         // data from localStorage
         let history = JSON.parse(localStorage.getItem("history") || "[]");
-        let zeroOneOnlyMisses60 = parseInt(localStorage.getItem("zeroOneOnlyMisses60") || "0");
-        let twoThreeOnlyMisses60 = parseInt(localStorage.getItem("twoThreeOnlyMisses60") || "0");
+        // misses: four categories
+        let twoOnlyMisses60 = parseInt(localStorage.getItem("twoOnlyMisses60") || "0");
+        let threeOnlyMisses60 = parseInt(localStorage.getItem("threeOnlyMisses60") || "0");
         let threeOrMoreMisses60 = parseInt(localStorage.getItem("threeOrMoreMisses60") || "0");
         let fiveUntilZeroMisses60 = parseInt(localStorage.getItem("fiveUntilZeroMisses60") || "0");
-        let zeroOneOnlyNumbers = JSON.parse(localStorage.getItem("zeroOneOnlyNumbers") || "[]");
-        let twoThreeOnlyNumbers = JSON.parse(localStorage.getItem("twoThreeOnlyNumbers") || "[]");
+        // persistent sets of numbers
+        let twoOnlyNumbers = JSON.parse(localStorage.getItem("twoOnlyNumbers") || "[]");
+        let threeOnlyNumbers = JSON.parse(localStorage.getItem("threeOnlyNumbers") || "[]");
         let threeOrMoreNumbers = JSON.parse(localStorage.getItem("threeOrMoreNumbers") || "[]");
         let fiveUntilZeroNumbers = JSON.parse(localStorage.getItem("fiveUntilZeroNumbers") || "[]");
         let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
@@ -439,8 +435,8 @@
         }
         function checkFor100PlusMisses() {
           const cats = [
-            { name: "Zero and One Only", misses: zeroOneOnlyMisses60, color: "#9c27b0" },
-            { name: "Two and Three Only", misses: twoThreeOnlyMisses60, color: "#FF9800" },
+            { name: "Two Only", misses: twoOnlyMisses60, color: "#4CAF50" },
+            { name: "Three Only", misses: threeOnlyMisses60, color: "#FF9800" },
             { name: "Three or More", misses: threeOrMoreMisses60, color: "#F44336" },
             { name: "Five until Zero", misses: fiveUntilZeroMisses60, color: "#00BCD4" }
           ];
@@ -454,9 +450,9 @@
         function saveState() {
           const state = {
             history: [...history],
-            zeroOneOnlyMisses60, twoThreeOnlyMisses60, threeOrMoreMisses60, fiveUntilZeroMisses60,
-            zeroOneOnlyNumbers: [...zeroOneOnlyNumbers],
-            twoThreeOnlyNumbers: [...twoThreeOnlyNumbers],
+            twoOnlyMisses60, threeOnlyMisses60, threeOrMoreMisses60, fiveUntilZeroMisses60,
+            twoOnlyNumbers: [...twoOnlyNumbers],
+            threeOnlyNumbers: [...threeOnlyNumbers],
             threeOrMoreNumbers: [...threeOrMoreNumbers],
             fiveUntilZeroNumbers: [...fiveUntilZeroNumbers]
           };
@@ -469,12 +465,12 @@
           if (stateHistory.length === 0) return false;
           const prev = stateHistory.pop();
           history = prev.history;
-          zeroOneOnlyMisses60 = prev.zeroOneOnlyMisses60 || 0;
-          twoThreeOnlyMisses60 = prev.twoThreeOnlyMisses60 || 0;
+          twoOnlyMisses60 = prev.twoOnlyMisses60 || 0;
+          threeOnlyMisses60 = prev.threeOnlyMisses60 || 0;
           threeOrMoreMisses60 = prev.threeOrMoreMisses60 || 0;
           fiveUntilZeroMisses60 = prev.fiveUntilZeroMisses60 || 0;
-          zeroOneOnlyNumbers = prev.zeroOneOnlyNumbers || [];
-          twoThreeOnlyNumbers = prev.twoThreeOnlyNumbers || [];
+          twoOnlyNumbers = prev.twoOnlyNumbers || [];
+          threeOnlyNumbers = prev.threeOnlyNumbers || [];
           threeOrMoreNumbers = prev.threeOrMoreNumbers || [];
           fiveUntilZeroNumbers = prev.fiveUntilZeroNumbers || [];
           saveAllToLocalStorage();
@@ -482,18 +478,18 @@
         }
 
         // ----- category finders (60-spin) -----
-        function findZeroOneOnlyNumbers(windowSize) {
+        function findTwoOnlyNumbers(windowSize) {
           const last = history.slice(-windowSize); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
           const res = {};
-          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c===0||c===1) res[num]={count:c, group:getGroup(num)}; }
-          let c00 = map["00"]||0; if (c00===0||c00===1) res["00"]={count:c00, group:getGroup("00")};
+          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c===2) res[num]={count:c, group:getGroup(num)}; }
+          let c00 = map["00"]||0; if (c00===2) res["00"]={count:c00, group:getGroup("00")};
           return res;
         }
-        function findTwoThreeOnlyNumbers(windowSize) {
+        function findThreeOnlyNumbers(windowSize) {
           const last = history.slice(-windowSize); const map = {}; last.forEach(n => map[n] = (map[n]||0)+1);
           const res = {};
-          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c>=2&&c<=3) res[num]={count:c, group:getGroup(num)}; }
-          let c00 = map["00"]||0; if (c00>=2&&c00<=3) res["00"]={count:c00, group:getGroup("00")};
+          for (let i=0; i<=36; i++) { let num=i.toString(); let c=map[num]||0; if (c===3) res[num]={count:c, group:getGroup(num)}; }
+          if ((map["00"]||0)===3) res["00"]={count:3, group:getGroup("00")};
           return res;
         }
         function findThreeOrMoreNumbers(windowSize) {
@@ -510,16 +506,16 @@
           return res;
         }
 
-        // helpers for previous category members
-        function getPreviousZeroOneOnlyNumbers() {
+        // helpers for previous category members (misses calc)
+        function getPreviousTwoOnlyNumbers() {
           if (history.length===0) return [];
           const prev = history.slice(0,-1).slice(-60); const map = {}; prev.forEach(n=>map[n]=(map[n]||0)+1);
-          return zeroOneOnlyNumbers.filter(num => { let c=map[num]||0; return c===0||c===1; });
+          return twoOnlyNumbers.filter(num => (map[num]||0)===2);
         }
-        function getPreviousTwoThreeOnlyNumbers() {
+        function getPreviousThreeOnlyNumbers() {
           if (history.length===0) return [];
           const prev = history.slice(0,-1).slice(-60); const map = {}; prev.forEach(n=>map[n]=(map[n]||0)+1);
-          return twoThreeOnlyNumbers.filter(num => { let c=map[num]||0; return c>=2 && c<=3; });
+          return threeOnlyNumbers.filter(num => (map[num]||0)===3);
         }
         function getPreviousThreeOrMoreNumbers() {
           if (history.length===0) return [];
@@ -533,13 +529,13 @@
         }
 
         // removal checks
-        function checkRemoveFromZeroOneOnlyNumbers(num) {
+        function checkRemoveFromTwoOnlyNumbers(num) {
           const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
-          if ((c!==0 && c!==1) && zeroOneOnlyNumbers.includes(num)) { zeroOneOnlyNumbers = zeroOneOnlyNumbers.filter(x=>x!==num); return true; } return false;
+          if (c!==2 && twoOnlyNumbers.includes(num)) { twoOnlyNumbers = twoOnlyNumbers.filter(x=>x!==num); return true; } return false;
         }
-        function checkRemoveFromTwoThreeOnlyNumbers(num) {
+        function checkRemoveFromThreeOnlyNumbers(num) {
           const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
-          if ((c<2||c>3) && twoThreeOnlyNumbers.includes(num)) { twoThreeOnlyNumbers = twoThreeOnlyNumbers.filter(x=>x!==num); return true; } return false;
+          if (c!==3 && threeOnlyNumbers.includes(num)) { threeOnlyNumbers = threeOnlyNumbers.filter(x=>x!==num); return true; } return false;
         }
         function checkRemoveFromThreeOrMoreNumbers(num) {
           const last60 = history.slice(-60); const c = last60.filter(n=>n===num).length;
@@ -553,35 +549,47 @@
         function calculateMissesAll() {
           if (history.length === 0) return;
           const lastSpin = history[history.length-1];
-          const prevZero = getPreviousZeroOneOnlyNumbers();
-          const prevTwo = getPreviousTwoThreeOnlyNumbers();
-          const prevThree = getPreviousThreeOrMoreNumbers();
+          const prevTwoOnly = getPreviousTwoOnlyNumbers();
+          const prevThreeOnly = getPreviousThreeOnlyNumbers();
+          const prevThreeOrMore = getPreviousThreeOrMoreNumbers();
           const prevFive = getPreviousFiveUntilZeroNumbers();
 
-          if (prevZero.length) { if (prevZero.includes(lastSpin)) { zeroOneOnlyMisses60=0; clearAlertForCategory("Zero and One Only"); } else zeroOneOnlyMisses60 += prevZero.length; }
-          if (prevTwo.length) { if (prevTwo.includes(lastSpin)) { twoThreeOnlyMisses60=0; clearAlertForCategory("Two and Three Only"); } else twoThreeOnlyMisses60 += prevTwo.length; }
-          if (prevThree.length) { if (prevThree.includes(lastSpin)) { threeOrMoreMisses60=0; clearAlertForCategory("Three or More"); } else threeOrMoreMisses60 += prevThree.length; }
-          if (prevFive.length) { if (prevFive.includes(lastSpin)) { fiveUntilZeroMisses60=0; clearAlertForCategory("Five until Zero"); } else fiveUntilZeroMisses60 += prevFive.length; }
+          if (prevTwoOnly.length) { 
+            if (prevTwoOnly.includes(lastSpin)) { twoOnlyMisses60=0; clearAlertForCategory("Two Only"); } 
+            else twoOnlyMisses60 += prevTwoOnly.length; 
+          }
+          if (prevThreeOnly.length) { 
+            if (prevThreeOnly.includes(lastSpin)) { threeOnlyMisses60=0; clearAlertForCategory("Three Only"); } 
+            else threeOnlyMisses60 += prevThreeOnly.length; 
+          }
+          if (prevThreeOrMore.length) { 
+            if (prevThreeOrMore.includes(lastSpin)) { threeOrMoreMisses60=0; clearAlertForCategory("Three or More"); } 
+            else threeOrMoreMisses60 += prevThreeOrMore.length; 
+          }
+          if (prevFive.length) { 
+            if (prevFive.includes(lastSpin)) { fiveUntilZeroMisses60=0; clearAlertForCategory("Five until Zero"); } 
+            else fiveUntilZeroMisses60 += prevFive.length; 
+          }
 
           const last60 = history.slice(-60);
           const map = {}; last60.forEach(n => map[n]=(map[n]||0)+1);
-          // add numbers
+          // add numbers to persistent sets
           for (let i=0;i<=36;i++) { let num=i.toString(); let cnt=map[num]||0; 
-            if (cnt===0||cnt===1) { if (!zeroOneOnlyNumbers.includes(num)) zeroOneOnlyNumbers.push(num); }
-            if (cnt>=2&&cnt<=3) { if (!twoThreeOnlyNumbers.includes(num)) twoThreeOnlyNumbers.push(num); }
+            if (cnt===2) { if (!twoOnlyNumbers.includes(num)) twoOnlyNumbers.push(num); }
+            if (cnt===3) { if (!threeOnlyNumbers.includes(num)) threeOnlyNumbers.push(num); }
             if (cnt>=3) { if (!threeOrMoreNumbers.includes(num)) threeOrMoreNumbers.push(num); }
             if (cnt>=5) { if (!fiveUntilZeroNumbers.includes(num)) fiveUntilZeroNumbers.push(num); }
           }
           let c00 = map["00"]||0;
-          if (c00===0||c00===1) { if (!zeroOneOnlyNumbers.includes("00")) zeroOneOnlyNumbers.push("00"); }
-          if (c00>=2&&c00<=3) { if (!twoThreeOnlyNumbers.includes("00")) twoThreeOnlyNumbers.push("00"); }
+          if (c00===2) { if (!twoOnlyNumbers.includes("00")) twoOnlyNumbers.push("00"); }
+          if (c00===3) { if (!threeOnlyNumbers.includes("00")) threeOnlyNumbers.push("00"); }
           if (c00>=3) { if (!threeOrMoreNumbers.includes("00")) threeOrMoreNumbers.push("00"); }
           if (c00>=5) { if (!fiveUntilZeroNumbers.includes("00")) fiveUntilZeroNumbers.push("00"); }
 
           // remove stale
           [...Array(37).keys()].map(i=>i.toString()).concat(["00"]).forEach(num => {
-            checkRemoveFromZeroOneOnlyNumbers(num);
-            checkRemoveFromTwoThreeOnlyNumbers(num);
+            checkRemoveFromTwoOnlyNumbers(num);
+            checkRemoveFromThreeOnlyNumbers(num);
             checkRemoveFromThreeOrMoreNumbers(num);
             checkRemoveFromFiveUntilZeroNumbers(num);
           });
@@ -616,20 +624,20 @@
             }
             document.getElementById(spanId).textContent = `Total misses: ${missesVal}`;
           }
-          updateCat("zeroOneOnly", findZeroOneOnlyNumbers(60), zeroOneOnlyMisses60, "zero-one-count", "zeroOneOnlyMissesText60");
-          updateCat("twoThreeOnly", findTwoThreeOnlyNumbers(60), twoThreeOnlyMisses60, "two-three-count", "twoThreeOnlyMissesText60");
+          updateCat("twoOnly", findTwoOnlyNumbers(60), twoOnlyMisses60, "two-only-count", "twoOnlyMissesText60");
+          updateCat("threeOnly", findThreeOnlyNumbers(60), threeOnlyMisses60, "three-only-count", "threeOnlyMissesText60");
           updateCat("threeOrMore", findThreeOrMoreNumbers(60), threeOrMoreMisses60, "three-or-more-count", "threeOrMoreMissesText60");
           updateCat("fiveUntilZero", findFiveUntilZeroNumbers(60), fiveUntilZeroMisses60, "five-until-zero-count", "fiveUntilZeroMissesText60");
         }
 
         function saveAllToLocalStorage() {
           localStorage.setItem("history", JSON.stringify(history));
-          localStorage.setItem("zeroOneOnlyMisses60", zeroOneOnlyMisses60);
-          localStorage.setItem("twoThreeOnlyMisses60", twoThreeOnlyMisses60);
+          localStorage.setItem("twoOnlyMisses60", twoOnlyMisses60);
+          localStorage.setItem("threeOnlyMisses60", threeOnlyMisses60);
           localStorage.setItem("threeOrMoreMisses60", threeOrMoreMisses60);
           localStorage.setItem("fiveUntilZeroMisses60", fiveUntilZeroMisses60);
-          localStorage.setItem("zeroOneOnlyNumbers", JSON.stringify(zeroOneOnlyNumbers));
-          localStorage.setItem("twoThreeOnlyNumbers", JSON.stringify(twoThreeOnlyNumbers));
+          localStorage.setItem("twoOnlyNumbers", JSON.stringify(twoOnlyNumbers));
+          localStorage.setItem("threeOnlyNumbers", JSON.stringify(threeOnlyNumbers));
           localStorage.setItem("threeOrMoreNumbers", JSON.stringify(threeOrMoreNumbers));
           localStorage.setItem("fiveUntilZeroNumbers", JSON.stringify(fiveUntilZeroNumbers));
           localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
@@ -662,8 +670,8 @@
           if (restorePreviousState()) { updateDisplay(); status.textContent="Undo successful."; }
           else {
             history.pop();
-            zeroOneOnlyMisses60=0; twoThreeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0;
-            zeroOneOnlyNumbers=[]; twoThreeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[];
+            twoOnlyMisses60=0; threeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0;
+            twoOnlyNumbers=[]; threeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[];
             alertedCategories={};
             const old = [...history];
             history=[];
@@ -675,8 +683,8 @@
 
         window.resetAll = function() {
           if (confirm("Reset all data?")) {
-            history=[]; zeroOneOnlyMisses60=0; twoThreeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0;
-            zeroOneOnlyNumbers=[]; twoThreeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[];
+            history=[]; twoOnlyMisses60=0; threeOnlyMisses60=0; threeOrMoreMisses60=0; fiveUntilZeroMisses60=0;
+            twoOnlyNumbers=[]; threeOnlyNumbers=[]; threeOrMoreNumbers=[]; fiveUntilZeroNumbers=[];
             stateHistory=[]; alertedCategories={};
             localStorage.clear();
             updateDisplay(); document.getElementById("inputStatus").textContent="All data reset";
@@ -686,8 +694,8 @@
 
         window.resetMisses = function(groupWithSuffix) {
           const type = groupWithSuffix.replace('60','');
-          if (type==='ZeroOneOnly') { zeroOneOnlyMisses60=0; clearAlertForCategory("Zero and One Only"); }
-          else if (type==='TwoThreeOnly') { twoThreeOnlyMisses60=0; clearAlertForCategory("Two and Three Only"); }
+          if (type==='TwoOnly') { twoOnlyMisses60=0; clearAlertForCategory("Two Only"); }
+          else if (type==='ThreeOnly') { threeOnlyMisses60=0; clearAlertForCategory("Three Only"); }
           else if (type==='ThreeOrMore') { threeOrMoreMisses60=0; clearAlertForCategory("Three or More"); }
           else if (type==='FiveUntilZero') { fiveUntilZeroMisses60=0; clearAlertForCategory("Five until Zero"); }
           else return;

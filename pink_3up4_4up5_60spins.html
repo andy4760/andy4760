@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pink Roulette Tracker + Group C Quadruplicates</title>
+  <title>Pink Roulette Tracker + Groups A/B/C/D (Two‑Row Layout)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -225,19 +225,26 @@
       padding-bottom: 5px;
       border-bottom: 2px solid #ffeb3b;
     }
+
+    /* ===== NEW TWO‑ROW LAYOUT ===== */
     .duplicate-groups {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 20px;
       margin-top: 15px;
-      justify-content: center;
     }
+    /* On smaller screens stack vertically */
+    @media (max-width: 768px) {
+      .duplicate-groups {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .group-box {
-      flex: 1;
-      min-width: 280px;
       background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
       padding: 10px;
+      width: 100%;
     }
     .group-a-box {
       border: 2px solid #2196F3;
@@ -247,6 +254,9 @@
     }
     .group-c-box {
       border: 2px solid #9C27B0; /* purple for group C */
+    }
+    .group-d-box {
+      border: 2px solid #00BCD4; /* cyan for group D */
     }
     .group-header {
       font-size: 1rem;
@@ -268,6 +278,10 @@
     .group-c-header {
       color: #9C27B0;
       border-bottom: 1px solid #9C27B0;
+    }
+    .group-d-header {
+      color: #00BCD4;
+      border-bottom: 1px solid #00BCD4;
     }
     .duplicate-list {
       display: flex;
@@ -560,13 +574,7 @@
         min-height: 60px;
       }
       
-      .duplicate-groups {
-        flex-direction: column;
-      }
-      
-      .group-box {
-        min-width: 100%;
-      }
+      /* groups already stack via grid media query */
       
       .misses-counter {
         flex-direction: column;
@@ -598,8 +606,8 @@
 <body>
   <div class="container">
     <header>
-      <h1>Pink Roulette Tracker + Quadruplicates</h1>
-      <div class="tagline">Track triplicates (A/B) & quadruplicates (C) in last 60 spins</div>
+      <h1>Pink Roulette Tracker + Quadruplicates (C) + Triplicates (D)</h1>
+      <div class="tagline">Group A/B triplicates w/ auto‑reset | Group C quadruplicates | Group D triplicates (no privilege)</div>
     </header>
 
     <div id="recentSpins"></div>
@@ -628,9 +636,9 @@
       <div id="inputStatus" class="input-status"></div>
     </div>
 
-    <!-- 60-Spin Section with three groups -->
+    <!-- 60-Spin Section with four groups, arranged in two rows -->
     <div class="duplicate-section">
-      <div class="duplicate-title">Triplicates (A/B) & Quadruplicates (C) in Last 60 Spins</div>
+      <div class="duplicate-title">Triplicates (A/B) & Quadruplicates (C) & Triplicates (D) in Last 60 Spins</div>
       <div class="duplicate-groups">
         <!-- Group A Triplicates (Black+Green) -->
         <div class="group-box group-a-box">
@@ -656,7 +664,7 @@
           </div>
         </div>
 
-        <!-- NEW: Group C Quadruplicates (all numbers) -->
+        <!-- Group C Quadruplicates (all numbers) -->
         <div class="group-box group-c-box">
           <div class="group-header group-c-header">Group C Quadruplicates (60)</div>
           <div id="groupCDuplicates60" class="duplicate-list">
@@ -667,11 +675,23 @@
             <button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button>
           </div>
         </div>
+
+        <!-- Group D Triplicates (all numbers, no auto-reset) -->
+        <div class="group-box group-d-box">
+          <div class="group-header group-d-header">Group D Triplicates (60) – no auto‑reset</div>
+          <div id="groupDDuplicates60" class="duplicate-list">
+            <div class="no-duplicates">No triplicates</div>
+          </div>
+          <div class="misses-counter">
+            <span id="groupDMissesText60">Misses: 0</span>
+            <button class="misses-reset-btn" onclick="resetMisses('D60')">Reset</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Alert Modal -->
+  <!-- Alert Modal (unchanged, works for A/B/C) -->
   <div id="alertModal" class="alert-modal">
     <div class="alert-content" id="alertContent">
       <div class="alert-title" id="alertTitle">?? HIT! ??</div>
@@ -709,7 +729,7 @@
     // Group A (black+green) , Group B (red+green)
     const groupA = ["0", "00", "2", "4", "6", "8", "10", "11", "13", "15", "17", "20", "22", "24", "26", "28", "29", "31", "33", "35"];
     const groupB = ["0", "00", "1", "3", "5", "7", "9", "12", "14", "16", "18", "19", "21", "23", "25", "27", "30", "32", "34", "36"];
-    // Group C includes ALL numbers (0,00,1..36) – we'll handle via logic, no need separate list
+    // Group D includes ALL numbers (0,00,1..36) – handled via overall counts
 
     // ==================== STATE VARIABLES ====================
     let history = JSON.parse(localStorage.getItem("history") || "[]");
@@ -722,9 +742,12 @@
     let missesB60 = parseInt(localStorage.getItem("missesB60") || "0");
     let autoResetPrivilegeB60 = JSON.parse(localStorage.getItem("autoResetPrivilegeB60") || "[]");
     
-    // NEW: Group C (quadruplicates, threshold 4)
+    // Group C (quadruplicates, threshold 4)
     let missesC60 = parseInt(localStorage.getItem("missesC60") || "0");
     let autoResetPrivilegeC60 = JSON.parse(localStorage.getItem("autoResetPrivilegeC60") || "[]");
+    
+    // NEW: Group D (triplicates, threshold 3, no auto-reset privilege)
+    let missesD60 = parseInt(localStorage.getItem("missesD60") || "0");
     
     // Undo history
     let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
@@ -738,16 +761,17 @@
       return "";
     }
 
-    // Returns groups the number belongs to: A, B, and always C
+    // Returns groups the number belongs to: A, B, C (always), D (always)
     function getSubgroups(n) {
       const groups = [];
       if (groupA.includes(n)) groups.push("A");
       if (groupB.includes(n)) groups.push("B");
       groups.push("C"); // every spin belongs to group C
+      groups.push("D"); // every spin belongs to group D
       return groups;
     }
 
-    // Get frequency maps for A, B, and overall (C) from an array of spins
+    // Get frequency maps for A, B, and overall (C/D) from an array of spins
     function getGroupCounts(spins) {
       const groupACounts = {};
       const groupBCounts = {};
@@ -784,7 +808,7 @@
     function saveState() {
       const state = {
         history: [...history],
-        missesA60, missesB60, missesC60,
+        missesA60, missesB60, missesC60, missesD60,
         autoResetPrivilegeA60: [...autoResetPrivilegeA60],
         autoResetPrivilegeB60: [...autoResetPrivilegeB60],
         autoResetPrivilegeC60: [...autoResetPrivilegeC60]
@@ -801,6 +825,7 @@
       missesA60 = prev.missesA60 || 0;
       missesB60 = prev.missesB60 || 0;
       missesC60 = prev.missesC60 || 0;
+      missesD60 = prev.missesD60 || 0;
       autoResetPrivilegeA60 = prev.autoResetPrivilegeA60 || [];
       autoResetPrivilegeB60 = prev.autoResetPrivilegeB60 || [];
       autoResetPrivilegeC60 = prev.autoResetPrivilegeC60 || [];
@@ -810,7 +835,7 @@
     }
 
     // ==================== CORE LOGIC ====================
-    // Calculate misses & privileges for all three groups based on last 60 spins
+    // Calculate misses & privileges for all groups based on last 60 spins
     function calculateMissesAndPrivileges() {
       if (history.length === 0) return;
 
@@ -824,15 +849,15 @@
       const prevCounts = getGroupCounts(prevLast60);
       const currCounts = getGroupCounts(currentLast60);
 
-      // --- Helper to update a group (threshold T, hits reset misses, auto-reset on drop from T to T-1) ---
-      function updateGroup(groupLetter, threshold, prevMap, currMap, missesVar, privilegeArray) {
+      // --- Helper for groups with privilege (A,B,C) ---
+      function updateGroupWithPrivilege(groupLetter, threshold, prevMap, currMap, missesVar, privilegeArray) {
         // Find previous qualifying numbers (count >= threshold)
         const prevQualifiers = [];
         for (const [num, cnt] of Object.entries(prevMap)) {
           if (cnt >= threshold) prevQualifiers.push(num);
         }
 
-        // Hit detection: if lastSpin is in prevQualifiers and belongs to this group (always true for C)
+        // Hit detection: if lastSpin is in prevQualifiers and belongs to this group
         if (prevQualifiers.length > 0) {
           const belongs = (groupLetter === 'C') || lastGroups.includes(groupLetter);
           if (belongs && prevQualifiers.includes(lastSpin)) {
@@ -852,7 +877,7 @@
             if (currCnt === threshold - 1) {
               missesVar = 0;
               privilegeArray = privilegeArray.filter(x => x !== num);
-              // Show alert for auto-reset (defer to avoid DOM conflict)
+              // Show alert for auto-reset
               setTimeout(() => showAutoResetAlert(num, groupLetter, threshold-1, "60"), 50);
             }
           }
@@ -862,19 +887,32 @@
       }
 
       // Apply for Group A (threshold 3)
-      let resA = updateGroup('A', 3, prevCounts.groupACounts, currCounts.groupACounts, missesA60, autoResetPrivilegeA60);
+      let resA = updateGroupWithPrivilege('A', 3, prevCounts.groupACounts, currCounts.groupACounts, missesA60, autoResetPrivilegeA60);
       missesA60 = resA.misses;
       autoResetPrivilegeA60 = resA.privileges;
 
       // Group B (threshold 3)
-      let resB = updateGroup('B', 3, prevCounts.groupBCounts, currCounts.groupBCounts, missesB60, autoResetPrivilegeB60);
+      let resB = updateGroupWithPrivilege('B', 3, prevCounts.groupBCounts, currCounts.groupBCounts, missesB60, autoResetPrivilegeB60);
       missesB60 = resB.misses;
       autoResetPrivilegeB60 = resB.privileges;
 
-      // Group C (threshold 4) – note: lastSpin always belongs
-      let resC = updateGroup('C', 4, prevCounts.groupCCounts, currCounts.groupCCounts, missesC60, autoResetPrivilegeC60);
+      // Group C (threshold 4)
+      let resC = updateGroupWithPrivilege('C', 4, prevCounts.groupCCounts, currCounts.groupCCounts, missesC60, autoResetPrivilegeC60);
       missesC60 = resC.misses;
       autoResetPrivilegeC60 = resC.privileges;
+
+      // --- Group D (threshold 3, no privilege, no auto-reset) ---
+      const prevTriplesD = [];
+      for (const [num, cnt] of Object.entries(prevCounts.groupCCounts)) {
+        if (cnt >= 3) prevTriplesD.push(num);
+      }
+      if (prevTriplesD.length > 0) {
+        if (prevTriplesD.includes(lastSpin)) {
+          missesD60 = 0; // hit
+        } else {
+          missesD60 += prevTriplesD.length; // miss
+        }
+      }
     }
 
     // ==================== ALERT HANDLING ====================
@@ -893,7 +931,6 @@
       
       alertGroupText.textContent = `Group ${group} (${windowSuffix} spins)`;
       
-      // Customize title based on group and type
       if (group === 'C') {
         if (alertType === 'newTriplicate') {
           alertTitle.textContent = '?? NEW QUADRUPLICATE! ??';
@@ -945,7 +982,7 @@
       document.getElementById('alertModal').style.display = 'none';
     }
 
-    // Check for new triplicate/quadruplicate or hit after adding a spin
+    // Check for new triplicate/quadruplicate or hit after adding a spin (Groups A,B,C only)
     function checkForAlert(lastSpin) {
       const lastSpins = history.slice(-60);
       const previousSpins = history.slice(0, -1);
@@ -956,7 +993,7 @@
       
       const groups = getSubgroups(lastSpin);
       
-      // Check Group A (triplicate)
+      // Group A
       if (groups.includes('A')) {
         const prevCnt = prevCounts.groupACounts[lastSpin] || 0;
         const currCnt = currCounts.groupACounts[lastSpin] || 0;
@@ -965,7 +1002,7 @@
           else if (prevCnt === 3 && currCnt === 3) showAlert(lastSpin, 'A', currCnt, 'hit', '60');
         }
       }
-      // Group B (triplicate)
+      // Group B
       if (groups.includes('B')) {
         const prevCnt = prevCounts.groupBCounts[lastSpin] || 0;
         const currCnt = currCounts.groupBCounts[lastSpin] || 0;
@@ -974,7 +1011,7 @@
           else if (prevCnt === 3 && currCnt === 3) showAlert(lastSpin, 'B', currCnt, 'hit', '60');
         }
       }
-      // Group C (quadruplicate)
+      // Group C
       {
         const prevCnt = prevCounts.groupCCounts[lastSpin] || 0;
         const currCnt = currCounts.groupCCounts[lastSpin] || 0;
@@ -983,10 +1020,11 @@
           else if (prevCnt === 4 && currCnt === 4) showAlert(lastSpin, 'C', currCnt, 'hit', '60');
         }
       }
+      // Group D has no alerts
     }
 
     // ==================== UI UPDATE ====================
-    function updateDuplicateDisplayForWindow(windowSize, suffix, missesA, missesB, missesC, privA, privB, privC) {
+    function updateDuplicateDisplayForWindow(windowSize, suffix, missesA, missesB, missesC, missesD, privA, privB, privC) {
       const lastSpins = history.slice(-windowSize);
       const counts = getGroupCounts(lastSpins);
       
@@ -1049,11 +1087,31 @@
           groupCDiv.appendChild(item);
         }
       }
+
+      // NEW: Group D triplicates (overall, threshold 3) – no privilege
+      const groupDTrips = extractTriplicates(counts.groupCCounts); // same overall counts
+      const groupDDiv = document.getElementById(`groupDDuplicates${suffix}`);
+      groupDDiv.innerHTML = '';
+      if (Object.keys(groupDTrips).length === 0) {
+        groupDDiv.innerHTML = '<div class="no-duplicates">No triplicates</div>';
+      } else {
+        for (const [num, cnt] of Object.entries(groupDTrips)) {
+          const col = getColor(num);
+          const item = document.createElement('div');
+          item.className = 'duplicate-item';
+          item.innerHTML = `
+            <div class="duplicate-number ${col}">${num}</div>
+            <div class="duplicate-count">${cnt}</div>
+          `; // no privilege indicator
+          groupDDiv.appendChild(item);
+        }
+      }
       
       // Update misses counters
       document.getElementById(`groupAMissesText${suffix}`).textContent = `Misses: ${missesA}`;
       document.getElementById(`groupBMissesText${suffix}`).textContent = `Misses: ${missesB}`;
       document.getElementById(`groupCMissesText${suffix}`).textContent = `Misses: ${missesC}`;
+      document.getElementById(`groupDMissesText${suffix}`).textContent = `Misses: ${missesD}`;
     }
 
     function updateDisplay() {
@@ -1073,7 +1131,7 @@
       }
       document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
       
-      updateDuplicateDisplayForWindow(60, "60", missesA60, missesB60, missesC60, autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeC60);
+      updateDuplicateDisplayForWindow(60, "60", missesA60, missesB60, missesC60, missesD60, autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeC60);
     }
 
     // ==================== PERSISTENCE ====================
@@ -1082,6 +1140,7 @@
       localStorage.setItem("missesA60", missesA60);
       localStorage.setItem("missesB60", missesB60);
       localStorage.setItem("missesC60", missesC60);
+      localStorage.setItem("missesD60", missesD60);
       localStorage.setItem("autoResetPrivilegeA60", JSON.stringify(autoResetPrivilegeA60));
       localStorage.setItem("autoResetPrivilegeB60", JSON.stringify(autoResetPrivilegeB60));
       localStorage.setItem("autoResetPrivilegeC60", JSON.stringify(autoResetPrivilegeC60));
@@ -1126,22 +1185,13 @@
         updateDisplay();
         document.getElementById("inputStatus").textContent = "Undo successful";
       } else {
-        // fallback
+        // fallback (should not happen often)
         history.pop();
-        // crude full recalc (simplified)
-        missesA60 = missesB60 = missesC60 = 0;
+        // crude reset: clear all and rebuild (simplified)
+        missesA60 = missesB60 = missesC60 = missesD60 = 0;
         autoResetPrivilegeA60 = autoResetPrivilegeB60 = autoResetPrivilegeC60 = [];
-        // Replay all spins to rebuild state (simplified: recalc from scratch)
-        for (let i = 0; i < history.length; i++) {
-          const spin = history[i];
-          // we need to recalc step by step, but for brevity we call calculateMissesAndPrivileges after each? 
-          // Better: recalc by reconstructing state using a temporary replay.
-          // We'll do a simple reset and then re-add all spins except last? Not trivial. 
-          // For the sake of time, we'll just clear and warn.
-          localStorage.clear();
-          history = [];
-          document.getElementById("inputStatus").textContent = "Undo fallback – data reset";
-        }
+        localStorage.clear();
+        document.getElementById("inputStatus").textContent = "Undo fallback – data reset";
         saveAllToLocalStorage();
         updateDisplay();
       }
@@ -1150,7 +1200,7 @@
     function resetAll() {
       if (confirm("Reset all data?")) {
         history = [];
-        missesA60 = missesB60 = missesC60 = 0;
+        missesA60 = missesB60 = missesC60 = missesD60 = 0;
         autoResetPrivilegeA60 = autoResetPrivilegeB60 = autoResetPrivilegeC60 = [];
         stateHistory = [];
         localStorage.clear();
@@ -1160,13 +1210,14 @@
     }
 
     function resetMisses(groupWithSuffix) {
-      const group = groupWithSuffix[0]; // 'A', 'B', 'C'
+      const group = groupWithSuffix[0]; // 'A', 'B', 'C', 'D'
       const suffix = groupWithSuffix.substring(1);
       if (confirm(`Reset misses for Group ${group} (${suffix} spins) to 0?`)) {
         saveState();
         if (group === 'A') missesA60 = 0;
         else if (group === 'B') missesB60 = 0;
         else if (group === 'C') missesC60 = 0;
+        else if (group === 'D') missesD60 = 0;
         saveAllToLocalStorage();
         updateDisplay();
         document.getElementById("inputStatus").textContent = `Group ${group} misses reset`;

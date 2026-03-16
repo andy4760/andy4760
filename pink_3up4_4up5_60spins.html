@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pink Roulette Tracker + Groups A/B/C/D (Two‑Row Layout)</title>
+  <title>Brown Roulette Tracker + Groups A/B/C/D (Two‑Row Layout)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -226,14 +226,13 @@
       border-bottom: 2px solid #ffeb3b;
     }
 
-    /* ===== NEW TWO‑ROW LAYOUT ===== */
+    /* ===== TWO‑ROW LAYOUT ===== */
     .duplicate-groups {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       margin-top: 15px;
     }
-    /* On smaller screens stack vertically */
     @media (max-width: 768px) {
       .duplicate-groups {
         grid-template-columns: 1fr;
@@ -253,10 +252,10 @@
       border: 2px solid #FF9800;
     }
     .group-c-box {
-      border: 2px solid #9C27B0; /* purple for group C */
+      border: 2px solid #9C27B0;
     }
     .group-d-box {
-      border: 2px solid #00BCD4; /* cyan for group D */
+      border: 2px solid #00BCD4;
     }
     .group-header {
       font-size: 1rem;
@@ -363,6 +362,37 @@
       border-radius: 2px;
       margin-top: 1px;
     }
+    /* Auto‑reset privilege box with its own misses counter */
+    .privilege-box {
+      margin-top: 20px;
+      border: 2px solid gold;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .privilege-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      color: gold;
+      border-bottom: 1px solid gold;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    .privilege-group-label {
+      font-size: 8px;
+      color: gold;
+      background: rgba(255, 215, 0, 0.2);
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+    .privilege-miss-badge {
+      font-size: 7px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffab91;
+      padding: 1px 2px;
+      border-radius: 2px;
+      margin-top: 1px;
+    }
     .numpad {
       position: fixed;
       bottom: 0;
@@ -413,7 +443,7 @@
       background: linear-gradient(145deg, #ef5350, #e53935); 
     }
     
-    /* Alert Modal */
+    /* Alert Modal (unchanged) */
     .alert-modal {
       display: none;
       position: fixed;
@@ -574,8 +604,6 @@
         min-height: 60px;
       }
       
-      /* groups already stack via grid media query */
-      
       .misses-counter {
         flex-direction: column;
         gap: 5px;
@@ -606,7 +634,7 @@
 <body>
   <div class="container">
     <header>
-      <h1>Pink Roulette Tracker + Quadruplicates (C) + Triplicates (D)</h1>
+      <h1>Pink Roulette Tracker </h1>
       <div class="tagline">Group A/B triplicates w/ auto‑reset | Group C quadruplicates | Group D triplicates (no privilege)</div>
     </header>
 
@@ -638,7 +666,7 @@
 
     <!-- 60-Spin Section with four groups, arranged in two rows -->
     <div class="duplicate-section">
-      <div class="duplicate-title">Triplicates (A/B) & Quadruplicates (C) & Triplicates (D) in Last 60 Spins</div>
+
       <div class="duplicate-groups">
         <!-- Group A Triplicates (Black+Green) -->
         <div class="group-box group-a-box">
@@ -687,11 +715,24 @@
             <button class="misses-reset-btn" onclick="resetMisses('D60')">Reset</button>
           </div>
         </div>
+      </div> <!-- end duplicate-groups -->
+
+      <!-- Auto‑Reset Privilege Box (Groups A/B/C) with collective misses counter -->
+      <div class="privilege-box">
+        <div class="privilege-title">Auto‑Reset Privileged Numbers (Groups A/B/C) — Misses Since Last Hit</div>
+        <div id="privilegeList" class="duplicate-list">
+          <div class="no-duplicates">No auto‑reset numbers</div>
+        </div>
+        <!-- New collective misses counter + reset button, like other groups -->
+        <div class="misses-counter" style="margin-top: 12px; border-top: 1px dashed gold; padding-top: 8px;">
+          <span id="privilegeMissesText">Misses: 0</span>
+          <button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button>
+        </div>
       </div>
-    </div>
+    </div> <!-- end duplicate-section -->
   </div>
 
-  <!-- Alert Modal (unchanged, works for A/B/C) -->
+  <!-- Alert Modal (unchanged) -->
   <div id="alertModal" class="alert-modal">
     <div class="alert-content" id="alertContent">
       <div class="alert-title" id="alertTitle">?? HIT! ??</div>
@@ -746,9 +787,12 @@
     let missesC60 = parseInt(localStorage.getItem("missesC60") || "0");
     let autoResetPrivilegeC60 = JSON.parse(localStorage.getItem("autoResetPrivilegeC60") || "[]");
     
-    // NEW: Group D (triplicates, threshold 3, no auto-reset privilege)
+    // Group D (triplicates, threshold 3, no auto-reset privilege)
     let missesD60 = parseInt(localStorage.getItem("missesD60") || "0");
     
+    // NEW: collective misses for all privileged numbers (Groups A/B/C combined)
+    let privilegeMisses = parseInt(localStorage.getItem("privilegeMisses") || "0");
+
     // Undo history
     let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
@@ -811,7 +855,8 @@
         missesA60, missesB60, missesC60, missesD60,
         autoResetPrivilegeA60: [...autoResetPrivilegeA60],
         autoResetPrivilegeB60: [...autoResetPrivilegeB60],
-        autoResetPrivilegeC60: [...autoResetPrivilegeC60]
+        autoResetPrivilegeC60: [...autoResetPrivilegeC60],
+        privilegeMisses
       };
       stateHistory.push(state);
       if (stateHistory.length > 50) stateHistory = stateHistory.slice(-50);
@@ -829,6 +874,7 @@
       autoResetPrivilegeA60 = prev.autoResetPrivilegeA60 || [];
       autoResetPrivilegeB60 = prev.autoResetPrivilegeB60 || [];
       autoResetPrivilegeC60 = prev.autoResetPrivilegeC60 || [];
+      privilegeMisses = prev.privilegeMisses || 0;
       saveAllToLocalStorage();
       localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
       return true;
@@ -848,6 +894,13 @@
 
       const prevCounts = getGroupCounts(prevLast60);
       const currCounts = getGroupCounts(currentLast60);
+
+      // Capture previous privileged sets (before updates) for privilegeMisses calculation
+      const prevPrivilegedSet = new Set([
+        ...autoResetPrivilegeA60,
+        ...autoResetPrivilegeB60,
+        ...autoResetPrivilegeC60
+      ]);
 
       // --- Helper for groups with privilege (A,B,C) ---
       function updateGroupWithPrivilege(groupLetter, threshold, prevMap, currMap, missesVar, privilegeArray) {
@@ -913,6 +966,17 @@
           missesD60 += prevTriplesD.length; // miss
         }
       }
+
+      // --- NEW: collective privilege misses (Groups A/B/C combined) ---
+      // Use the privileged set *before* this spin (prevPrivilegedSet)
+      if (prevPrivilegedSet.size > 0) {
+        if (prevPrivilegedSet.has(lastSpin)) {
+          privilegeMisses = 0; // hit on any privileged number
+        } else {
+          privilegeMisses += prevPrivilegedSet.size; // miss: add number of privileged numbers
+        }
+      }
+      // If prevPrivilegedSet was empty, misses stay unchanged (0 or whatever)
     }
 
     // ==================== ALERT HANDLING ====================
@@ -1088,7 +1152,7 @@
         }
       }
 
-      // NEW: Group D triplicates (overall, threshold 3) – no privilege
+      // Group D triplicates (overall, threshold 3) – no privilege
       const groupDTrips = extractTriplicates(counts.groupCCounts); // same overall counts
       const groupDDiv = document.getElementById(`groupDDuplicates${suffix}`);
       groupDDiv.innerHTML = '';
@@ -1114,6 +1178,64 @@
       document.getElementById(`groupDMissesText${suffix}`).textContent = `Misses: ${missesD}`;
     }
 
+    // Update the auto‑reset privilege display with individual miss badges + collective counter
+    function updatePrivilegeDisplay() {
+      const container = document.getElementById('privilegeList');
+      if (!container) return;
+
+      // Collect all numbers that have auto‑reset privilege in any group
+      const numbers = new Set();
+      autoResetPrivilegeA60.forEach(n => numbers.add(n));
+      autoResetPrivilegeB60.forEach(n => numbers.add(n));
+      autoResetPrivilegeC60.forEach(n => numbers.add(n));
+
+      // Sort: 0, 00, 1, 2, ... 36
+      const sorted = Array.from(numbers).sort((a, b) => {
+        if (a === '00' && b === '00') return 0;
+        if (a === '00') return -1;  // 00 before 0
+        if (b === '00') return 1;
+        const na = parseInt(a, 10);
+        const nb = parseInt(b, 10);
+        return na - nb;
+      });
+
+      container.innerHTML = '';
+      if (sorted.length === 0) {
+        container.innerHTML = '<div class="no-duplicates">No auto‑reset numbers</div>';
+      } else {
+        sorted.forEach(num => {
+          const groups = [];
+          if (autoResetPrivilegeA60.includes(num)) groups.push('A');
+          if (autoResetPrivilegeB60.includes(num)) groups.push('B');
+          if (autoResetPrivilegeC60.includes(num)) groups.push('C');
+          const groupStr = groups.join('/');
+          const col = getColor(num);
+
+          // Find last occurrence index
+          let lastIndex = -1;
+          for (let i = history.length - 1; i >= 0; i--) {
+            if (history[i] === num) {
+              lastIndex = i;
+              break;
+            }
+          }
+          const missesSinceLast = (lastIndex === -1) ? '?' : (history.length - 1 - lastIndex);
+
+          const item = document.createElement('div');
+          item.className = 'duplicate-item';
+          item.innerHTML = `
+            <div class="duplicate-number ${col}">${num}</div>
+            <div class="privilege-group-label">${groupStr}</div>
+            <div class="privilege-miss-badge">🚫${missesSinceLast}</div>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      // Update collective privilege misses counter
+      document.getElementById('privilegeMissesText').textContent = `Misses: ${privilegeMisses}`;
+    }
+
     function updateDisplay() {
       const container = document.getElementById("recentSpins");
       container.innerHTML = "";
@@ -1132,6 +1254,9 @@
       document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
       
       updateDuplicateDisplayForWindow(60, "60", missesA60, missesB60, missesC60, missesD60, autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeC60);
+      
+      // Update the auto‑reset privilege box (individual misses + collective counter)
+      updatePrivilegeDisplay();
     }
 
     // ==================== PERSISTENCE ====================
@@ -1144,6 +1269,7 @@
       localStorage.setItem("autoResetPrivilegeA60", JSON.stringify(autoResetPrivilegeA60));
       localStorage.setItem("autoResetPrivilegeB60", JSON.stringify(autoResetPrivilegeB60));
       localStorage.setItem("autoResetPrivilegeC60", JSON.stringify(autoResetPrivilegeC60));
+      localStorage.setItem("privilegeMisses", privilegeMisses);
       localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
     }
 
@@ -1187,9 +1313,9 @@
       } else {
         // fallback (should not happen often)
         history.pop();
-        // crude reset: clear all and rebuild (simplified)
         missesA60 = missesB60 = missesC60 = missesD60 = 0;
         autoResetPrivilegeA60 = autoResetPrivilegeB60 = autoResetPrivilegeC60 = [];
+        privilegeMisses = 0;
         localStorage.clear();
         document.getElementById("inputStatus").textContent = "Undo fallback – data reset";
         saveAllToLocalStorage();
@@ -1202,6 +1328,7 @@
         history = [];
         missesA60 = missesB60 = missesC60 = missesD60 = 0;
         autoResetPrivilegeA60 = autoResetPrivilegeB60 = autoResetPrivilegeC60 = [];
+        privilegeMisses = 0;
         stateHistory = [];
         localStorage.clear();
         updateDisplay();
@@ -1221,6 +1348,17 @@
         saveAllToLocalStorage();
         updateDisplay();
         document.getElementById("inputStatus").textContent = `Group ${group} misses reset`;
+      }
+    }
+
+    // New reset for collective privilege misses
+    function resetPrivilegeMisses() {
+      if (confirm("Reset collective misses for privileged numbers (Groups A/B/C) to 0?")) {
+        saveState();
+        privilegeMisses = 0;
+        saveAllToLocalStorage();
+        updateDisplay();
+        document.getElementById("inputStatus").textContent = "Privilege misses reset";
       }
     }
 
@@ -1245,6 +1383,9 @@
       if (stateHistory.length === 0 && history.length > 0) saveState();
       updateDisplay();
     });
+
+    // Expose resetPrivilegeMisses globally for button
+    window.resetPrivilegeMisses = resetPrivilegeMisses;
   </script>
 </body>
 </html>

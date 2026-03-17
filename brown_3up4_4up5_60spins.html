@@ -334,6 +334,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
     }
     .misses-counter span {
       flex: 1;
@@ -668,38 +670,41 @@
     <div class="duplicate-section">
 
       <div class="duplicate-groups">
-        <!-- Group A Triplicates (Black+Green) -->
+        <!-- Group A Triplicates (Black+Green) with TWO misses counters -->
         <div class="group-box group-a-box">
           <div class="group-header group-a-header">Group A Triplicates (60)</div>
           <div id="groupADuplicates60" class="duplicate-list">
             <div class="no-duplicates">No triplicates</div>
           </div>
-          <div class="misses-counter">
-            <span id="groupAMissesText60">Misses: 0</span>
+          <div class="misses-counter" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;">
+            <span>Auto: <span id="groupAMissesAutoText60">0</span></span>
+            <span>No auto: <span id="groupAMissesNoAutoText60">0</span></span>
             <button class="misses-reset-btn" onclick="resetMisses('A60')">Reset</button>
           </div>
         </div>
         
-        <!-- Group B Triplicates (Red+Green) -->
+        <!-- Group B Triplicates (Red+Green) with TWO misses counters -->
         <div class="group-box group-b-box">
           <div class="group-header group-b-header">Group B Triplicates (60)</div>
           <div id="groupBDuplicates60" class="duplicate-list">
             <div class="no-duplicates">No triplicates</div>
           </div>
-          <div class="misses-counter">
-            <span id="groupBMissesText60">Misses: 0</span>
+          <div class="misses-counter" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;">
+            <span>Auto: <span id="groupBMissesAutoText60">0</span></span>
+            <span>No auto: <span id="groupBMissesNoAutoText60">0</span></span>
             <button class="misses-reset-btn" onclick="resetMisses('B60')">Reset</button>
           </div>
         </div>
 
-        <!-- Group C Quadruplicates (all numbers) -->
+        <!-- Group C Quadruplicates (all numbers) with TWO misses counters -->
         <div class="group-box group-c-box">
           <div class="group-header group-c-header">Group C Quadruplicates (60)</div>
           <div id="groupCDuplicates60" class="duplicate-list">
             <div class="no-duplicates">No quadruplicates</div>
           </div>
-          <div class="misses-counter">
-            <span id="groupCMissesText60">Misses: 0</span>
+          <div class="misses-counter" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;">
+            <span>Auto: <span id="groupCMissesAutoText60">0</span></span>
+            <span>No auto: <span id="groupCMissesNoAutoText60">0</span></span>
             <button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button>
           </div>
         </div>
@@ -723,7 +728,6 @@
         <div id="privilegeList" class="duplicate-list">
           <div class="no-duplicates">No auto‑reset numbers</div>
         </div>
-        <!-- New collective misses counter + reset button, like other groups -->
         <div class="misses-counter" style="margin-top: 12px; border-top: 1px dashed gold; padding-top: 8px;">
           <span id="privilegeMissesText">Misses: 0</span>
           <button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button>
@@ -775,22 +779,25 @@
     // ==================== STATE VARIABLES ====================
     let history = JSON.parse(localStorage.getItem("history") || "[]");
     
-    // Group A (triplicates, threshold 3)
+    // Group A (triplicates, threshold 3) – dual counters
     let missesA60 = parseInt(localStorage.getItem("missesA60") || "0");
+    let missesA60NoAuto = parseInt(localStorage.getItem("missesA60NoAuto") || "0");
     let autoResetPrivilegeA60 = JSON.parse(localStorage.getItem("autoResetPrivilegeA60") || "[]");
     
-    // Group B (triplicates, threshold 3)
+    // Group B (triplicates, threshold 3) – dual counters
     let missesB60 = parseInt(localStorage.getItem("missesB60") || "0");
+    let missesB60NoAuto = parseInt(localStorage.getItem("missesB60NoAuto") || "0");
     let autoResetPrivilegeB60 = JSON.parse(localStorage.getItem("autoResetPrivilegeB60") || "[]");
     
-    // Group C (quadruplicates, threshold 4)
+    // Group C (quadruplicates, threshold 4) – dual counters
     let missesC60 = parseInt(localStorage.getItem("missesC60") || "0");
+    let missesC60NoAuto = parseInt(localStorage.getItem("missesC60NoAuto") || "0");
     let autoResetPrivilegeC60 = JSON.parse(localStorage.getItem("autoResetPrivilegeC60") || "[]");
     
     // Group D (triplicates, threshold 3, no auto-reset privilege)
     let missesD60 = parseInt(localStorage.getItem("missesD60") || "0");
     
-    // NEW: collective misses for all privileged numbers (Groups A/B/C combined)
+    // Collective misses for all privileged numbers (Groups A/B/C combined)
     let privilegeMisses = parseInt(localStorage.getItem("privilegeMisses") || "0");
 
     // Undo history
@@ -852,7 +859,10 @@
     function saveState() {
       const state = {
         history: [...history],
-        missesA60, missesB60, missesC60, missesD60,
+        missesA60, missesA60NoAuto,
+        missesB60, missesB60NoAuto,
+        missesC60, missesC60NoAuto,
+        missesD60,
         autoResetPrivilegeA60: [...autoResetPrivilegeA60],
         autoResetPrivilegeB60: [...autoResetPrivilegeB60],
         autoResetPrivilegeC60: [...autoResetPrivilegeC60],
@@ -868,8 +878,11 @@
       const prev = stateHistory.pop();
       history = prev.history;
       missesA60 = prev.missesA60 || 0;
+      missesA60NoAuto = prev.missesA60NoAuto || 0;
       missesB60 = prev.missesB60 || 0;
+      missesB60NoAuto = prev.missesB60NoAuto || 0;
       missesC60 = prev.missesC60 || 0;
+      missesC60NoAuto = prev.missesC60NoAuto || 0;
       missesD60 = prev.missesD60 || 0;
       autoResetPrivilegeA60 = prev.autoResetPrivilegeA60 || [];
       autoResetPrivilegeB60 = prev.autoResetPrivilegeB60 || [];
@@ -902,59 +915,119 @@
         ...autoResetPrivilegeC60
       ]);
 
-      // --- Helper for groups with privilege (A,B,C) ---
-      function updateGroupWithPrivilege(groupLetter, threshold, prevMap, currMap, missesVar, privilegeArray) {
-        // Find previous qualifying numbers (count >= threshold)
-        const prevQualifiers = [];
-        for (const [num, cnt] of Object.entries(prevMap)) {
-          if (cnt >= threshold) prevQualifiers.push(num);
-        }
+      // --- Group A (threshold 3) ---
+      {
+        const threshold = 3;
+        const prevMap = prevCounts.groupACounts;
+        const currMap = currCounts.groupACounts;
+        const groupLetter = 'A';
 
-        // Hit detection: if lastSpin is in prevQualifiers and belongs to this group
+        // Previous qualifiers
+        const prevQualifiers = [];
+        for (const [num, cnt] of Object.entries(prevMap)) if (cnt >= threshold) prevQualifiers.push(num);
+
         if (prevQualifiers.length > 0) {
-          const belongs = (groupLetter === 'C') || lastGroups.includes(groupLetter);
+          const belongs = lastGroups.includes('A');
           if (belongs && prevQualifiers.includes(lastSpin)) {
-            // HIT: reset misses, grant privilege if not already
-            missesVar = 0;
-            if (!privilegeArray.includes(lastSpin)) privilegeArray.push(lastSpin);
+            // HIT
+            missesA60 = 0;
+            missesA60NoAuto = 0;
+            if (!autoResetPrivilegeA60.includes(lastSpin)) autoResetPrivilegeA60.push(lastSpin);
           } else {
-            // MISS: add number of qualifiers
-            missesVar += prevQualifiers.length;
+            // MISS
+            missesA60 += prevQualifiers.length;
+            missesA60NoAuto += prevQualifiers.length;
           }
         }
 
-        // Auto‑reset when a privileged number drops from threshold to threshold-1
+        // Auto‑reset: privileged number drops from 3 to 2
         for (const [num, prevCnt] of Object.entries(prevMap)) {
-          if (prevCnt === threshold && privilegeArray.includes(num)) {
+          if (prevCnt === threshold && autoResetPrivilegeA60.includes(num)) {
             const currCnt = currMap[num] || 0;
             if (currCnt === threshold - 1) {
-              missesVar = 0;
-              privilegeArray = privilegeArray.filter(x => x !== num);
-              // Show alert for auto-reset
+              missesA60 = 0; // auto-reset only affects the auto counter
+              autoResetPrivilegeA60 = autoResetPrivilegeA60.filter(x => x !== num);
               setTimeout(() => showAutoResetAlert(num, groupLetter, threshold-1, "60"), 50);
             }
           }
         }
-
-        return { misses: missesVar, privileges: privilegeArray };
       }
 
-      // Apply for Group A (threshold 3)
-      let resA = updateGroupWithPrivilege('A', 3, prevCounts.groupACounts, currCounts.groupACounts, missesA60, autoResetPrivilegeA60);
-      missesA60 = resA.misses;
-      autoResetPrivilegeA60 = resA.privileges;
+      // --- Group B (threshold 3) ---
+      {
+        const threshold = 3;
+        const prevMap = prevCounts.groupBCounts;
+        const currMap = currCounts.groupBCounts;
+        const groupLetter = 'B';
 
-      // Group B (threshold 3)
-      let resB = updateGroupWithPrivilege('B', 3, prevCounts.groupBCounts, currCounts.groupBCounts, missesB60, autoResetPrivilegeB60);
-      missesB60 = resB.misses;
-      autoResetPrivilegeB60 = resB.privileges;
+        const prevQualifiers = [];
+        for (const [num, cnt] of Object.entries(prevMap)) if (cnt >= threshold) prevQualifiers.push(num);
 
-      // Group C (threshold 4)
-      let resC = updateGroupWithPrivilege('C', 4, prevCounts.groupCCounts, currCounts.groupCCounts, missesC60, autoResetPrivilegeC60);
-      missesC60 = resC.misses;
-      autoResetPrivilegeC60 = resC.privileges;
+        if (prevQualifiers.length > 0) {
+          const belongs = lastGroups.includes('B');
+          if (belongs && prevQualifiers.includes(lastSpin)) {
+            // HIT
+            missesB60 = 0;
+            missesB60NoAuto = 0;
+            if (!autoResetPrivilegeB60.includes(lastSpin)) autoResetPrivilegeB60.push(lastSpin);
+          } else {
+            // MISS
+            missesB60 += prevQualifiers.length;
+            missesB60NoAuto += prevQualifiers.length;
+          }
+        }
 
-      // --- Group D (threshold 3, no privilege, no auto-reset) ---
+        // Auto‑reset
+        for (const [num, prevCnt] of Object.entries(prevMap)) {
+          if (prevCnt === threshold && autoResetPrivilegeB60.includes(num)) {
+            const currCnt = currMap[num] || 0;
+            if (currCnt === threshold - 1) {
+              missesB60 = 0;
+              autoResetPrivilegeB60 = autoResetPrivilegeB60.filter(x => x !== num);
+              setTimeout(() => showAutoResetAlert(num, groupLetter, threshold-1, "60"), 50);
+            }
+          }
+        }
+      }
+
+      // --- Group C (threshold 4) ---
+      {
+        const threshold = 4;
+        const prevMap = prevCounts.groupCCounts;
+        const currMap = currCounts.groupCCounts;
+        const groupLetter = 'C';
+
+        const prevQualifiers = [];
+        for (const [num, cnt] of Object.entries(prevMap)) if (cnt >= threshold) prevQualifiers.push(num);
+
+        if (prevQualifiers.length > 0) {
+          const belongs = lastGroups.includes('C'); // always true, but kept for consistency
+          if (belongs && prevQualifiers.includes(lastSpin)) {
+            // HIT
+            missesC60 = 0;
+            missesC60NoAuto = 0;
+            if (!autoResetPrivilegeC60.includes(lastSpin)) autoResetPrivilegeC60.push(lastSpin);
+          } else {
+            // MISS
+            missesC60 += prevQualifiers.length;
+            missesC60NoAuto += prevQualifiers.length;
+          }
+        }
+
+        // Auto‑reset (4 -> 3)
+        for (const [num, prevCnt] of Object.entries(prevMap)) {
+          if (prevCnt === threshold && autoResetPrivilegeC60.includes(num)) {
+            const currCnt = currMap[num] || 0;
+            if (currCnt === threshold - 1) {
+              missesC60 = 0;
+              autoResetPrivilegeC60 = autoResetPrivilegeC60.filter(x => x !== num);
+              setTimeout(() => showAutoResetAlert(num, groupLetter, threshold-1, "60"), 50);
+            }
+          }
+        }
+      }
+
+      // --- Group D (threshold 3, no privilege, single counter) ---
       const prevTriplesD = [];
       for (const [num, cnt] of Object.entries(prevCounts.groupCCounts)) {
         if (cnt >= 3) prevTriplesD.push(num);
@@ -967,16 +1040,14 @@
         }
       }
 
-      // --- NEW: collective privilege misses (Groups A/B/C combined) ---
-      // Use the privileged set *before* this spin (prevPrivilegedSet)
+      // --- Collective privilege misses (Groups A/B/C combined) ---
       if (prevPrivilegedSet.size > 0) {
         if (prevPrivilegedSet.has(lastSpin)) {
-          privilegeMisses = 0; // hit on any privileged number
+          privilegeMisses = 0;
         } else {
-          privilegeMisses += prevPrivilegedSet.size; // miss: add number of privileged numbers
+          privilegeMisses += prevPrivilegedSet.size;
         }
       }
-      // If prevPrivilegedSet was empty, misses stay unchanged (0 or whatever)
     }
 
     // ==================== ALERT HANDLING ====================
@@ -1088,7 +1159,10 @@
     }
 
     // ==================== UI UPDATE ====================
-    function updateDuplicateDisplayForWindow(windowSize, suffix, missesA, missesB, missesC, missesD, privA, privB, privC) {
+    function updateDuplicateDisplayForWindow(windowSize, suffix,
+                                            missesA, missesB, missesC, missesD,
+                                            missesANoAuto, missesBNoAuto, missesCNoAuto,
+                                            privA, privB, privC) {
       const lastSpins = history.slice(-windowSize);
       const counts = getGroupCounts(lastSpins);
       
@@ -1153,7 +1227,7 @@
       }
 
       // Group D triplicates (overall, threshold 3) – no privilege
-      const groupDTrips = extractTriplicates(counts.groupCCounts); // same overall counts
+      const groupDTrips = extractTriplicates(counts.groupCCounts);
       const groupDDiv = document.getElementById(`groupDDuplicates${suffix}`);
       groupDDiv.innerHTML = '';
       if (Object.keys(groupDTrips).length === 0) {
@@ -1166,15 +1240,18 @@
           item.innerHTML = `
             <div class="duplicate-number ${col}">${num}</div>
             <div class="duplicate-count">${cnt}</div>
-          `; // no privilege indicator
+          `;
           groupDDiv.appendChild(item);
         }
       }
       
-      // Update misses counters
-      document.getElementById(`groupAMissesText${suffix}`).textContent = `Misses: ${missesA}`;
-      document.getElementById(`groupBMissesText${suffix}`).textContent = `Misses: ${missesB}`;
-      document.getElementById(`groupCMissesText${suffix}`).textContent = `Misses: ${missesC}`;
+      // Update misses counters (dual for A, B, C; single for D)
+      document.getElementById(`groupAMissesAutoText${suffix}`).textContent = missesA;
+      document.getElementById(`groupAMissesNoAutoText${suffix}`).textContent = missesANoAuto;
+      document.getElementById(`groupBMissesAutoText${suffix}`).textContent = missesB;
+      document.getElementById(`groupBMissesNoAutoText${suffix}`).textContent = missesBNoAuto;
+      document.getElementById(`groupCMissesAutoText${suffix}`).textContent = missesC;
+      document.getElementById(`groupCMissesNoAutoText${suffix}`).textContent = missesCNoAuto;
       document.getElementById(`groupDMissesText${suffix}`).textContent = `Misses: ${missesD}`;
     }
 
@@ -1183,16 +1260,14 @@
       const container = document.getElementById('privilegeList');
       if (!container) return;
 
-      // Collect all numbers that have auto‑reset privilege in any group
       const numbers = new Set();
       autoResetPrivilegeA60.forEach(n => numbers.add(n));
       autoResetPrivilegeB60.forEach(n => numbers.add(n));
       autoResetPrivilegeC60.forEach(n => numbers.add(n));
 
-      // Sort: 0, 00, 1, 2, ... 36
       const sorted = Array.from(numbers).sort((a, b) => {
         if (a === '00' && b === '00') return 0;
-        if (a === '00') return -1;  // 00 before 0
+        if (a === '00') return -1;
         if (b === '00') return 1;
         const na = parseInt(a, 10);
         const nb = parseInt(b, 10);
@@ -1211,7 +1286,6 @@
           const groupStr = groups.join('/');
           const col = getColor(num);
 
-          // Find last occurrence index
           let lastIndex = -1;
           for (let i = history.length - 1; i >= 0; i--) {
             if (history[i] === num) {
@@ -1232,7 +1306,6 @@
         });
       }
 
-      // Update collective privilege misses counter
       document.getElementById('privilegeMissesText').textContent = `Misses: ${privilegeMisses}`;
     }
 
@@ -1253,9 +1326,11 @@
       }
       document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
       
-      updateDuplicateDisplayForWindow(60, "60", missesA60, missesB60, missesC60, missesD60, autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeC60);
+      updateDuplicateDisplayForWindow(60, "60",
+                                      missesA60, missesB60, missesC60, missesD60,
+                                      missesA60NoAuto, missesB60NoAuto, missesC60NoAuto,
+                                      autoResetPrivilegeA60, autoResetPrivilegeB60, autoResetPrivilegeC60);
       
-      // Update the auto‑reset privilege box (individual misses + collective counter)
       updatePrivilegeDisplay();
     }
 
@@ -1263,8 +1338,11 @@
     function saveAllToLocalStorage() {
       localStorage.setItem("history", JSON.stringify(history));
       localStorage.setItem("missesA60", missesA60);
+      localStorage.setItem("missesA60NoAuto", missesA60NoAuto);
       localStorage.setItem("missesB60", missesB60);
+      localStorage.setItem("missesB60NoAuto", missesB60NoAuto);
       localStorage.setItem("missesC60", missesC60);
+      localStorage.setItem("missesC60NoAuto", missesC60NoAuto);
       localStorage.setItem("missesD60", missesD60);
       localStorage.setItem("autoResetPrivilegeA60", JSON.stringify(autoResetPrivilegeA60));
       localStorage.setItem("autoResetPrivilegeB60", JSON.stringify(autoResetPrivilegeB60));
@@ -1311,9 +1389,8 @@
         updateDisplay();
         document.getElementById("inputStatus").textContent = "Undo successful";
       } else {
-        // fallback (should not happen often)
         history.pop();
-        missesA60 = missesB60 = missesC60 = missesD60 = 0;
+        missesA60 = missesA60NoAuto = missesB60 = missesB60NoAuto = missesC60 = missesC60NoAuto = missesD60 = 0;
         autoResetPrivilegeA60 = autoResetPrivilegeB60 = autoResetPrivilegeC60 = [];
         privilegeMisses = 0;
         localStorage.clear();
@@ -1326,7 +1403,7 @@
     function resetAll() {
       if (confirm("Reset all data?")) {
         history = [];
-        missesA60 = missesB60 = missesC60 = missesD60 = 0;
+        missesA60 = missesA60NoAuto = missesB60 = missesB60NoAuto = missesC60 = missesC60NoAuto = missesD60 = 0;
         autoResetPrivilegeA60 = autoResetPrivilegeB60 = autoResetPrivilegeC60 = [];
         privilegeMisses = 0;
         stateHistory = [];
@@ -1341,17 +1418,24 @@
       const suffix = groupWithSuffix.substring(1);
       if (confirm(`Reset misses for Group ${group} (${suffix} spins) to 0?`)) {
         saveState();
-        if (group === 'A') missesA60 = 0;
-        else if (group === 'B') missesB60 = 0;
-        else if (group === 'C') missesC60 = 0;
-        else if (group === 'D') missesD60 = 0;
+        if (group === 'A') {
+          missesA60 = 0;
+          missesA60NoAuto = 0;
+        } else if (group === 'B') {
+          missesB60 = 0;
+          missesB60NoAuto = 0;
+        } else if (group === 'C') {
+          missesC60 = 0;
+          missesC60NoAuto = 0;
+        } else if (group === 'D') {
+          missesD60 = 0;
+        }
         saveAllToLocalStorage();
         updateDisplay();
         document.getElementById("inputStatus").textContent = `Group ${group} misses reset`;
       }
     }
 
-    // New reset for collective privilege misses
     function resetPrivilegeMisses() {
       if (confirm("Reset collective misses for privileged numbers (Groups A/B/C) to 0?")) {
         saveState();
@@ -1384,7 +1468,6 @@
       updateDisplay();
     });
 
-    // Expose resetPrivilegeMisses globally for button
     window.resetPrivilegeMisses = resetPrivilegeMisses;
   </script>
 </body>

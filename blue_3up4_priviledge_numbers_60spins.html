@@ -125,26 +125,30 @@
       padding: 15px;
       margin: 20px 0;
     }
-    /* LAYOUT: rows with 2 columns, plus new hit sequence row */
-    .row-1, .row-2, .row-3, .row-4, .row-hitseq {
+    
+    /* NEW LAYOUT ROWS */
+    .row-combined, .row-groupd-priv, .row-a-b, .row-top5-c {
       display: grid;
       gap: 20px;
       margin-bottom: 20px;
-    }
-    .row-1, .row-2, .row-3, .row-4 {
       grid-template-columns: 1fr 1fr;
     }
     .row-hitseq {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 20px;
       grid-template-columns: 1fr;
     }
     @media (max-width: 768px) {
-      .row-1, .row-2, .row-3, .row-4 {
+      .row-combined, .row-groupd-priv, .row-a-b, .row-top5-c {
         grid-template-columns: 1fr;
       }
       .row-hitseq {
         grid-template-columns: 1fr;
       }
     }
+    
+    /* original box styles */
     .group-box, .three-only-box, .privilege-box, .combined-box, .top5-box, .hitseq-box {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 12px;
@@ -298,6 +302,7 @@
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
   <div class="controls">
+    <div id="entryCount">Total spins: 0</div>
     <input id="numberInput" placeholder="0-36 / 00" maxlength="2" />
     <button onclick="addNumber()">Add Spin</button>
     <button onclick="undo()">Undo</button>
@@ -305,38 +310,23 @@
     <div id="inputStatus" class="input-status"></div>
   </div>
   <div id="recentSpins"></div>
-  <div id="entryCount">Total spins: 0</div>
 
   <div class="duplicate-section">
-    <!-- ROW 1: Group D Triplicates (60) + Auto-Reset Privileged Numbers -->
-    <div class="row-1">
-      <div class="group-box group-d-box">
-        <div class="group-header group-d-header">Group D Triplicates (60) Three Or More</div>
-        <div id="groupDDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="groupDMissesText60">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('D60')">Reset</button></div>
-      </div>
-      <div class="privilege-box">
-        <div class="privilege-title">Auto‑Reset Privileged Numbers Until Gone </div>
-        <div id="privilegeList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="privilegeMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button></div>
-      </div>
-    </div>
-
-    <!-- ROW 2: COMBINED (Privileged ∪ Three Only) + TOP 5 PRIVILEGED -->
-    <div class="row-2">
+    <!-- FIRST HORIZONTAL: COMBINED + THREE ONLY -->
+    <div class="row-combined">
       <div class="combined-box">
-        <div class="combined-title">⚡ COMBINED: Privileged Numbers + Three Only </div>
+        <div class="combined-title">⚡ COMBINED: Privileged Numbers + Three Only</div>
         <div id="combinedList" class="duplicate-list"><div class="no-duplicates">—</div></div>
         <div class="misses-counter"><span id="combinedMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetCombinedMisses()">Reset</button></div>
       </div>
-      <div class="top5-box">
-        <div class="top5-header">🔥 TOP 5 PRIVILEGED (most recent)</div>
-        <div id="top5List" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="top5MissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetTop5Misses()">Reset</button></div>
+      <div class="three-only-box">
+        <div class="three-only-title">Three Only (exact triplicates)</div>
+        <div id="threeOnlyList" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="threeOnlyMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('Three60')">Reset</button></div>
       </div>
     </div>
 
-    <!-- NEW ROW: HIT SEQUENCE for COMBINED (misses totals at each hit) -->
+    <!-- SECOND HORIZONTAL: COMBINED HIT SEQUENCE (full width) -->
     <div class="row-hitseq">
       <div class="hitseq-box">
         <div class="hitseq-header">📈 COMBINED HIT SEQUENCE (misses totals at each hit)</div>
@@ -345,22 +335,22 @@
       </div>
     </div>
 
-    <!-- ROW 3: Three Only (exact triplicates) + Group C Quadruplicates (60) -->
-    <div class="row-3">
-      <div class="three-only-box">
-        <div class="three-only-title">Three Only (exact triplicates)</div>
-        <div id="threeOnlyList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="threeOnlyMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('Three60')">Reset</button></div>
+    <!-- THIRD HORIZONTAL: Group D Triplicates + Auto-Reset Privileged -->
+    <div class="row-groupd-priv">
+      <div class="group-box group-d-box">
+        <div class="group-header group-d-header">Group D Triplicates (60) Three Or More</div>
+        <div id="groupDDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="groupDMissesText60">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('D60')">Reset</button></div>
       </div>
-      <div class="group-box group-c-box">
-        <div class="group-header group-c-header">Group C Quadruplicates (60)</div>
-        <div id="groupCDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span>Auto: <span id="groupCMissesAutoText60">0</span></span><span>No auto: <span id="groupCMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button></div>
+      <div class="privilege-box">
+        <div class="privilege-title">Auto‑Reset Privileged Numbers Until Gone</div>
+        <div id="privilegeList" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="privilegeMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button></div>
       </div>
     </div>
 
-    <!-- ROW 4: Group A Triplicates (60) + Group B Triplicates (60) -->
-    <div class="row-4">
+    <!-- FOURTH HORIZONTAL: Group A + Group B -->
+    <div class="row-a-b">
       <div class="group-box group-a-box">
         <div class="group-header group-a-header">Group A Triplicates (60)</div>
         <div id="groupADuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
@@ -370,6 +360,20 @@
         <div class="group-header group-b-header">Group B Triplicates (60)</div>
         <div id="groupBDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
         <div class="misses-counter"><span>Auto: <span id="groupBMissesAutoText60">0</span></span><span>No auto: <span id="groupBMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('B60')">Reset</button></div>
+      </div>
+    </div>
+
+    <!-- FIFTH HORIZONTAL: TOP 5 PRIVILEGED + Group C Quadruplicates -->
+    <div class="row-top5-c">
+      <div class="top5-box">
+        <div class="top5-header">🔥 TOP 5 PRIVILEGED (most recent)</div>
+        <div id="top5List" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="top5MissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetTop5Misses()">Reset</button></div>
+      </div>
+      <div class="group-box group-c-box">
+        <div class="group-header group-c-header">Group C Quadruplicates (60)</div>
+        <div id="groupCDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span>Auto: <span id="groupCMissesAutoText60">0</span></span><span>No auto: <span id="groupCMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button></div>
       </div>
     </div>
   </div>
@@ -414,10 +418,9 @@
   let privilegeMisses = parseInt(localStorage.getItem("privilegeMisses") || "0");
   let combinedMisses = parseInt(localStorage.getItem("combinedMisses") || "0");
   let top5Misses = parseInt(localStorage.getItem("top5Misses") || "0");
-  let combinedHitHistory = JSON.parse(localStorage.getItem("combinedHitHistory") || "[]"); // array of misses totals at each hit
+  let combinedHitHistory = JSON.parse(localStorage.getItem("combinedHitHistory") || "[]");
   let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
-  // helpers
   function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n,10); if (colors.red.includes(num)) return "red"; if (colors.black.includes(num)) return "black"; return ""; }
   function getSubgroups(n) { const groups = []; if (groupA.includes(n)) groups.push("A"); if (groupB.includes(n)) groups.push("B"); groups.push("C","D"); return groups; }
   function getGroupCounts(spins) {
@@ -430,7 +433,6 @@
   function extractExactTriplicates(map) { const res={}; for(let [num,cnt] of Object.entries(map)) if(cnt===3) res[num]=cnt; return res; }
   function lastOccurrence(num, arr) { for(let i=arr.length-1; i>=0; i--) if(arr[i]===num) return i; return -1; }
   
-  // Get top 5 privileged numbers (most recent last occurrence) from union set
   function getTop5PrivilegedSet(historyArr, privilegeUnionArray) {
     if(!privilegeUnionArray.length) return [];
     const withLastIdx = privilegeUnionArray.map(num => ({ num, lastIdx: lastOccurrence(num, historyArr) }));
@@ -438,7 +440,6 @@
     return withLastIdx.slice(0,5).map(item => item.num);
   }
 
-  // Combined set (Privileged + Three Only exact)
   function getPrivilegedAndThreeOnlySetInfo() {
     const last60 = history.slice(-60);
     const counts = getGroupCounts(last60);
@@ -507,7 +508,6 @@
     localStorage.setItem("stateHistory",JSON.stringify(stateHistory));
   }
 
-  // CORE LOGIC (updated to record combined hit sequence)
   function calculateMissesAndPrivileges() {
     if(history.length===0) return;
     const lastSpin = history[history.length-1];
@@ -517,10 +517,7 @@
     const prevCounts = getGroupCounts(prevLast60);
     const currCounts = getGroupCounts(currentLast60);
     
-    // Privileged numbers union (previous state)
     const prevPrivSet = new Set([...autoResetPrivilegeA60, ...autoResetPrivilegeB60, ...autoResetPrivilegeC60]);
-    
-    // --- TOP 5 MISSES (from previous top5 privileged numbers) ---
     const prevPrivilegeArray = Array.from(prevPrivSet);
     const prevTop5Numbers = getTop5PrivilegedSet(prevSpins, prevPrivilegeArray);
     const prevTop5Set = new Set(prevTop5Numbers);
@@ -529,23 +526,18 @@
       else top5Misses += prevTop5Set.size;
     }
     
-    // --- COMBINED MISSES & HIT SEQUENCE ---
     const prevExactThree = new Set();
     for(let [num,cnt] of Object.entries(prevCounts.groupCCounts)) if(cnt === 3) prevExactThree.add(num);
     const prevCombinedSet = new Set([...prevPrivSet, ...prevExactThree]);
     if(prevCombinedSet.size > 0) {
       if(prevCombinedSet.has(lastSpin)) {
-        // HIT: record the current combinedMisses (the misses total before reset)
-        if(combinedMisses > 0 || true) { // record even 0 if you want, but typical sequence records the miss count at hit
-          combinedHitHistory.push(combinedMisses);
-        }
+        combinedHitHistory.push(combinedMisses);
         combinedMisses = 0;
       } else {
         combinedMisses += prevCombinedSet.size;
       }
     }
     
-    // Group A, B, C, D, Three Only logic (unchanged)
     const thresholdA = 3;
     const prevQualifiersA = Object.entries(prevCounts.groupACounts).filter(([_,c]) => c>=thresholdA).map(([n])=>n);
     if(prevQualifiersA.length>0) {
@@ -671,7 +663,6 @@
   }
 
   function updateDisplay() {
-    // ... (previous display code unchanged, plus new hit sequence)
     const container = document.getElementById("recentSpins");
     container.innerHTML = "";
     for(let i=0;i<60;i++) {
@@ -685,7 +676,6 @@
     const last60 = history.slice(-60);
     const counts = getGroupCounts(last60);
     
-    // Group A, B, C, D, Three Only displays (unchanged)
     const aTrips = extractTriplicates(counts.groupACounts);
     const aDiv = document.getElementById("groupADuplicates60");
     aDiv.innerHTML = Object.keys(aTrips).length ? "" : '<div class="no-duplicates">No triplicates</div>';
@@ -728,7 +718,6 @@
       threeDiv.appendChild(item);
     }
     
-    // Privilege full list
     const privSet = new Set([...autoResetPrivilegeA60, ...autoResetPrivilegeB60, ...autoResetPrivilegeC60]);
     const privDiv = document.getElementById("privilegeList");
     if(privSet.size === 0) privDiv.innerHTML = '<div class="no-duplicates">No auto‑reset numbers</div>';
@@ -751,7 +740,6 @@
       }
     }
     
-    // TOP 5 display
     const allPrivilegeArray = Array.from(privSet);
     const top5Numbers = getTop5PrivilegedSet(history, allPrivilegeArray);
     const top5Container = document.getElementById("top5List");
@@ -767,7 +755,6 @@
       }
     }
     
-    // Combined box
     const combinedInfo = getPrivilegedAndThreeOnlySetInfo();
     const combinedContainer = document.getElementById("combinedList");
     if(combinedInfo.length === 0) combinedContainer.innerHTML = '<div class="no-duplicates">No privileged numbers or exact triplicates</div>';
@@ -781,7 +768,6 @@
       }
     }
     
-    // Hit sequence display
     const hitSeqContainer = document.getElementById("combinedHitSeqList");
     if(combinedHitHistory.length === 0) hitSeqContainer.innerHTML = '<div class="no-duplicates">No hits yet</div>';
     else {
@@ -794,7 +780,6 @@
     }
     document.getElementById("hitSeqCount").textContent = combinedHitHistory.length;
     
-    // Update all miss counters
     document.getElementById("combinedMissesText").textContent = `Misses: ${combinedMisses}`;
     document.getElementById("groupAMissesAutoText60").textContent = missesA60;
     document.getElementById("groupAMissesNoAutoText60").textContent = missesA60NoAuto;
@@ -808,7 +793,6 @@
     document.getElementById("top5MissesText").textContent = `Misses: ${top5Misses}`;
   }
 
-  // Public functions
   function addNumber() {
     let val = document.getElementById("numberInput").value.trim();
     if(!val) { document.getElementById("inputStatus").textContent = "Enter number"; return; }

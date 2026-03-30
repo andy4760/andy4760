@@ -125,21 +125,31 @@
       padding: 15px;
       margin: 20px 0;
     }
-    /* NEW LAYOUT: 4 rows, each with 2 columns */
-    .row-1, .row-2, .row-3, .row-4 {
+    
+    /* NEW LAYOUT ROWS */
+    .row-combined, .row-groupd-priv, .row-a-b, .row-top5-c {
       display: grid;
       gap: 20px;
       margin-bottom: 20px;
-    }
-    .row-1, .row-2, .row-3, .row-4 {
       grid-template-columns: 1fr 1fr;
     }
+    .row-hitseq {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 20px;
+      grid-template-columns: 1fr;
+    }
     @media (max-width: 768px) {
-      .row-1, .row-2, .row-3, .row-4 {
+      .row-combined, .row-groupd-priv, .row-a-b, .row-top5-c {
+        grid-template-columns: 1fr;
+      }
+      .row-hitseq {
         grid-template-columns: 1fr;
       }
     }
-    .group-box, .three-only-box, .privilege-box, .combined-box, .top5-box {
+    
+    /* original box styles */
+    .group-box, .three-only-box, .privilege-box, .combined-box, .top5-box, .hitseq-box {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 12px;
       padding: 12px;
@@ -152,6 +162,7 @@
     .group-b-box { border: 2px solid #FF9800; }
     .group-c-box { border: 2px solid #9C27B0; }
     .top5-box { border: 2px solid #E91E63; background: rgba(233,30,99,0.1); }
+    .hitseq-box { border: 2px solid #aa66ff; background: rgba(170,102,255,0.1); }
     .group-header {
       font-weight: bold;
       text-align: center;
@@ -174,6 +185,7 @@
     .group-b-header { color: #FF9800; border-bottom-color: #FF9800; }
     .group-c-header { color: #9C27B0; border-bottom-color: #9C27B0; }
     .top5-header { color: #E91E63; border-bottom: 1px solid #E91E63; text-align: center; margin-bottom: 10px; font-weight: bold; }
+    .hitseq-header { color: #aa66ff; border-bottom: 1px solid #aa66ff; text-align: center; margin-bottom: 10px; font-weight: bold; }
     .duplicate-list {
       display: flex;
       flex-wrap: wrap;
@@ -198,7 +210,7 @@
       font-size: 16px;
       border: 1px solid rgba(255,255,255,0.2);
     }
-    .duplicate-count, .group-badge, .privilege-group-label, .privilege-miss-badge, .combined-badge, .top5-badge {
+    .duplicate-count, .group-badge, .privilege-group-label, .privilege-miss-badge, .combined-badge, .top5-badge, .hitseq-badge {
       font-size: 8px;
       background: rgba(0,0,0,0.6);
       padding: 1px 4px;
@@ -226,6 +238,10 @@
       color: white;
       cursor: pointer;
       border: none;
+    }
+    .hitseq-badge {
+      background: #aa66ff;
+      color: white;
     }
     .numpad {
       position: fixed;
@@ -286,6 +302,7 @@
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
   <div class="controls">
+    <div id="entryCount">Total spins: 0</div>
     <input id="numberInput" placeholder="0-36 / 00" maxlength="2" />
     <button onclick="addNumber()">Add Spin</button>
     <button onclick="undo()">Undo</button>
@@ -293,53 +310,47 @@
     <div id="inputStatus" class="input-status"></div>
   </div>
   <div id="recentSpins"></div>
-  <div id="entryCount">Total spins: 0</div>
 
   <div class="duplicate-section">
-    <!-- ROW 1: Group D Triplicates (60) + Auto-Reset Privileged Numbers -->
-    <div class="row-1">
+    <!-- FIRST HORIZONTAL: COMBINED + THREE ONLY -->
+    <div class="row-combined">
+      <div class="combined-box">
+        <div class="combined-title">⚡ COMBINED: Privileged Numbers + Three Only</div>
+        <div id="combinedList" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="combinedMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetCombinedMisses()">Reset</button></div>
+      </div>
+      <div class="three-only-box">
+        <div class="three-only-title">Three Only (exact triplicates)</div>
+        <div id="threeOnlyList" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="threeOnlyMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('Three60')">Reset</button></div>
+      </div>
+    </div>
+
+    <!-- SECOND HORIZONTAL: COMBINED HIT SEQUENCE (full width) -->
+    <div class="row-hitseq">
+      <div class="hitseq-box">
+        <div class="hitseq-header">📈 COMBINED HIT SEQUENCE (misses totals at each hit)</div>
+        <div id="combinedHitSeqList" class="duplicate-list"><div class="no-duplicates">No hits yet</div></div>
+        <div class="misses-counter"><span>Total hits: <span id="hitSeqCount">0</span></span><button class="misses-reset-btn" onclick="resetCombinedHitHistory()">Reset sequence</button></div>
+      </div>
+    </div>
+
+    <!-- THIRD HORIZONTAL: Group D Triplicates + Auto-Reset Privileged -->
+    <div class="row-groupd-priv">
       <div class="group-box group-d-box">
         <div class="group-header group-d-header">Group D Triplicates (60) Three Or More</div>
         <div id="groupDDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
         <div class="misses-counter"><span id="groupDMissesText60">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('D60')">Reset</button></div>
       </div>
       <div class="privilege-box">
-        <div class="privilege-title">Auto‑Reset Privileged Numbers Until Gone </div>
+        <div class="privilege-title">Auto‑Reset Privileged Numbers Until Gone</div>
         <div id="privilegeList" class="duplicate-list"><div class="no-duplicates">—</div></div>
         <div class="misses-counter"><span id="privilegeMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button></div>
       </div>
     </div>
 
-    <!-- ROW 2: COMBINED (Privileged ∪ Three Only) + TOP 5 PRIVILEGED -->
-    <div class="row-2">
-      <div class="combined-box">
-        <div class="combined-title">⚡ COMBINED: Privileged Numbers + Three Only </div>
-        <div id="combinedList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="combinedMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetCombinedMisses()">Reset</button></div>
-      </div>
-      <div class="top5-box">
-        <div class="top5-header">🔥 TOP 5 PRIVILEGED (most recent)</div>
-        <div id="top5List" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="top5MissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetTop5Misses()">Reset</button></div>
-      </div>
-    </div>
-
-    <!-- ROW 3: Three Only (exact triplicates) + Group C Quadruplicates (60) -->
-    <div class="row-3">
-      <div class="three-only-box">
-        <div class="three-only-title">Three Only (exact triplicates)</div>
-        <div id="threeOnlyList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="threeOnlyMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetMisses('Three60')">Reset</button></div>
-      </div>
-      <div class="group-box group-c-box">
-        <div class="group-header group-c-header">Group C Quadruplicates (60)</div>
-        <div id="groupCDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span>Auto: <span id="groupCMissesAutoText60">0</span></span><span>No auto: <span id="groupCMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button></div>
-      </div>
-    </div>
-
-    <!-- ROW 4: Group A Triplicates (60) + Group B Triplicates (60) -->
-    <div class="row-4">
+    <!-- FOURTH HORIZONTAL: Group A + Group B -->
+    <div class="row-a-b">
       <div class="group-box group-a-box">
         <div class="group-header group-a-header">Group A Triplicates (60)</div>
         <div id="groupADuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
@@ -349,6 +360,20 @@
         <div class="group-header group-b-header">Group B Triplicates (60)</div>
         <div id="groupBDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
         <div class="misses-counter"><span>Auto: <span id="groupBMissesAutoText60">0</span></span><span>No auto: <span id="groupBMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('B60')">Reset</button></div>
+      </div>
+    </div>
+
+    <!-- FIFTH HORIZONTAL: TOP 5 PRIVILEGED + Group C Quadruplicates -->
+    <div class="row-top5-c">
+      <div class="top5-box">
+        <div class="top5-header">🔥 TOP 5 PRIVILEGED (most recent)</div>
+        <div id="top5List" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span id="top5MissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetTop5Misses()">Reset</button></div>
+      </div>
+      <div class="group-box group-c-box">
+        <div class="group-header group-c-header">Group C Quadruplicates (60)</div>
+        <div id="groupCDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
+        <div class="misses-counter"><span>Auto: <span id="groupCMissesAutoText60">0</span></span><span>No auto: <span id="groupCMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button></div>
       </div>
     </div>
   </div>
@@ -393,9 +418,9 @@
   let privilegeMisses = parseInt(localStorage.getItem("privilegeMisses") || "0");
   let combinedMisses = parseInt(localStorage.getItem("combinedMisses") || "0");
   let top5Misses = parseInt(localStorage.getItem("top5Misses") || "0");
+  let combinedHitHistory = JSON.parse(localStorage.getItem("combinedHitHistory") || "[]");
   let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
-  // helpers
   function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n,10); if (colors.red.includes(num)) return "red"; if (colors.black.includes(num)) return "black"; return ""; }
   function getSubgroups(n) { const groups = []; if (groupA.includes(n)) groups.push("A"); if (groupB.includes(n)) groups.push("B"); groups.push("C","D"); return groups; }
   function getGroupCounts(spins) {
@@ -408,7 +433,6 @@
   function extractExactTriplicates(map) { const res={}; for(let [num,cnt] of Object.entries(map)) if(cnt===3) res[num]=cnt; return res; }
   function lastOccurrence(num, arr) { for(let i=arr.length-1; i>=0; i--) if(arr[i]===num) return i; return -1; }
   
-  // Get top 5 privileged numbers (most recent last occurrence) from union set
   function getTop5PrivilegedSet(historyArr, privilegeUnionArray) {
     if(!privilegeUnionArray.length) return [];
     const withLastIdx = privilegeUnionArray.map(num => ({ num, lastIdx: lastOccurrence(num, historyArr) }));
@@ -416,7 +440,6 @@
     return withLastIdx.slice(0,5).map(item => item.num);
   }
 
-  // Combined set (Privileged + Three Only exact)
   function getPrivilegedAndThreeOnlySetInfo() {
     const last60 = history.slice(-60);
     const counts = getGroupCounts(last60);
@@ -440,7 +463,13 @@
   }
 
   function saveStateToHistory() {
-    const snap = { history:[...history], missesA60, missesA60NoAuto, missesB60, missesB60NoAuto, missesC60, missesC60NoAuto, missesD60, missesThree60, autoResetPrivilegeA60:[...autoResetPrivilegeA60], autoResetPrivilegeB60:[...autoResetPrivilegeB60], autoResetPrivilegeC60:[...autoResetPrivilegeC60], privilegeMisses, combinedMisses, top5Misses };
+    const snap = { 
+      history:[...history], 
+      missesA60, missesA60NoAuto, missesB60, missesB60NoAuto, missesC60, missesC60NoAuto, missesD60, missesThree60, 
+      autoResetPrivilegeA60:[...autoResetPrivilegeA60], autoResetPrivilegeB60:[...autoResetPrivilegeB60], autoResetPrivilegeC60:[...autoResetPrivilegeC60], 
+      privilegeMisses, combinedMisses, top5Misses,
+      combinedHitHistory: [...combinedHitHistory]
+    };
     stateHistory.push(snap);
     if(stateHistory.length>50) stateHistory=stateHistory.slice(-50);
     localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
@@ -459,6 +488,7 @@
     privilegeMisses=prev.privilegeMisses;
     combinedMisses=prev.combinedMisses !== undefined ? prev.combinedMisses : 0;
     top5Misses=prev.top5Misses !== undefined ? prev.top5Misses : 0;
+    combinedHitHistory = prev.combinedHitHistory ? [...prev.combinedHitHistory] : [];
     persistAll();
     return true;
   }
@@ -474,10 +504,10 @@
     localStorage.setItem("privilegeMisses",privilegeMisses);
     localStorage.setItem("combinedMisses",combinedMisses);
     localStorage.setItem("top5Misses",top5Misses);
+    localStorage.setItem("combinedHitHistory",JSON.stringify(combinedHitHistory));
     localStorage.setItem("stateHistory",JSON.stringify(stateHistory));
   }
 
-  // CORE LOGIC (updated with top5 misses)
   function calculateMissesAndPrivileges() {
     if(history.length===0) return;
     const lastSpin = history[history.length-1];
@@ -487,10 +517,7 @@
     const prevCounts = getGroupCounts(prevLast60);
     const currCounts = getGroupCounts(currentLast60);
     
-    // Privileged numbers union (previous state)
     const prevPrivSet = new Set([...autoResetPrivilegeA60, ...autoResetPrivilegeB60, ...autoResetPrivilegeC60]);
-    
-    // --- TOP 5 MISSES (from previous top5 privileged numbers) ---
     const prevPrivilegeArray = Array.from(prevPrivSet);
     const prevTop5Numbers = getTop5PrivilegedSet(prevSpins, prevPrivilegeArray);
     const prevTop5Set = new Set(prevTop5Numbers);
@@ -499,16 +526,18 @@
       else top5Misses += prevTop5Set.size;
     }
     
-    // --- COMBINED MISSES (Privileged ∪ Three Only exact) ---
     const prevExactThree = new Set();
     for(let [num,cnt] of Object.entries(prevCounts.groupCCounts)) if(cnt === 3) prevExactThree.add(num);
     const prevCombinedSet = new Set([...prevPrivSet, ...prevExactThree]);
     if(prevCombinedSet.size > 0) {
-      if(prevCombinedSet.has(lastSpin)) combinedMisses = 0;
-      else combinedMisses += prevCombinedSet.size;
+      if(prevCombinedSet.has(lastSpin)) {
+        combinedHitHistory.push(combinedMisses);
+        combinedMisses = 0;
+      } else {
+        combinedMisses += prevCombinedSet.size;
+      }
     }
     
-    // Group A, B, C, D, Three Only logic (unchanged)
     const thresholdA = 3;
     const prevQualifiersA = Object.entries(prevCounts.groupACounts).filter(([_,c]) => c>=thresholdA).map(([n])=>n);
     if(prevQualifiersA.length>0) {
@@ -647,7 +676,6 @@
     const last60 = history.slice(-60);
     const counts = getGroupCounts(last60);
     
-    // Group A, B, C, D, Three Only displays (unchanged)
     const aTrips = extractTriplicates(counts.groupACounts);
     const aDiv = document.getElementById("groupADuplicates60");
     aDiv.innerHTML = Object.keys(aTrips).length ? "" : '<div class="no-duplicates">No triplicates</div>';
@@ -690,7 +718,6 @@
       threeDiv.appendChild(item);
     }
     
-    // Privilege full list
     const privSet = new Set([...autoResetPrivilegeA60, ...autoResetPrivilegeB60, ...autoResetPrivilegeC60]);
     const privDiv = document.getElementById("privilegeList");
     if(privSet.size === 0) privDiv.innerHTML = '<div class="no-duplicates">No auto‑reset numbers</div>';
@@ -713,7 +740,6 @@
       }
     }
     
-    // TOP 5 display (most recent)
     const allPrivilegeArray = Array.from(privSet);
     const top5Numbers = getTop5PrivilegedSet(history, allPrivilegeArray);
     const top5Container = document.getElementById("top5List");
@@ -729,7 +755,6 @@
       }
     }
     
-    // Combined box
     const combinedInfo = getPrivilegedAndThreeOnlySetInfo();
     const combinedContainer = document.getElementById("combinedList");
     if(combinedInfo.length === 0) combinedContainer.innerHTML = '<div class="no-duplicates">No privileged numbers or exact triplicates</div>';
@@ -742,6 +767,18 @@
         combinedContainer.appendChild(item);
       }
     }
+    
+    const hitSeqContainer = document.getElementById("combinedHitSeqList");
+    if(combinedHitHistory.length === 0) hitSeqContainer.innerHTML = '<div class="no-duplicates">No hits yet</div>';
+    else {
+      hitSeqContainer.innerHTML = "";
+      for(let val of combinedHitHistory) {
+        let item = document.createElement("div"); item.className="duplicate-item";
+        item.innerHTML = `<div class="duplicate-number hitseq-number" style="background: #aa66ff; color:white;">${val}</div><div class="hitseq-badge">misses</div>`;
+        hitSeqContainer.appendChild(item);
+      }
+    }
+    document.getElementById("hitSeqCount").textContent = combinedHitHistory.length;
     
     document.getElementById("combinedMissesText").textContent = `Misses: ${combinedMisses}`;
     document.getElementById("groupAMissesAutoText60").textContent = missesA60;
@@ -756,7 +793,6 @@
     document.getElementById("top5MissesText").textContent = `Misses: ${top5Misses}`;
   }
 
-  // Public functions
   function addNumber() {
     let val = document.getElementById("numberInput").value.trim();
     if(!val) { document.getElementById("inputStatus").textContent = "Enter number"; return; }
@@ -774,14 +810,15 @@
   function undo() {
     if(history.length===0) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; }
     if(restoreFromHistory()) { updateDisplay(); document.getElementById("inputStatus").textContent = "Undo done"; }
-    else { history.pop(); missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; localStorage.clear(); persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Fallback reset"; }
+    else { history.pop(); missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; localStorage.clear(); persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Fallback reset"; }
   }
-  function resetAll() { if(confirm("Reset everything?")) { history=[]; missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; stateHistory=[]; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Full reset"; } }
+  function resetAll() { if(confirm("Reset everything?")) { history=[]; missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; stateHistory=[]; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Full reset"; } }
   function resetMisses(id) { let group=id[0]; if(group==='T') { if(confirm("Reset Three Only misses?")) { saveStateToHistory(); missesThree60=0; persistAll(); updateDisplay(); } return; }
     if(confirm(`Reset Group ${group} misses?`)) { saveStateToHistory(); if(group==='A'){ missesA60=0; missesA60NoAuto=0; } else if(group==='B'){ missesB60=0; missesB60NoAuto=0; } else if(group==='C'){ missesC60=0; missesC60NoAuto=0; } else if(group==='D') missesD60=0; persistAll(); updateDisplay(); } }
   function resetPrivilegeMisses() { if(confirm("Reset collective privilege misses?")) { saveStateToHistory(); privilegeMisses=0; persistAll(); updateDisplay(); } }
   function resetCombinedMisses() { if(confirm("Reset combined (Privileged + Three Only) misses?")) { saveStateToHistory(); combinedMisses=0; persistAll(); updateDisplay(); } }
   function resetTop5Misses() { if(confirm("Reset Top 5 Privileged misses?")) { saveStateToHistory(); top5Misses=0; persistAll(); updateDisplay(); } }
+  function resetCombinedHitHistory() { if(confirm("Reset the COMBINED HIT SEQUENCE (clear all recorded miss totals)?")) { saveStateToHistory(); combinedHitHistory = []; persistAll(); updateDisplay(); } }
   function numpadClick(v) { let inp = document.getElementById("numberInput"); if(v==='00') inp.value='00'; else if(inp.value.length<2) inp.value+=v; }
   function backspace() { let inp = document.getElementById("numberInput"); inp.value = inp.value.slice(0,-1); }
   function closeAlert() { document.getElementById("alertModal").style.display = "none"; }
@@ -792,7 +829,7 @@
     if(stateHistory.length===0 && history.length>0) saveStateToHistory();
     updateDisplay();
   });
-  window.addNumber=addNumber; window.undo=undo; window.resetAll=resetAll; window.resetMisses=resetMisses; window.resetPrivilegeMisses=resetPrivilegeMisses; window.resetCombinedMisses=resetCombinedMisses; window.resetTop5Misses=resetTop5Misses; window.numpadClick=numpadClick; window.backspace=backspace; window.closeAlert=closeAlert;
+  window.addNumber=addNumber; window.undo=undo; window.resetAll=resetAll; window.resetMisses=resetMisses; window.resetPrivilegeMisses=resetPrivilegeMisses; window.resetCombinedMisses=resetCombinedMisses; window.resetTop5Misses=resetTop5Misses; window.resetCombinedHitHistory=resetCombinedHitHistory; window.numpadClick=numpadClick; window.backspace=backspace; window.closeAlert=closeAlert;
 </script>
 </body>
 </html>

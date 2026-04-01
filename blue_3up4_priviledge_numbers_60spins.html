@@ -335,6 +335,15 @@
       </div>
     </div>
 
+    <!-- NEW: THREE ONLY HIT SEQUENCE (full width) -->
+    <div class="row-hitseq">
+      <div class="hitseq-box">
+        <div class="hitseq-header">🎯 THREE ONLY (exact triplicates) HIT SEQUENCE</div>
+        <div id="threeOnlyHitSeqList" class="duplicate-list"><div class="no-duplicates">No hits yet</div></div>
+        <div class="misses-counter"><span>Total hits: <span id="threeOnlyHitSeqCount">0</span></span><button class="misses-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset sequence</button></div>
+      </div>
+    </div>
+
     <!-- THIRD HORIZONTAL: Group D Triplicates + Auto-Reset Privileged -->
     <div class="row-groupd-priv">
       <div class="group-box group-d-box">
@@ -419,6 +428,7 @@
   let combinedMisses = parseInt(localStorage.getItem("combinedMisses") || "0");
   let top5Misses = parseInt(localStorage.getItem("top5Misses") || "0");
   let combinedHitHistory = JSON.parse(localStorage.getItem("combinedHitHistory") || "[]");
+  let threeOnlyHitHistory = JSON.parse(localStorage.getItem("threeOnlyHitHistory") || "[]");  // NEW
   let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
   function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n,10); if (colors.red.includes(num)) return "red"; if (colors.black.includes(num)) return "black"; return ""; }
@@ -468,7 +478,8 @@
       missesA60, missesA60NoAuto, missesB60, missesB60NoAuto, missesC60, missesC60NoAuto, missesD60, missesThree60, 
       autoResetPrivilegeA60:[...autoResetPrivilegeA60], autoResetPrivilegeB60:[...autoResetPrivilegeB60], autoResetPrivilegeC60:[...autoResetPrivilegeC60], 
       privilegeMisses, combinedMisses, top5Misses,
-      combinedHitHistory: [...combinedHitHistory]
+      combinedHitHistory: [...combinedHitHistory],
+      threeOnlyHitHistory: [...threeOnlyHitHistory]   // NEW
     };
     stateHistory.push(snap);
     if(stateHistory.length>50) stateHistory=stateHistory.slice(-50);
@@ -489,6 +500,7 @@
     combinedMisses=prev.combinedMisses !== undefined ? prev.combinedMisses : 0;
     top5Misses=prev.top5Misses !== undefined ? prev.top5Misses : 0;
     combinedHitHistory = prev.combinedHitHistory ? [...prev.combinedHitHistory] : [];
+    threeOnlyHitHistory = prev.threeOnlyHitHistory ? [...prev.threeOnlyHitHistory] : []; // NEW
     persistAll();
     return true;
   }
@@ -505,6 +517,7 @@
     localStorage.setItem("combinedMisses",combinedMisses);
     localStorage.setItem("top5Misses",top5Misses);
     localStorage.setItem("combinedHitHistory",JSON.stringify(combinedHitHistory));
+    localStorage.setItem("threeOnlyHitHistory",JSON.stringify(threeOnlyHitHistory));
     localStorage.setItem("stateHistory",JSON.stringify(stateHistory));
   }
 
@@ -537,6 +550,20 @@
         combinedMisses += prevCombinedSet.size;
       }
     }
+    
+    // ---- THREE ONLY HIT SEQUENCE (exact triplicates) ----
+    const prevExact = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c===3).map(([n])=>n);
+    if(prevExact.length > 0) {
+      if(prevExact.includes(lastSpin)) {
+        // Hit: record current missesThree60 value, then reset
+        threeOnlyHitHistory.push(missesThree60);
+        if(threeOnlyHitHistory.length > 100) threeOnlyHitHistory = threeOnlyHitHistory.slice(-100);
+        missesThree60 = 0;
+      } else {
+        missesThree60 += prevExact.length;
+      }
+    }
+    // ----------------------------------------------------
     
     const thresholdA = 3;
     const prevQualifiersA = Object.entries(prevCounts.groupACounts).filter(([_,c]) => c>=thresholdA).map(([n])=>n);
@@ -594,9 +621,6 @@
 
     const prevTriplesD = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c>=3).map(([n])=>n);
     if(prevTriplesD.length>0) { prevTriplesD.includes(lastSpin) ? (missesD60=0) : (missesD60+=prevTriplesD.length); }
-
-    const prevExact = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c===3).map(([n])=>n);
-    if(prevExact.length>0) { prevExact.includes(lastSpin) ? (missesThree60=0) : (missesThree60+=prevExact.length); }
 
     if(prevPrivSet.size>0) {
       if(prevPrivSet.has(lastSpin)) privilegeMisses=0;
@@ -663,6 +687,7 @@
   }
 
   function updateDisplay() {
+    // (keep existing DOM updates, plus threeOnlyHitSequence)
     const container = document.getElementById("recentSpins");
     container.innerHTML = "";
     for(let i=0;i<60;i++) {
@@ -779,7 +804,20 @@
       }
     }
     document.getElementById("hitSeqCount").textContent = combinedHitHistory.length;
-    
+
+    // NEW: Three Only Hit Sequence display
+    const threeHitContainer = document.getElementById("threeOnlyHitSeqList");
+    if(threeOnlyHitHistory.length === 0) threeHitContainer.innerHTML = '<div class="no-duplicates">No hits yet</div>';
+    else {
+      threeHitContainer.innerHTML = "";
+      for(let val of threeOnlyHitHistory) {
+        let item = document.createElement("div"); item.className="duplicate-item";
+        item.innerHTML = `<div class="duplicate-number hitseq-number" style="background: #ffaa33; color:#1e1e2e;">${val}</div><div class="hitseq-badge">misses</div>`;
+        threeHitContainer.appendChild(item);
+      }
+    }
+    document.getElementById("threeOnlyHitSeqCount").textContent = threeOnlyHitHistory.length;
+
     document.getElementById("combinedMissesText").textContent = `Misses: ${combinedMisses}`;
     document.getElementById("groupAMissesAutoText60").textContent = missesA60;
     document.getElementById("groupAMissesNoAutoText60").textContent = missesA60NoAuto;
@@ -810,15 +848,16 @@
   function undo() {
     if(history.length===0) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; }
     if(restoreFromHistory()) { updateDisplay(); document.getElementById("inputStatus").textContent = "Undo done"; }
-    else { history.pop(); missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; localStorage.clear(); persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Fallback reset"; }
+    else { history.pop(); missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; threeOnlyHitHistory=[]; localStorage.clear(); persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Fallback reset"; }
   }
-  function resetAll() { if(confirm("Reset everything?")) { history=[]; missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; stateHistory=[]; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Full reset"; } }
+  function resetAll() { if(confirm("Reset everything?")) { history=[]; missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; threeOnlyHitHistory=[]; stateHistory=[]; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Full reset"; } }
   function resetMisses(id) { let group=id[0]; if(group==='T') { if(confirm("Reset Three Only misses?")) { saveStateToHistory(); missesThree60=0; persistAll(); updateDisplay(); } return; }
     if(confirm(`Reset Group ${group} misses?`)) { saveStateToHistory(); if(group==='A'){ missesA60=0; missesA60NoAuto=0; } else if(group==='B'){ missesB60=0; missesB60NoAuto=0; } else if(group==='C'){ missesC60=0; missesC60NoAuto=0; } else if(group==='D') missesD60=0; persistAll(); updateDisplay(); } }
   function resetPrivilegeMisses() { if(confirm("Reset collective privilege misses?")) { saveStateToHistory(); privilegeMisses=0; persistAll(); updateDisplay(); } }
   function resetCombinedMisses() { if(confirm("Reset combined (Privileged + Three Only) misses?")) { saveStateToHistory(); combinedMisses=0; persistAll(); updateDisplay(); } }
   function resetTop5Misses() { if(confirm("Reset Top 5 Privileged misses?")) { saveStateToHistory(); top5Misses=0; persistAll(); updateDisplay(); } }
   function resetCombinedHitHistory() { if(confirm("Reset the COMBINED HIT SEQUENCE (clear all recorded miss totals)?")) { saveStateToHistory(); combinedHitHistory = []; persistAll(); updateDisplay(); } }
+  function resetThreeOnlyHitHistory() { if(confirm("Reset the THREE ONLY HIT SEQUENCE (clear all recorded miss totals)?")) { saveStateToHistory(); threeOnlyHitHistory = []; persistAll(); updateDisplay(); } }
   function numpadClick(v) { let inp = document.getElementById("numberInput"); if(v==='00') inp.value='00'; else if(inp.value.length<2) inp.value+=v; }
   function backspace() { let inp = document.getElementById("numberInput"); inp.value = inp.value.slice(0,-1); }
   function closeAlert() { document.getElementById("alertModal").style.display = "none"; }
@@ -829,7 +868,7 @@
     if(stateHistory.length===0 && history.length>0) saveStateToHistory();
     updateDisplay();
   });
-  window.addNumber=addNumber; window.undo=undo; window.resetAll=resetAll; window.resetMisses=resetMisses; window.resetPrivilegeMisses=resetPrivilegeMisses; window.resetCombinedMisses=resetCombinedMisses; window.resetTop5Misses=resetTop5Misses; window.resetCombinedHitHistory=resetCombinedHitHistory; window.numpadClick=numpadClick; window.backspace=backspace; window.closeAlert=closeAlert;
+  window.addNumber=addNumber; window.undo=undo; window.resetAll=resetAll; window.resetMisses=resetMisses; window.resetPrivilegeMisses=resetPrivilegeMisses; window.resetCombinedMisses=resetCombinedMisses; window.resetTop5Misses=resetTop5Misses; window.resetCombinedHitHistory=resetCombinedHitHistory; window.resetThreeOnlyHitHistory=resetThreeOnlyHitHistory; window.numpadClick=numpadClick; window.backspace=backspace; window.closeAlert=closeAlert;
 </script>
 </body>
 </html>

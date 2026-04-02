@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Brown Roulette Tracker • Privileged + Three Only Combined</title>
+  <title>Brown Roulette Tracker • Privileged + Three Only + Group D Hit Seq</title>
   <style>
     * {
       box-sizing: border-box;
@@ -295,7 +295,7 @@
 </head>
 <body>
 <div class="container">
-  <header><h1>Brown Roulette Tracker</h1><div class="tagline">Auto‑privilege • extended stay • Privileged + Three Only Combined</div></header>
+  <header><h1>Brown Roulette Tracker</h1><div class="tagline">Auto‑privilege • extended stay • Privileged + Three Only Combined + Group D Hit Seq</div></header>
   <div class="legend">
     <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
     <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
@@ -341,6 +341,18 @@
         <div class="hitseq-header">🎯 THREE ONLY (exact triplicates) HIT SEQUENCE</div>
         <div id="threeOnlyHitSeqList" class="duplicate-list"><div class="no-duplicates">No hits yet</div></div>
         <div class="misses-counter"><span>Total hits: <span id="threeOnlyHitSeqCount">0</span></span><button class="misses-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset sequence</button></div>
+      </div>
+    </div>
+
+    <!-- NEW: GROUP D TRIPLICATES HIT SEQUENCE (full width) -->
+    <div class="row-hitseq">
+      <div class="hitseq-box">
+        <div class="hitseq-header">📊 GROUP D TRIPLICATES (≥3) HIT SEQUENCE</div>
+        <div id="groupDHitSeqList" class="duplicate-list"><div class="no-duplicates">No hits yet</div></div>
+        <div class="misses-counter">
+          <span>Current misses: <span id="groupDHitSeqMissesText">0</span></span>
+          <button class="misses-reset-btn" onclick="resetGroupDHitHistory()">Reset sequence</button>
+        </div>
       </div>
     </div>
 
@@ -428,7 +440,8 @@
   let combinedMisses = parseInt(localStorage.getItem("combinedMisses") || "0");
   let top5Misses = parseInt(localStorage.getItem("top5Misses") || "0");
   let combinedHitHistory = JSON.parse(localStorage.getItem("combinedHitHistory") || "[]");
-  let threeOnlyHitHistory = JSON.parse(localStorage.getItem("threeOnlyHitHistory") || "[]");  // NEW
+  let threeOnlyHitHistory = JSON.parse(localStorage.getItem("threeOnlyHitHistory") || "[]");
+  let groupDHitHistory = JSON.parse(localStorage.getItem("groupDHitHistory") || "[]");   // NEW: Group D hit sequence
   let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
   function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n,10); if (colors.red.includes(num)) return "red"; if (colors.black.includes(num)) return "black"; return ""; }
@@ -479,7 +492,8 @@
       autoResetPrivilegeA60:[...autoResetPrivilegeA60], autoResetPrivilegeB60:[...autoResetPrivilegeB60], autoResetPrivilegeC60:[...autoResetPrivilegeC60], 
       privilegeMisses, combinedMisses, top5Misses,
       combinedHitHistory: [...combinedHitHistory],
-      threeOnlyHitHistory: [...threeOnlyHitHistory]   // NEW
+      threeOnlyHitHistory: [...threeOnlyHitHistory],
+      groupDHitHistory: [...groupDHitHistory]   // NEW
     };
     stateHistory.push(snap);
     if(stateHistory.length>50) stateHistory=stateHistory.slice(-50);
@@ -500,7 +514,8 @@
     combinedMisses=prev.combinedMisses !== undefined ? prev.combinedMisses : 0;
     top5Misses=prev.top5Misses !== undefined ? prev.top5Misses : 0;
     combinedHitHistory = prev.combinedHitHistory ? [...prev.combinedHitHistory] : [];
-    threeOnlyHitHistory = prev.threeOnlyHitHistory ? [...prev.threeOnlyHitHistory] : []; // NEW
+    threeOnlyHitHistory = prev.threeOnlyHitHistory ? [...prev.threeOnlyHitHistory] : [];
+    groupDHitHistory = prev.groupDHitHistory ? [...prev.groupDHitHistory] : [];
     persistAll();
     return true;
   }
@@ -518,6 +533,7 @@
     localStorage.setItem("top5Misses",top5Misses);
     localStorage.setItem("combinedHitHistory",JSON.stringify(combinedHitHistory));
     localStorage.setItem("threeOnlyHitHistory",JSON.stringify(threeOnlyHitHistory));
+    localStorage.setItem("groupDHitHistory",JSON.stringify(groupDHitHistory));
     localStorage.setItem("stateHistory",JSON.stringify(stateHistory));
   }
 
@@ -551,11 +567,10 @@
       }
     }
     
-    // ---- THREE ONLY HIT SEQUENCE (exact triplicates) ----
+    // THREE ONLY HIT SEQUENCE
     const prevExact = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c===3).map(([n])=>n);
     if(prevExact.length > 0) {
       if(prevExact.includes(lastSpin)) {
-        // Hit: record current missesThree60 value, then reset
         threeOnlyHitHistory.push(missesThree60);
         if(threeOnlyHitHistory.length > 100) threeOnlyHitHistory = threeOnlyHitHistory.slice(-100);
         missesThree60 = 0;
@@ -563,7 +578,20 @@
         missesThree60 += prevExact.length;
       }
     }
-    // ----------------------------------------------------
+    
+    // --- GROUP D TRIPLICATES HIT SEQUENCE (numbers with count >=3) ---
+    const prevTriplesD = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c >= 3).map(([n])=>n);
+    if(prevTriplesD.length > 0) {
+      if(prevTriplesD.includes(lastSpin)) {
+        // HIT: record current misses value before reset
+        groupDHitHistory.push(missesD60);
+        if(groupDHitHistory.length > 100) groupDHitHistory = groupDHitHistory.slice(-100);
+        missesD60 = 0;
+      } else {
+        missesD60 += prevTriplesD.length;
+      }
+    }
+    // -------------------------------------------------------------
     
     const thresholdA = 3;
     const prevQualifiersA = Object.entries(prevCounts.groupACounts).filter(([_,c]) => c>=thresholdA).map(([n])=>n);
@@ -619,9 +647,9 @@
       }
     }
 
-    const prevTriplesD = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c>=3).map(([n])=>n);
-    if(prevTriplesD.length>0) { prevTriplesD.includes(lastSpin) ? (missesD60=0) : (missesD60+=prevTriplesD.length); }
-
+    // Legacy group D misses handling (already integrated above with hit sequence, but keep separate display update)
+    // The above block updates missesD60 exactly like before, plus records history.
+    
     if(prevPrivSet.size>0) {
       if(prevPrivSet.has(lastSpin)) privilegeMisses=0;
       else privilegeMisses += prevPrivSet.size;
@@ -687,7 +715,6 @@
   }
 
   function updateDisplay() {
-    // (keep existing DOM updates, plus threeOnlyHitSequence)
     const container = document.getElementById("recentSpins");
     container.innerHTML = "";
     for(let i=0;i<60;i++) {
@@ -805,7 +832,6 @@
     }
     document.getElementById("hitSeqCount").textContent = combinedHitHistory.length;
 
-    // NEW: Three Only Hit Sequence display
     const threeHitContainer = document.getElementById("threeOnlyHitSeqList");
     if(threeOnlyHitHistory.length === 0) threeHitContainer.innerHTML = '<div class="no-duplicates">No hits yet</div>';
     else {
@@ -817,6 +843,19 @@
       }
     }
     document.getElementById("threeOnlyHitSeqCount").textContent = threeOnlyHitHistory.length;
+
+    // NEW: Group D Hit Sequence display
+    const groupDHitContainer = document.getElementById("groupDHitSeqList");
+    if(groupDHitHistory.length === 0) groupDHitContainer.innerHTML = '<div class="no-duplicates">No hits yet</div>';
+    else {
+      groupDHitContainer.innerHTML = "";
+      for(let val of groupDHitHistory) {
+        let item = document.createElement("div"); item.className="duplicate-item";
+        item.innerHTML = `<div class="duplicate-number hitseq-number" style="background: #00BCD4; color:white;">${val}</div><div class="hitseq-badge">misses</div>`;
+        groupDHitContainer.appendChild(item);
+      }
+    }
+    document.getElementById("groupDHitSeqMissesText").textContent = missesD60;
 
     document.getElementById("combinedMissesText").textContent = `Misses: ${combinedMisses}`;
     document.getElementById("groupAMissesAutoText60").textContent = missesA60;
@@ -848,16 +887,17 @@
   function undo() {
     if(history.length===0) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; }
     if(restoreFromHistory()) { updateDisplay(); document.getElementById("inputStatus").textContent = "Undo done"; }
-    else { history.pop(); missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; threeOnlyHitHistory=[]; localStorage.clear(); persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Fallback reset"; }
+    else { history.pop(); missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; threeOnlyHitHistory=[]; groupDHitHistory=[]; localStorage.clear(); persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Fallback reset"; }
   }
-  function resetAll() { if(confirm("Reset everything?")) { history=[]; missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; threeOnlyHitHistory=[]; stateHistory=[]; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Full reset"; } }
+  function resetAll() { if(confirm("Reset everything?")) { history=[]; missesA60=missesA60NoAuto=missesB60=missesB60NoAuto=missesC60=missesC60NoAuto=missesD60=missesThree60=0; autoResetPrivilegeA60=autoResetPrivilegeB60=autoResetPrivilegeC60=[]; privilegeMisses=0; combinedMisses=0; top5Misses=0; combinedHitHistory=[]; threeOnlyHitHistory=[]; groupDHitHistory=[]; stateHistory=[]; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = "Full reset"; } }
   function resetMisses(id) { let group=id[0]; if(group==='T') { if(confirm("Reset Three Only misses?")) { saveStateToHistory(); missesThree60=0; persistAll(); updateDisplay(); } return; }
     if(confirm(`Reset Group ${group} misses?`)) { saveStateToHistory(); if(group==='A'){ missesA60=0; missesA60NoAuto=0; } else if(group==='B'){ missesB60=0; missesB60NoAuto=0; } else if(group==='C'){ missesC60=0; missesC60NoAuto=0; } else if(group==='D') missesD60=0; persistAll(); updateDisplay(); } }
   function resetPrivilegeMisses() { if(confirm("Reset collective privilege misses?")) { saveStateToHistory(); privilegeMisses=0; persistAll(); updateDisplay(); } }
   function resetCombinedMisses() { if(confirm("Reset combined (Privileged + Three Only) misses?")) { saveStateToHistory(); combinedMisses=0; persistAll(); updateDisplay(); } }
   function resetTop5Misses() { if(confirm("Reset Top 5 Privileged misses?")) { saveStateToHistory(); top5Misses=0; persistAll(); updateDisplay(); } }
   function resetCombinedHitHistory() { if(confirm("Reset the COMBINED HIT SEQUENCE (clear all recorded miss totals)?")) { saveStateToHistory(); combinedHitHistory = []; persistAll(); updateDisplay(); } }
-  function resetThreeOnlyHitHistory() { if(confirm("Reset the THREE ONLY HIT SEQUENCE (clear all recorded miss totals)?")) { saveStateToHistory(); threeOnlyHitHistory = []; persistAll(); updateDisplay(); } }
+  function resetThreeOnlyHitHistory() { if(confirm("Reset the THREE ONLY HIT SEQUENCE?")) { saveStateToHistory(); threeOnlyHitHistory = []; persistAll(); updateDisplay(); } }
+  function resetGroupDHitHistory() { if(confirm("Reset the GROUP D TRIPLICATES HIT SEQUENCE (clear recorded miss totals)?")) { saveStateToHistory(); groupDHitHistory = []; persistAll(); updateDisplay(); } }
   function numpadClick(v) { let inp = document.getElementById("numberInput"); if(v==='00') inp.value='00'; else if(inp.value.length<2) inp.value+=v; }
   function backspace() { let inp = document.getElementById("numberInput"); inp.value = inp.value.slice(0,-1); }
   function closeAlert() { document.getElementById("alertModal").style.display = "none"; }
@@ -868,7 +908,7 @@
     if(stateHistory.length===0 && history.length>0) saveStateToHistory();
     updateDisplay();
   });
-  window.addNumber=addNumber; window.undo=undo; window.resetAll=resetAll; window.resetMisses=resetMisses; window.resetPrivilegeMisses=resetPrivilegeMisses; window.resetCombinedMisses=resetCombinedMisses; window.resetTop5Misses=resetTop5Misses; window.resetCombinedHitHistory=resetCombinedHitHistory; window.resetThreeOnlyHitHistory=resetThreeOnlyHitHistory; window.numpadClick=numpadClick; window.backspace=backspace; window.closeAlert=closeAlert;
+  window.addNumber=addNumber; window.undo=undo; window.resetAll=resetAll; window.resetMisses=resetMisses; window.resetPrivilegeMisses=resetPrivilegeMisses; window.resetCombinedMisses=resetCombinedMisses; window.resetTop5Misses=resetTop5Misses; window.resetCombinedHitHistory=resetCombinedHitHistory; window.resetThreeOnlyHitHistory=resetThreeOnlyHitHistory; window.resetGroupDHitHistory=resetGroupDHitHistory; window.numpadClick=numpadClick; window.backspace=backspace; window.closeAlert=closeAlert;
 </script>
 </body>
 </html>

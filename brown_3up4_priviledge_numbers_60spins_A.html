@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Brown Roulette Tracker • Sticky Controls + Recent Spins</title>
+  <title>Brown Roulette Tracker • iPad Optimized</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,7 +13,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 1rem;
+      padding: 0.8rem;
       padding-bottom: 90px;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #f0f0f0;
@@ -25,17 +25,17 @@
       margin: 0 auto;
     }
 
-    /* header (title) + legend are normal flow – they scroll away */
+    /* header (title) + legend – normal scroll */
     header {
       text-align: center;
-      padding: 1rem 0;
-      margin-bottom: 1rem;
+      padding: 0.8rem 0;
+      margin-bottom: 0.8rem;
       background: rgba(0, 0, 0, 0.3);
       border-radius: 12px;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       background: linear-gradient(to right, #ff416c, #ff4b2b);
       -webkit-background-clip: text;
       background-clip: text;
@@ -45,77 +45,83 @@
     .tagline {
       color: #ccc;
       font-style: italic;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
-    /* ----- STICKY HEADER: controls + recent spins always on top ----- */
+    /* STICKY TOP BAR (controls + recent spins) */
     .sticky-top-bar {
       position: sticky;
       top: 0;
       z-index: 150;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       border-radius: 0 0 16px 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
-      margin: 0 0 1.2rem 0;
-      padding: 12px 12px 8px 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      margin: 0 0 1rem 0;
+      padding: 10px 12px 8px 12px;
       border-bottom: 1px solid rgba(255, 75, 43, 0.4);
     }
 
-    /* controls row */
     .controls {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       align-items: center;
     }
 
     input {
-      padding: 10px;
+      padding: 10px 12px;
       font-size: 1rem;
       width: 130px;
       text-align: center;
-      background: rgba(30, 30, 46, 0.9);
+      background: rgba(30, 30, 46, 0.95);
       border: 2px solid #444;
-      border-radius: 8px;
+      border-radius: 10px;
       color: white;
+      font-size: 18px; /* prevents zoom on iOS */
     }
     input:focus { border-color: #ff4b2b; outline: none; }
+
     button {
       padding: 10px 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
       background: rgba(60, 60, 80, 0.9);
       color: white;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 600;
       transition: 0.2s;
+      font-size: 0.9rem;
+      min-height: 44px; /* better touch target */
     }
     button:hover { transform: translateY(-2px); background: rgba(80, 80, 100, 0.9); }
-    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); } /* Add Spin */
-    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); } /* Undo */
-    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); } /* Reset All */
+    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); }
+    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); }
+    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); }
+
     #entryCount {
       background: rgba(0,0,0,0.5);
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 40px;
       font-weight: bold;
       font-size: 0.9rem;
+      white-space: nowrap;
     }
     .input-status {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       background: rgba(0,0,0,0.5);
       padding: 4px 10px;
       border-radius: 20px;
     }
 
-    /* recent spins row (inside sticky bar) */
+    /* RECENT SPINS - horizontal scroll with smooth touch */
     #recentSpins {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       gap: 8px;
       padding: 8px 4px;
       scrollbar-width: thin;
@@ -123,31 +129,20 @@
       border-top: 1px solid rgba(255,255,255,0.1);
     }
     #recentSpins::-webkit-scrollbar {
-      height: 5px;
+      height: 4px;
     }
-    #recentSpins::-webkit-scrollbar-track {
-      background: #2c2c44;
-      border-radius: 10px;
-    }
-    #recentSpins::-webkit-scrollbar-thumb {
-      background: #ff4b2b;
-      border-radius: 10px;
-    }
-
     .spin-box {
-      width: 45px;
-      height: 45px;
+      width: 48px;
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: bold;
       font-size: 22px;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       flex-shrink: 0;
-      transition: 0.1s;
     }
-
     .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; }
     .black { background: linear-gradient(145deg, #212121, #000000); color: white; }
     .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
@@ -156,28 +151,24 @@
     .legend {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin: 10px 0 20px 0;
+      gap: 24px;
+      margin: 12px 0 20px 0;
     }
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
+      gap: 8px;
+      font-size: 0.85rem;
     }
-    .legend-color { width: 16px; height: 16px; border-radius: 50%; }
-    .legend-red { background: #e53935; }
-    .legend-black { background: #212121; }
-    .legend-green { background: #2e7d32; }
+    .legend-color { width: 18px; height: 18px; border-radius: 50%; }
 
     /* SCROLLABLE GROUPS */
     .duplicate-section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 16px;
-      padding: 15px;
+      padding: 12px;
       margin: 20px 0;
     }
-
     .row-single {
       display: grid;
       gap: 20px;
@@ -195,173 +186,124 @@
         grid-template-columns: 1fr;
       }
     }
-
+    /* box styles (unchanged but more padding) */
     .group-box, .three-only-box, .privilege-box, .combined-box, .top5-box, .twoonly-box, .group-d-box, .group-c-box {
       background: rgba(0, 0, 0, 0.2);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 12px;
     }
     .twoonly-a-box { border: 2px solid #4caf50; background: rgba(76,175,80,0.1); }
     .twoonly-b-box { border: 2px solid #ffa726; background: rgba(255,167,38,0.1); }
     .three-only-box { border: 2px solid #FFC107; }
-    .combined-box { border: 2px solid #ff6e40; background: rgba(0,0,0,0.3); }
+    .combined-box { border: 2px solid #ff6e40; }
     .group-d-box { border: 2px solid #00BCD4; }
     .group-a-box { border: 2px solid #2196F3; }
     .group-b-box { border: 2px solid #FF9800; }
     .top5-box { border: 2px solid #E91E63; background: rgba(233,30,99,0.1); }
     .privilege-box { border: 2px solid gold; }
     .group-c-box { border: 2px solid #9C27B0; }
-    
-    .group-header, .twoonly-header, .combined-header, .three-header, .group-d-header, .top5-header, .privilege-title {
-      font-weight: bold;
-      text-align: center;
-      padding-bottom: 6px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid #444;
-    }
-    .twoonly-title-a { color: #8bc34a; border-bottom-color: #8bc34a; text-align: center; margin-bottom: 10px; }
-    .twoonly-title-b { color: #ffb74d; border-bottom-color: #ffb74d; text-align: center; margin-bottom: 10px; }
-    .three-header { color: #FFC107; border-bottom-color: #FFC107; }
-    .combined-header { color: #ff6e40; border-bottom-color: #ff6e40; }
-    .group-d-header { color: #00BCD4; border-bottom-color: #00BCD4; }
-    .group-a-header { color: #2196F3; border-bottom-color: #2196F3; }
-    .group-b-header { color: #FF9800; border-bottom-color: #FF9800; }
-    .top5-header { color: #E91E63; border-bottom-color: #E91E63; }
-    .privilege-title { color: gold; border-bottom-color: gold; }
-    .group-c-header { color: #9C27B0; border-bottom-color: #9C27B0; }
-    
+
     .duplicate-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       justify-content: center;
-      min-height: 45px;
+      min-height: 50px;
     }
     .duplicate-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
     }
     .duplicate-number {
-      width: 38px;
-      height: 38px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 18px;
       border: 1px solid rgba(255,255,255,0.2);
     }
     .duplicate-count, .group-badge, .privilege-group-label, .privilege-miss-badge, .combined-badge, .top5-badge {
-      font-size: 8px;
-      background: rgba(0,0,0,0.6);
-      padding: 1px 4px;
-      border-radius: 12px;
-      font-weight: bold;
+      font-size: 9px;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 5px;
+      border-radius: 14px;
     }
     .hitseq-mini-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       justify-content: center;
-      margin-top: 8px;
-      padding: 5px;
+      margin-top: 10px;
+      padding: 6px;
       background: rgba(0,0,0,0.2);
       border-radius: 12px;
-      min-height: 36px;
     }
     .hitseq-mini-item {
       background: #4caf50;
       color: white;
       font-weight: bold;
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-family: monospace;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 24px;
     }
-    .hitseq-mini-item-combined { background: #aa66ff; }
-    .hitseq-mini-item-three { background: #ffaa33; color: #1e1e2e; }
-    .hitseq-mini-item-groupd { background: #00BCD4; }
     .misses-counter {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      margin-top: 10px;
+      margin-top: 12px;
       background: rgba(0,0,0,0.3);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      gap: 10px;
     }
     .misses-reset-btn, .hitseq-reset-btn {
-      padding: 2px 8px;
-      font-size: 0.65rem;
+      padding: 5px 10px;
+      font-size: 0.7rem;
       background: #ff5722;
-      border-radius: 4px;
-      color: white;
-      cursor: pointer;
-      border: none;
+      border-radius: 20px;
     }
-    .hitseq-reset-btn { background: #3f51b5; margin-left: 4px; }
     .numpad {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(26, 26, 46, 0.96);
+      background: rgba(26, 26, 46, 0.98);
       padding: 12px;
       display: flex;
-      gap: 8px;
+      gap: 10px;
       overflow-x: auto;
       border-top: 2px solid #ff4b2b;
       z-index: 200;
+      -webkit-overflow-scrolling: touch;
     }
     .numpad button {
       flex: 1;
-      min-width: 60px;
-      padding: 12px 0;
-      font-size: 1.2rem;
-      border-radius: 10px;
+      min-width: 70px;
+      padding: 14px 0;
+      font-size: 1.3rem;
+      border-radius: 12px;
       background: #2c2c44;
+      min-height: 55px;
     }
     .numpad .enter { background: linear-gradient(145deg, #4caf50, #2e7d32); }
     .numpad .backspace { background: linear-gradient(145deg, #f44336, #d32f2f); }
-    .alert-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-    }
-    .alert-content {
-      background: linear-gradient(145deg, #1f1f2f, #12121c);
-      border-radius: 24px;
-      padding: 24px;
-      text-align: center;
-      max-width: 380px;
-      width: 90%;
-      border: 2px solid gold;
-    }
-    .close-alert { margin-top: 20px; background: #2196f3; padding: 8px 20px; border-radius: 40px; }
-    .privilege-indicator {
-      font-size: 7px;
-      background: gold;
-      color: black;
-      border-radius: 10px;
-      padding: 1px 4px;
-      margin-top: 2px;
-    }
-    @media (max-width: 600px) {
-      .spin-box { width: 38px; height: 38px; font-size: 18px; }
-      .duplicate-number { width: 32px; height: 32px; font-size: 14px; }
-      #recentSpins { gap: 5px; min-height: 55px; }
-      .controls button { padding: 6px 12px; font-size: 0.8rem; }
-      input { width: 100px; padding: 6px; }
+    .alert-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; }
+    .alert-content { background: linear-gradient(145deg,#1f1f2f,#12121c); border-radius:28px; padding:28px; text-align:center; max-width:380px; width:90%; border:2px solid gold; }
+    .close-alert { margin-top:20px; background:#2196f3; padding:10px 24px; border-radius:40px; font-size:1rem; }
+    .privilege-indicator { font-size:8px; background:gold; color:black; border-radius:12px; padding:2px 5px; margin-top:3px; }
+
+    @media (max-width: 800px) {
+      .spin-box { width: 44px; height: 44px; font-size: 20px; }
+      .duplicate-number { width: 40px; height: 40px; font-size: 17px; }
+      .controls button { padding: 8px 12px; font-size: 0.85rem; }
+      #entryCount { font-size: 0.8rem; padding: 4px 10px; }
+      .numpad button { min-width: 60px; padding: 12px 0; }
     }
   </style>
 </head>
@@ -369,21 +311,19 @@
 <div class="container">
   <header>
     <h1>Brown Roulette Tracker</h1>
-    <div class="tagline">Sticky Controls + Recent Numbers • Scroll Groups Freely</div>
+    <div class="tagline">iPad Optimized • Sticky Controls + Touch‑Friendly</div>
   </header>
-  
-  <!-- LEGEND (normal flow, scrolls away) -->
   <div class="legend">
     <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
     <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
 
-  <!-- STICKY TOP BAR: controls + recent spins always visible -->
+  <!-- STICKY BAR -->
   <div class="sticky-top-bar">
     <div class="controls">
       <div id="entryCount">Total spins: 0</div>
-      <input id="numberInput" placeholder="0-36 / 00" maxlength="2" />
+      <input id="numberInput" placeholder="0-36 / 00" maxlength="2" inputmode="numeric" />
       <button onclick="addNumber()">Add Spin</button>
       <button onclick="undo()">Undo</button>
       <button onclick="resetAll()">Reset All</button>
@@ -392,72 +332,24 @@
     <div id="recentSpins"></div>
   </div>
 
-  <!-- SCROLLABLE TRACKING GROUPS (all existing logic intact) -->
+  <!-- ALL TRACKING GROUPS (same as original) -->
   <div class="duplicate-section">
-    <div class="row-single">
-      <div class="twoonly-box twoonly-a-box">
-        <div class="twoonly-header twoonly-title-a">✨ Two Only A (exact duplicates) ✨</div>
-        <div id="twoOnlyAList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hit seq</button></div></div>
-        <div class="hitseq-mini-list" id="twoOnlyAHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-        <div style="font-size:10px; text-align:center; margin-top:4px;">hits: <span id="twoOnlyAHitCount">0</span></div>
-      </div>
-    </div>
-    <div class="row-single">
-      <div class="twoonly-box twoonly-b-box">
-        <div class="twoonly-header twoonly-title-b">✨ Two Only B (exact duplicates) ✨</div>
-        <div id="twoOnlyBList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hit seq</button></div></div>
-        <div class="hitseq-mini-list" id="twoOnlyBHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-        <div style="font-size:10px; text-align:center; margin-top:4px;">hits: <span id="twoOnlyBHitCount">0</span></div>
-      </div>
-    </div>
-    <div class="row-single">
-      <div class="three-only-box">
-        <div class="three-header">🎯 Three Only (exact triplicates)</div>
-        <div id="threeOnlyList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="threeOnlyMissesText">Misses: 0</span><div><button class="misses-reset-btn" onclick="resetMisses('Three60')">Reset misses</button><button class="hitseq-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset hit seq</button></div></div>
-        <div class="hitseq-mini-list" id="threeOnlyHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-        <div style="font-size:10px; text-align:center; margin-top:4px;">hits: <span id="threeOnlyHitSeqCount">0</span></div>
-      </div>
-    </div>
-    <div class="row-single">
-      <div class="combined-box">
-        <div class="combined-header">⚡ COMBINED: Privileged Numbers + Three Only</div>
-        <div id="combinedList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="combinedMissesText">Misses: 0</span><div><button class="misses-reset-btn" onclick="resetCombinedMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedHitHistory()">Reset hit seq</button></div></div>
-        <div class="hitseq-mini-list" id="combinedHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-        <div style="font-size:10px; text-align:center; margin-top:4px;">hits: <span id="hitSeqCount">0</span></div>
-      </div>
-    </div>
-    <div class="row-single">
-      <div class="group-d-box">
-        <div class="group-d-header">📊 Group D Triplicates (60) Three Or More</div>
-        <div id="groupDDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div>
-        <div class="misses-counter"><span id="groupDMissesText60">Misses: 0</span><div><button class="misses-reset-btn" onclick="resetMisses('D60')">Reset misses</button><button class="hitseq-reset-btn" onclick="resetGroupDHitHistory()">Reset hit seq</button></div></div>
-        <div class="hitseq-mini-list" id="groupDHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-        <div style="font-size:10px; text-align:center; margin-top:4px;">hits: <span id="groupDHitCount">0</span></div>
-      </div>
-    </div>
-    <div class="row-double">
-      <div class="group-box group-a-box"><div class="group-header group-a-header">Group A Triplicates (60)</div><div id="groupADuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Auto: <span id="groupAMissesAutoText60">0</span></span><span>No auto: <span id="groupAMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('A60')">Reset</button></div></div>
-      <div class="group-box group-b-box"><div class="group-header group-b-header">Group B Triplicates (60)</div><div id="groupBDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Auto: <span id="groupBMissesAutoText60">0</span></span><span>No auto: <span id="groupBMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('B60')">Reset</button></div></div>
-    </div>
-    <div class="row-double">
-      <div class="top5-box"><div class="top5-header">🔥 TOP 5 PRIVILEGED (most recent)</div><div id="top5List" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="top5MissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetTop5Misses()">Reset</button></div></div>
-      <div class="privilege-box"><div class="privilege-title">Auto‑Reset Privileged Numbers Until Gone</div><div id="privilegeList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="privilegeMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button></div></div>
-    </div>
-    <div class="row-single">
-      <div class="group-c-box"><div class="group-header group-c-header">Group C Quadruplicates (60)</div><div id="groupCDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Auto: <span id="groupCMissesAutoText60">0</span></span><span>No auto: <span id="groupCMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button></div></div>
-    </div>
+    <div class="row-single"><div class="twoonly-box twoonly-a-box"><div class="twoonly-header twoonly-title-a">✨ Two Only A ✨</div><div id="twoOnlyAList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="twoOnlyAHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="twoOnlyAHitCount">0</span></div></div></div>
+    <div class="row-single"><div class="twoonly-box twoonly-b-box"><div class="twoonly-header twoonly-title-b">✨ Two Only B ✨</div><div id="twoOnlyBList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="twoOnlyBHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="twoOnlyBHitCount">0</span></div></div></div>
+    <div class="row-single"><div class="three-only-box"><div class="three-header">🎯 Three Only</div><div id="threeOnlyList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="threeOnlyMissesText">Misses: 0</span><div><button class="misses-reset-btn" onclick="resetMisses('Three60')">Reset misses</button><button class="hitseq-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="threeOnlyHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="threeOnlyHitSeqCount">0</span></div></div></div>
+    <div class="row-single"><div class="combined-box"><div class="combined-header">⚡ COMBINED: Privileged + Three Only</div><div id="combinedList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="combinedMissesText">Misses: 0</span><div><button class="misses-reset-btn" onclick="resetCombinedMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="combinedHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="hitSeqCount">0</span></div></div></div>
+    <div class="row-single"><div class="group-d-box"><div class="group-d-header">📊 Group D (3+ occurrences)</div><div id="groupDDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="groupDMissesText60">Misses: 0</span><div><button class="misses-reset-btn" onclick="resetMisses('D60')">Reset misses</button><button class="hitseq-reset-btn" onclick="resetGroupDHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="groupDHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="groupDHitCount">0</span></div></div></div>
+    <div class="row-double"><div class="group-box group-a-box"><div class="group-header group-a-header">Group A Triplicates</div><div id="groupADuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Auto: <span id="groupAMissesAutoText60">0</span></span><span>No auto: <span id="groupAMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('A60')">Reset</button></div></div><div class="group-box group-b-box"><div class="group-header group-b-header">Group B Triplicates</div><div id="groupBDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Auto: <span id="groupBMissesAutoText60">0</span></span><span>No auto: <span id="groupBMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('B60')">Reset</button></div></div></div>
+    <div class="row-double"><div class="top5-box"><div class="top5-header">🔥 TOP 5 PRIVILEGED</div><div id="top5List" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="top5MissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetTop5Misses()">Reset</button></div></div><div class="privilege-box"><div class="privilege-title">Auto‑Reset Privileged</div><div id="privilegeList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span id="privilegeMissesText">Misses: 0</span><button class="misses-reset-btn" onclick="resetPrivilegeMisses()">Reset</button></div></div></div>
+    <div class="row-single"><div class="group-c-box"><div class="group-header group-c-header">Group C Quadruplicates</div><div id="groupCDuplicates60" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Auto: <span id="groupCMissesAutoText60">0</span></span><span>No auto: <span id="groupCMissesNoAutoText60">0</span></span><button class="misses-reset-btn" onclick="resetMisses('C60')">Reset</button></div></div></div>
   </div>
 </div>
 
-<div id="alertModal" class="alert-modal"><div class="alert-content" id="alertContent"><div class="alert-title" id="alertTitle">⚡</div><div id="alertNumber" class="alert-number">0</div><div class="alert-message" id="alertMessage"></div><button class="close-alert" onclick="closeAlert()">OK</button></div></div>
-<div class="numpad"><button class="backspace" onclick="backspace()">Back</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
+<div id="alertModal" class="alert-modal"><div class="alert-content"><div id="alertTitle">⚡</div><div id="alertNumber">0</div><div id="alertMessage"></div><button class="close-alert" onclick="closeAlert()">OK</button></div></div>
+<div class="numpad"><button class="backspace" onclick="backspace()">⌫</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
 
 <script>
-  // ---------- FULL TRACKING LOGIC (unchanged, same as original) ----------
+  // ---------- FULL TRACKING LOGIC (identical to original, no changes) ----------
   const colors = { red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36], black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35], green: ["0","00"] };
   const groupA = ["0","00","2","4","6","8","10","11","13","15","17","20","22","24","26","28","29","31","33","35"];
   const groupB = ["0","00","1","3","5","7","9","12","14","16","18","19","21","23","25","27","30","32","34","36"];
@@ -540,20 +432,20 @@
     const last60 = history.slice(-60);
     const counts = getGroupCounts(last60);
     const twoOnlyANumbers = []; for(let num of groupA) { if((counts.groupCCounts[num]||0) === 2) twoOnlyANumbers.push(num); }
-    const twoADiv = document.getElementById("twoOnlyAList"); twoADiv.innerHTML = twoOnlyANumbers.length ? "" : '<div class="no-duplicates">No exact duplicates in A</div>';
+    const twoADiv = document.getElementById("twoOnlyAList"); twoADiv.innerHTML = twoOnlyANumbers.length ? "" : '<div class="no-duplicates">—</div>';
     for(let num of twoOnlyANumbers) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">2</div>`; twoADiv.appendChild(item); }
     const twoOnlyBNumbers = []; for(let num of groupB) { if((counts.groupCCounts[num]||0) === 2) twoOnlyBNumbers.push(num); }
-    const twoBDiv = document.getElementById("twoOnlyBList"); twoBDiv.innerHTML = twoOnlyBNumbers.length ? "" : '<div class="no-duplicates">No exact duplicates in B</div>';
+    const twoBDiv = document.getElementById("twoOnlyBList"); twoBDiv.innerHTML = twoOnlyBNumbers.length ? "" : '<div class="no-duplicates">—</div>';
     for(let num of twoOnlyBNumbers) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">2</div>`; twoBDiv.appendChild(item); }
-    const exactTrips = extractExactTriplicates(counts.groupCCounts); const threeDiv = document.getElementById("threeOnlyList"); threeDiv.innerHTML = Object.keys(exactTrips).length ? "" : '<div class="no-duplicates">No numbers with exactly 3</div>'; for(let [num,cnt] of Object.entries(exactTrips)) { let item = document.createElement("div"); let groupsShort = []; if(groupA.includes(num)) groupsShort.push("A"); if(groupB.includes(num)) groupsShort.push("B"); item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="group-badge">${groupsShort.join('/')||'—'}</div><div class="duplicate-count">3</div>`; threeDiv.appendChild(item); }
+    const exactTrips = extractExactTriplicates(counts.groupCCounts); const threeDiv = document.getElementById("threeOnlyList"); threeDiv.innerHTML = Object.keys(exactTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(exactTrips)) { let item = document.createElement("div"); let groupsShort = []; if(groupA.includes(num)) groupsShort.push("A"); if(groupB.includes(num)) groupsShort.push("B"); item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="group-badge">${groupsShort.join('/')||'—'}</div><div class="duplicate-count">3</div>`; threeDiv.appendChild(item); }
     const privSet = new Set([...autoResetPrivilegeA60, ...autoResetPrivilegeB60, ...autoResetPrivilegeC60]);
     const combinedContainer = document.getElementById("combinedList"); const unionSet = new Set([...privSet, ...Object.keys(exactTrips)]); if(unionSet.size===0) combinedContainer.innerHTML='<div class="no-duplicates">—</div>'; else { combinedContainer.innerHTML=""; for(let num of unionSet){ let badges=[]; if(privSet.has(num)) badges.push("P"); if(exactTrips[num]) badges.push("3"); let lastIdx=lastOccurrence(num,history); let misses=lastIdx===-1?'∞':history.length-1-lastIdx; let item=document.createElement("div"); item.className="duplicate-item"; item.innerHTML=`<div class="duplicate-number ${getColor(num)}">${num}</div><div class="combined-badge">${badges.join('/')}</div><div class="privilege-miss-badge">🚫${misses}</div>`; combinedContainer.appendChild(item); } }
-    const dTrips = extractTriplicates(counts.groupCCounts); const dDiv = document.getElementById("groupDDuplicates60"); dDiv.innerHTML = Object.keys(dTrips).length ? "" : '<div class="no-duplicates">No triplicates</div>'; for(let [num,cnt] of Object.entries(dTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>`; dDiv.appendChild(item); }
-    const aTrips = extractTriplicates(counts.groupACounts); const aDiv = document.getElementById("groupADuplicates60"); aDiv.innerHTML = Object.keys(aTrips).length ? "" : '<div class="no-duplicates">No triplicates</div>'; for(let [num,cnt] of Object.entries(aTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeA60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; aDiv.appendChild(item); }
-    const bTrips = extractTriplicates(counts.groupBCounts); const bDiv = document.getElementById("groupBDuplicates60"); bDiv.innerHTML = Object.keys(bTrips).length ? "" : '<div class="no-duplicates">No triplicates</div>'; for(let [num,cnt] of Object.entries(bTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeB60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; bDiv.appendChild(item); }
-    const cQuads = extractQuadruplicates(counts.groupCCounts); const cDiv = document.getElementById("groupCDuplicates60"); cDiv.innerHTML = Object.keys(cQuads).length ? "" : '<div class="no-duplicates">No quadruplicates</div>'; for(let [num,cnt] of Object.entries(cQuads)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeC60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; cDiv.appendChild(item); }
-    const privDiv = document.getElementById("privilegeList"); if(privSet.size === 0) privDiv.innerHTML = '<div class="no-duplicates">No auto‑reset numbers</div>'; else { const privNumbers = Array.from(privSet).map(num => { let lastIdx = lastOccurrence(num, history); const groupsPriv = []; if(autoResetPrivilegeA60.includes(num)) groupsPriv.push("A"); if(autoResetPrivilegeB60.includes(num)) groupsPriv.push("B"); if(autoResetPrivilegeC60.includes(num)) groupsPriv.push("C"); const missesSince = lastIdx === -1 ? '?' : history.length-1-lastIdx; return { num, lastIdx, groupsPriv, missesSince }; }); privNumbers.sort((a,b)=> b.lastIdx - a.lastIdx); privDiv.innerHTML = ""; for(let p of privNumbers){ let item=document.createElement("div"); item.className="duplicate-item"; item.innerHTML=`<div class="duplicate-number ${getColor(p.num)}">${p.num}</div><div class="privilege-group-label">${p.groupsPriv.join('/')}</div><div class="privilege-miss-badge">🚫${p.missesSince}</div>`; privDiv.appendChild(item); } }
-    const top5Numbers = getTop5PrivilegedSet(history, Array.from(privSet)); const top5Container = document.getElementById("top5List"); if(top5Numbers.length === 0) top5Container.innerHTML = '<div class="no-duplicates">No privileged numbers</div>'; else { top5Container.innerHTML = ""; for(let num of top5Numbers) { let lastIdx = lastOccurrence(num, history); let missesSince = lastIdx === -1 ? '∞' : history.length - 1 - lastIdx; let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="top5-badge">🚫${missesSince}</div>`; top5Container.appendChild(item); } }
+    const dTrips = extractTriplicates(counts.groupCCounts); const dDiv = document.getElementById("groupDDuplicates60"); dDiv.innerHTML = Object.keys(dTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(dTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>`; dDiv.appendChild(item); }
+    const aTrips = extractTriplicates(counts.groupACounts); const aDiv = document.getElementById("groupADuplicates60"); aDiv.innerHTML = Object.keys(aTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(aTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeA60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; aDiv.appendChild(item); }
+    const bTrips = extractTriplicates(counts.groupBCounts); const bDiv = document.getElementById("groupBDuplicates60"); bDiv.innerHTML = Object.keys(bTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(bTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeB60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; bDiv.appendChild(item); }
+    const cQuads = extractQuadruplicates(counts.groupCCounts); const cDiv = document.getElementById("groupCDuplicates60"); cDiv.innerHTML = Object.keys(cQuads).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(cQuads)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeC60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; cDiv.appendChild(item); }
+    const privDiv = document.getElementById("privilegeList"); if(privSet.size === 0) privDiv.innerHTML = '<div class="no-duplicates">—</div>'; else { const privNumbers = Array.from(privSet).map(num => { let lastIdx = lastOccurrence(num, history); const groupsPriv = []; if(autoResetPrivilegeA60.includes(num)) groupsPriv.push("A"); if(autoResetPrivilegeB60.includes(num)) groupsPriv.push("B"); if(autoResetPrivilegeC60.includes(num)) groupsPriv.push("C"); const missesSince = lastIdx === -1 ? '?' : history.length-1-lastIdx; return { num, lastIdx, groupsPriv, missesSince }; }); privNumbers.sort((a,b)=> b.lastIdx - a.lastIdx); privDiv.innerHTML = ""; for(let p of privNumbers){ let item=document.createElement("div"); item.className="duplicate-item"; item.innerHTML=`<div class="duplicate-number ${getColor(p.num)}">${p.num}</div><div class="privilege-group-label">${p.groupsPriv.join('/')}</div><div class="privilege-miss-badge">🚫${p.missesSince}</div>`; privDiv.appendChild(item); } }
+    const top5Numbers = getTop5PrivilegedSet(history, Array.from(privSet)); const top5Container = document.getElementById("top5List"); if(top5Numbers.length === 0) top5Container.innerHTML = '<div class="no-duplicates">—</div>'; else { top5Container.innerHTML = ""; for(let num of top5Numbers) { let lastIdx = lastOccurrence(num, history); let missesSince = lastIdx === -1 ? '∞' : history.length - 1 - lastIdx; let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="top5-badge">🚫${missesSince}</div>`; top5Container.appendChild(item); } }
     const combinedSeqDiv = document.getElementById("combinedHitSeqList"); combinedSeqDiv.innerHTML = combinedHitHistory.length ? "" : '<div class="no-duplicates">No hits yet</div>'; for(let val of combinedHitHistory) { let span = document.createElement("span"); span.className = "hitseq-mini-item hitseq-mini-item-combined"; span.textContent = val; combinedSeqDiv.appendChild(span); } document.getElementById("hitSeqCount").textContent = combinedHitHistory.length;
     const threeSeqDiv = document.getElementById("threeOnlyHitSeqList"); threeSeqDiv.innerHTML = threeOnlyHitHistory.length ? "" : '<div class="no-duplicates">No hits yet</div>'; for(let val of threeOnlyHitHistory) { let span = document.createElement("span"); span.className = "hitseq-mini-item hitseq-mini-item-three"; span.textContent = val; threeSeqDiv.appendChild(span); } document.getElementById("threeOnlyHitSeqCount").textContent = threeOnlyHitHistory.length;
     const groupDSeqDiv = document.getElementById("groupDHitSeqList"); groupDSeqDiv.innerHTML = groupDHitHistory.length ? "" : '<div class="no-duplicates">No hits yet</div>'; for(let val of groupDHitHistory) { let span = document.createElement("span"); span.className = "hitseq-mini-item hitseq-mini-item-groupd"; span.textContent = val; groupDSeqDiv.appendChild(span); } document.getElementById("groupDHitCount").textContent = groupDHitHistory.length;

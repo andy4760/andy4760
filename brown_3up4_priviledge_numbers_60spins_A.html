@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Brown Roulette Tracker • iPad Optimized</title>
+  <title>Brown Roulette Tracker • Sticky Controls + Recent Spins (iPad Mini 2)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -25,7 +25,7 @@
       margin: 0 auto;
     }
 
-    /* header (title) + legend – normal scroll */
+    /* header (title) + legend – normal flow (scrolls away) */
     header {
       text-align: center;
       padding: 0.8rem 0;
@@ -48,25 +48,27 @@
       font-size: 0.8rem;
     }
 
-    /* STICKY TOP BAR (controls + recent spins) */
+    /* ===== STICKY TOP BAR (controls + recent spins) ===== */
     .sticky-top-bar {
+      position: -webkit-sticky;
       position: sticky;
       top: 0;
-      z-index: 150;
+      z-index: 200;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       border-radius: 0 0 16px 16px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
       margin: 0 0 1rem 0;
-      padding: 10px 12px 8px 12px;
-      border-bottom: 1px solid rgba(255, 75, 43, 0.4);
+      padding: 12px 12px 8px 12px;
+      border-bottom: 2px solid rgba(255, 75, 43, 0.5);
     }
 
+    /* controls row */
     .controls {
       display: flex;
       justify-content: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       align-items: center;
     }
 
@@ -96,9 +98,9 @@
       min-height: 44px; /* better touch target */
     }
     button:hover { transform: translateY(-2px); background: rgba(80, 80, 100, 0.9); }
-    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); }
-    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); }
-    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); }
+    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); } /* Add Spin */
+    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); } /* Undo */
+    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); } /* Reset All */
 
     #entryCount {
       background: rgba(0,0,0,0.5);
@@ -115,7 +117,7 @@
       border-radius: 20px;
     }
 
-    /* RECENT SPINS - horizontal scroll with smooth touch */
+    /* Recent spins row (horizontal scroll) */
     #recentSpins {
       display: flex;
       flex-direction: row;
@@ -126,7 +128,7 @@
       padding: 8px 4px;
       scrollbar-width: thin;
       min-height: 65px;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      border-top: 1px solid rgba(255,255,255,0.15);
     }
     #recentSpins::-webkit-scrollbar {
       height: 4px;
@@ -148,6 +150,7 @@
     .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
     .empty { background: rgba(60, 60, 80, 0.5); border: 1px solid #444; }
 
+    /* Legend (scrolls away) */
     .legend {
       display: flex;
       justify-content: center;
@@ -161,8 +164,11 @@
       font-size: 0.85rem;
     }
     .legend-color { width: 18px; height: 18px; border-radius: 50%; }
+    .legend-red { background: #e53935; }
+    .legend-black { background: #212121; }
+    .legend-green { background: #2e7d32; }
 
-    /* SCROLLABLE GROUPS */
+    /* ===== SCROLLABLE GROUPS (all tracking boxes) ===== */
     .duplicate-section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 16px;
@@ -186,7 +192,6 @@
         grid-template-columns: 1fr;
       }
     }
-    /* box styles (unchanged but more padding) */
     .group-box, .three-only-box, .privilege-box, .combined-box, .top5-box, .twoonly-box, .group-d-box, .group-c-box {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 14px;
@@ -311,15 +316,16 @@
 <div class="container">
   <header>
     <h1>Brown Roulette Tracker</h1>
-    <div class="tagline">iPad Optimized • Sticky Controls + Touch‑Friendly</div>
+    <div class="tagline">Sticky Controls + Recent Spins • iPad Mini 2 Optimized</div>
   </header>
+  
   <div class="legend">
     <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
     <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
 
-  <!-- STICKY BAR -->
+  <!-- STICKY TOP BAR: controls AND recent spins always visible -->
   <div class="sticky-top-bar">
     <div class="controls">
       <div id="entryCount">Total spins: 0</div>
@@ -332,7 +338,7 @@
     <div id="recentSpins"></div>
   </div>
 
-  <!-- ALL TRACKING GROUPS (same as original) -->
+  <!-- SCROLLABLE TRACKING GROUPS (all logic intact) -->
   <div class="duplicate-section">
     <div class="row-single"><div class="twoonly-box twoonly-a-box"><div class="twoonly-header twoonly-title-a">✨ Two Only A ✨</div><div id="twoOnlyAList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="twoOnlyAHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="twoOnlyAHitCount">0</span></div></div></div>
     <div class="row-single"><div class="twoonly-box twoonly-b-box"><div class="twoonly-header twoonly-title-b">✨ Two Only B ✨</div><div id="twoOnlyBList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="twoOnlyBHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="twoOnlyBHitCount">0</span></div></div></div>
@@ -349,7 +355,7 @@
 <div class="numpad"><button class="backspace" onclick="backspace()">⌫</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
 
 <script>
-  // ---------- FULL TRACKING LOGIC (identical to original, no changes) ----------
+  // ---------- FULL TRACKING LOGIC (unchanged, same as original) ----------
   const colors = { red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36], black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35], green: ["0","00"] };
   const groupA = ["0","00","2","4","6","8","10","11","13","15","17","20","22","24","26","28","29","31","33","35"];
   const groupB = ["0","00","1","3","5","7","9","12","14","16","18","19","21","23","25","27","30","32","34","36"];

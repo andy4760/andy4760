@@ -25,7 +25,6 @@
       margin: 0 auto;
     }
 
-    /* header (title) + legend – normal flow (scrolls away) */
     header {
       text-align: center;
       padding: 0.8rem 0;
@@ -48,7 +47,6 @@
       font-size: 0.8rem;
     }
 
-    /* ===== STICKY TOP BAR (controls + recent spins) ===== */
     .sticky-top-bar {
       position: -webkit-sticky;
       position: sticky;
@@ -62,7 +60,6 @@
       border-bottom: 2px solid rgba(255, 75, 43, 0.5);
     }
 
-    /* controls row */
     .controls {
       display: flex;
       justify-content: center;
@@ -81,7 +78,7 @@
       border: 2px solid #444;
       border-radius: 10px;
       color: white;
-      font-size: 18px; /* prevents zoom on iOS */
+      font-size: 18px;
     }
     input:focus { border-color: #ff4b2b; outline: none; }
 
@@ -95,12 +92,12 @@
       font-weight: 600;
       transition: 0.2s;
       font-size: 0.9rem;
-      min-height: 44px; /* better touch target */
+      min-height: 44px;
     }
     button:hover { transform: translateY(-2px); background: rgba(80, 80, 100, 0.9); }
-    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); } /* Add Spin */
-    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); } /* Undo */
-    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); } /* Reset All */
+    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); }
+    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); }
+    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); }
 
     #entryCount {
       background: rgba(0,0,0,0.5);
@@ -117,7 +114,6 @@
       border-radius: 20px;
     }
 
-    /* Recent spins row (horizontal scroll) */
     #recentSpins {
       display: flex;
       flex-direction: row;
@@ -150,7 +146,6 @@
     .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
     .empty { background: rgba(60, 60, 80, 0.5); border: 1px solid #444; }
 
-    /* Legend (scrolls away) */
     .legend {
       display: flex;
       justify-content: center;
@@ -168,7 +163,6 @@
     .legend-black { background: #212121; }
     .legend-green { background: #2e7d32; }
 
-    /* ===== SCROLLABLE GROUPS (all tracking boxes) ===== */
     .duplicate-section {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 16px;
@@ -248,8 +242,9 @@
       background: rgba(0,0,0,0.2);
       border-radius: 12px;
     }
+    /* 🔵 CHANGED FROM GREEN (#4caf50) TO BLUE (#2196f3) 🔵 */
     .hitseq-mini-item {
-      background: #4caf50;
+      background: #2196f3;
       color: white;
       font-weight: bold;
       font-size: 13px;
@@ -325,7 +320,6 @@
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
 
-  <!-- STICKY TOP BAR: controls AND recent spins always visible -->
   <div class="sticky-top-bar">
     <div class="controls">
       <div id="entryCount">Total spins: 0</div>
@@ -338,7 +332,6 @@
     <div id="recentSpins"></div>
   </div>
 
-  <!-- SCROLLABLE TRACKING GROUPS (all logic intact) -->
   <div class="duplicate-section">
     <div class="row-single"><div class="twoonly-box twoonly-a-box"><div class="twoonly-header twoonly-title-a">✨ Two Only A ✨</div><div id="twoOnlyAList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="twoOnlyAHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="twoOnlyAHitCount">0</span></div></div></div>
     <div class="row-single"><div class="twoonly-box twoonly-b-box"><div class="twoonly-header twoonly-title-b">✨ Two Only B ✨</div><div id="twoOnlyBList" class="duplicate-list"><div class="no-duplicates">—</div></div><div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="twoOnlyBHitSeqList"><div class="no-duplicates">No hits yet</div></div><div style="font-size:10px; text-align:center;">hits: <span id="twoOnlyBHitCount">0</span></div></div></div>
@@ -355,7 +348,7 @@
 <div class="numpad"><button class="backspace" onclick="backspace()">⌫</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
 
 <script>
-  // ---------- FULL TRACKING LOGIC (unchanged, same as original) ----------
+  // ---------- FULL TRACKING LOGIC (unchanged) ----------
   const colors = { red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36], black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35], green: ["0","00"] };
   const groupA = ["0","00","2","4","6","8","10","11","13","15","17","20","22","24","26","28","29","31","33","35"];
   const groupB = ["0","00","1","3","5","7","9","12","14","16","18","19","21","23","25","27","30","32","34","36"];
@@ -445,7 +438,48 @@
     for(let num of twoOnlyBNumbers) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">2</div>`; twoBDiv.appendChild(item); }
     const exactTrips = extractExactTriplicates(counts.groupCCounts); const threeDiv = document.getElementById("threeOnlyList"); threeDiv.innerHTML = Object.keys(exactTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(exactTrips)) { let item = document.createElement("div"); let groupsShort = []; if(groupA.includes(num)) groupsShort.push("A"); if(groupB.includes(num)) groupsShort.push("B"); item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="group-badge">${groupsShort.join('/')||'—'}</div><div class="duplicate-count">3</div>`; threeDiv.appendChild(item); }
     const privSet = new Set([...autoResetPrivilegeA60, ...autoResetPrivilegeB60, ...autoResetPrivilegeC60]);
-    const combinedContainer = document.getElementById("combinedList"); const unionSet = new Set([...privSet, ...Object.keys(exactTrips)]); if(unionSet.size===0) combinedContainer.innerHTML='<div class="no-duplicates">—</div>'; else { combinedContainer.innerHTML=""; for(let num of unionSet){ let badges=[]; if(privSet.has(num)) badges.push("P"); if(exactTrips[num]) badges.push("3"); let lastIdx=lastOccurrence(num,history); let misses=lastIdx===-1?'∞':history.length-1-lastIdx; let item=document.createElement("div"); item.className="duplicate-item"; item.innerHTML=`<div class="duplicate-number ${getColor(num)}">${num}</div><div class="combined-badge">${badges.join('/')}</div><div class="privilege-miss-badge">🚫${misses}</div>`; combinedContainer.appendChild(item); } }
+    
+    // Combined list: privileged first (by recency) then three‑only
+    const combinedContainer = document.getElementById("combinedList");
+    const threeOnlyKeys = Object.keys(exactTrips);
+    let privilegedItems = [];
+    for (let num of privSet) {
+      const lastIdx = lastOccurrence(num, history);
+      privilegedItems.push({ num, lastIdx, isPrivileged: true, isThreeOnly: threeOnlyKeys.includes(num) });
+    }
+    privilegedItems.sort((a,b) => b.lastIdx - a.lastIdx);
+    let threeOnlyItems = [];
+    for (let num of threeOnlyKeys) {
+      if (!privSet.has(num)) {
+        const lastIdx = lastOccurrence(num, history);
+        threeOnlyItems.push({ num, lastIdx, isPrivileged: false, isThreeOnly: true });
+      }
+    }
+    threeOnlyItems.sort((a,b) => b.lastIdx - a.lastIdx);
+    const combinedItems = [...privilegedItems, ...threeOnlyItems];
+    if (combinedItems.length === 0) {
+      combinedContainer.innerHTML = '<div class="no-duplicates">—</div>';
+    } else {
+      combinedContainer.innerHTML = "";
+      for (let item of combinedItems) {
+        const num = item.num;
+        const isPriv = item.isPrivileged;
+        const isThree = item.isThreeOnly;
+        let badge = "";
+        if (isPriv && isThree) badge = "P/3";
+        else if (isPriv) badge = "P";
+        else if (isThree) badge = "3";
+        const lastIdx = lastOccurrence(num, history);
+        const misses = lastIdx === -1 ? '∞' : history.length - 1 - lastIdx;
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "duplicate-item";
+        itemDiv.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div>
+                             <div class="combined-badge">${badge}</div>
+                             <div class="privilege-miss-badge">🚫${misses}</div>`;
+        combinedContainer.appendChild(itemDiv);
+      }
+    }
+    
     const dTrips = extractTriplicates(counts.groupCCounts); const dDiv = document.getElementById("groupDDuplicates60"); dDiv.innerHTML = Object.keys(dTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(dTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>`; dDiv.appendChild(item); }
     const aTrips = extractTriplicates(counts.groupACounts); const aDiv = document.getElementById("groupADuplicates60"); aDiv.innerHTML = Object.keys(aTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(aTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeA60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; aDiv.appendChild(item); }
     const bTrips = extractTriplicates(counts.groupBCounts); const bDiv = document.getElementById("groupBDuplicates60"); bDiv.innerHTML = Object.keys(bTrips).length ? "" : '<div class="no-duplicates">—</div>'; for(let [num,cnt] of Object.entries(bTrips)) { let item = document.createElement("div"); item.className="duplicate-item"; item.innerHTML = `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${cnt}</div>${autoResetPrivilegeB60.includes(num)?'<div class="privilege-indicator">AUTO-RESET</div>':''}`; bDiv.appendChild(item); }

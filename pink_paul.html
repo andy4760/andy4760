@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Pink Roulette Tracker • Sticky Controls + Recent Spins (iPad Mini 2)</title>
+  <title>Pink Roulette Tracker • Swapped Layout (Recent Spins on Top)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -60,12 +60,29 @@
       border-bottom: 2px solid rgba(255, 75, 43, 0.5);
     }
 
+    /* NEW ORDER: recent spins now comes FIRST inside sticky bar, controls below */
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      gap: 8px;
+      padding: 8px 4px;
+      scrollbar-width: thin;
+      min-height: 65px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 12px;
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 4px;
+    }
+
     .controls {
       display: flex;
       justify-content: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 12px;
       align-items: center;
     }
 
@@ -114,21 +131,6 @@
       border-radius: 20px;
     }
 
-    #recentSpins {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      gap: 8px;
-      padding: 8px 4px;
-      scrollbar-width: thin;
-      min-height: 65px;
-      border-top: 1px solid rgba(255,255,255,0.15);
-    }
-    #recentSpins::-webkit-scrollbar {
-      height: 4px;
-    }
     .spin-box {
       width: 48px;
       height: 48px;
@@ -313,7 +315,7 @@
 <div class="container">
   <header>
     <h1>Pink Roulette Tracker</h1>
-    <div class="tagline">Sticky Controls + Recent Spins • iPad Mini 2 Optimized</div>
+    <div class="tagline">Swapped Layout • Recent Spins on Top • iPad Mini 2 Optimized</div>
   </header>
   
   <div class="legend">
@@ -322,7 +324,12 @@
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
 
+  <!-- STICKY TOP BAR: order swapped -> recent spins first, then controls -->
   <div class="sticky-top-bar">
+    <!-- 1. RECENT SPINS DISPLAY (now on top) -->
+    <div id="recentSpins"></div>
+    
+    <!-- 2. CONTROLS (Total spins, input, buttons) moved below recent spins -->
     <div class="controls">
       <div id="entryCount">Total spins: 0</div>
       <input id="numberInput" placeholder="0-36 / 00" maxlength="2" inputmode="numeric" />
@@ -331,7 +338,6 @@
       <button onclick="resetAll()">Reset All</button>
       <div id="inputStatus" class="input-status"></div>
     </div>
-    <div id="recentSpins"></div>
   </div>
 
   <div class="duplicate-section">

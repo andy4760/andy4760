@@ -534,7 +534,7 @@
   <button id="numpad4">4</button><button id="numpad5">5</button><button id="numpad6">6</button>
   <button id="numpad7">7</button><button id="numpad8">8</button><button id="numpad9">9</button>
   <button id="numpad0">0</button>
-  <button id="numpad00">00</button>
+  
   <button class="enter" id="numpadEnter">Enter</button>
 </div>
 
@@ -1277,7 +1277,6 @@
       document.getElementById("numpad8").onclick = function() { var inp = document.getElementById("numberInput"); inp.value += "8"; };
       document.getElementById("numpad9").onclick = function() { var inp = document.getElementById("numberInput"); inp.value += "9"; };
       document.getElementById("numpad0").onclick = function() { var inp = document.getElementById("numberInput"); inp.value += "0"; };
-      document.getElementById("numpad00").onclick = function() { document.getElementById("numberInput").value = "00"; };
       document.getElementById("numpadBackspace").onclick = function() { var inp = document.getElementById("numberInput"); inp.value = inp.value.slice(0,-1); };
       document.getElementById("numpadEnter").onclick = addNumber;
     }

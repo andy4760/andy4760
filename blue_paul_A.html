@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Blue Roulette Tracker • Triplicates A/B 60 • Core Tracking</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 0.8rem;
+      padding-bottom: 90px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 0.8rem 0;
+      margin-bottom: 0.8rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .tagline {
+      color: #ccc;
+      font-style: italic;
+      font-size: 0.8rem;
+    }
+
+    .sticky-top-bar {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      margin: 0 0 1rem 0;
+      padding: 12px 12px 8px 12px;
+      border-bottom: 2px solid rgba(255, 75, 43, 0.5);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    input {
+      padding: 10px 12px;
+      font-size: 1rem;
+      width: 130px;
+      text-align: center;
+      background: rgba(30, 30, 46, 0.95);
+      border: 2px solid #444;
+      border-radius: 10px;
+      color: white;
+      font-size: 18px;
+    }
+    input:focus { border-color: #ff4b2b; outline: none; }
+
+    button {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(60, 60, 80, 0.9);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+      font-size: 0.9rem;
+      min-height: 44px;
+    }
+    button:hover { transform: translateY(-2px); background: rgba(80, 80, 100, 0.9); }
+    .controls button:nth-child(3) { background: linear-gradient(145deg, #2196f3, #1976d2); }
+    .controls button:nth-child(4) { background: linear-gradient(145deg, #ff9800, #f57c00); }
+    .controls button:nth-child(5) { background: linear-gradient(145deg, #f44336, #d32f2f); }
+
+    #entryCount {
+      background: rgba(0,0,0,0.5);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    .input-status {
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    #recentSpins {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      gap: 8px;
+      padding: 8px 4px;
+      scrollbar-width: thin;
+      min-height: 65px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    #recentSpins::-webkit-scrollbar {
+      height: 4px;
+    }
+    .spin-box {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+    .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; }
+    .black { background: linear-gradient(145deg, #212121, #000000); color: white; }
+    .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
+    .empty { background: rgba(60, 60, 80, 0.5); border: 1px solid #444; }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin: 12px 0 20px 0;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .legend-color { width: 18px; height: 18px; border-radius: 50%; }
+    .legend-red { background: #e53935; }
+    .legend-black { background: #212121; }
+    .legend-green { background: #2e7d32; }
+
+    .duplicate-section {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 12px;
+      margin: 20px 0;
+    }
+    .row-single {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 20px;
+      grid-template-columns: 1fr;
+    }
+    .row-double {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 20px;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 768px) {
+      .row-double {
+        grid-template-columns: 1fr;
+      }
+    }
+    .group-box, .duplicates20-box, .duplicates30-box, .triplicates60-box, .triplicates60a-box, .triplicates60b-box, .twoonly-box, .combined-twoonly-box, .three-only-box, .group-c-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .duplicates20-box { border: 2px solid #ffaa44; background: rgba(255, 170, 68, 0.12); }
+    .duplicates30-box { border: 2px solid #ff8844; background: rgba(255, 136, 68, 0.12); }
+    .triplicates60-box { border: 2px solid #ff9966; background: rgba(255, 153, 102, 0.12); }
+    .triplicates60a-box { border: 2px solid #4caf50; background: rgba(76, 175, 80, 0.12); }
+    .triplicates60b-box { border: 2px solid #ffa726; background: rgba(255, 167, 38, 0.12); }
+    .combined-twoonly-box { border: 2px solid #00e5ff; background: rgba(0, 229, 255, 0.08); }
+    .twoonly-a-box { border: 2px solid #4caf50; background: rgba(76,175,80,0.1); }
+    .twoonly-b-box { border: 2px solid #ffa726; background: rgba(255,167,38,0.1); }
+    .three-only-box { border: 2px solid #FFC107; background: rgba(255,193,7,0.1); }
+    .group-c-box { border: 2px solid #9C27B0; background: rgba(156,39,176,0.12); }
+    .combined-big-box {
+      border: 3px solid #ffaa44;
+      background: rgba(255, 170, 68, 0.18);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .duplicate-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      min-height: 50px;
+    }
+    .duplicate-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .duplicate-number {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .duplicate-count, .group-badge {
+      font-size: 9px;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 5px;
+      border-radius: 14px;
+    }
+    .auto-badge {
+      font-size: 9px;
+      background: #ffaa33;
+      color: #1e1e2e;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 14px;
+      margin-top: 2px;
+    }
+    .badge-combined {
+      font-size: 8px;
+      background: #1e1e3a;
+      color: #ffdd99;
+      padding: 2px 5px;
+      border-radius: 12px;
+      margin-top: 2px;
+      text-align: center;
+      max-width: 70px;
+      white-space: nowrap;
+      overflow-x: auto;
+      font-weight: bold;
+    }
+    .hitseq-mini-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+      padding: 6px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+    }
+    .hitseq-mini-item {
+      background: #2196f3;
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 24px;
+    }
+    .misses-counter {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      background: rgba(0,0,0,0.3);
+      padding: 8px 12px;
+      border-radius: 10px;
+      gap: 10px;
+    }
+    .misses-reset-btn, .hitseq-reset-btn {
+      padding: 5px 10px;
+      font-size: 0.7rem;
+      background: #ff5722;
+      border-radius: 20px;
+    }
+    .numpad {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.98);
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      border-top: 2px solid #ff4b2b;
+      z-index: 200;
+      -webkit-overflow-scrolling: touch;
+    }
+    .numpad button {
+      flex: 1;
+      min-width: 70px;
+      padding: 14px 0;
+      font-size: 1.3rem;
+      border-radius: 12px;
+      background: #2c2c44;
+      min-height: 55px;
+    }
+    .numpad .enter { background: linear-gradient(145deg, #4caf50, #2e7d32); }
+    .numpad .backspace { background: linear-gradient(145deg, #f44336, #d32f2f); }
+    .alert-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; }
+    .alert-content { background: linear-gradient(145deg,#1f1f2f,#12121c); border-radius:28px; padding:28px; text-align:center; max-width:380px; width:90%; border:2px solid gold; }
+    .close-alert { margin-top:20px; background:#2196f3; padding:10px 24px; border-radius:40px; font-size:1rem; }
+
+    @media (max-width: 800px) {
+      .spin-box { width: 44px; height: 44px; font-size: 20px; }
+      .duplicate-number { width: 40px; height: 40px; font-size: 17px; }
+      .controls button { padding: 8px 12px; font-size: 0.85rem; }
+      #entryCount { font-size: 0.8rem; padding: 4px 10px; }
+      .numpad button { min-width: 60px; padding: 12px 0; }
+      .badge-combined { font-size: 7px; max-width: 60px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Blue Roulette Tracker</h1>
+    <div class="tagline">Duplicates20 • Duplicates30 • Triplicates60 • Triplicates A/B 60 • Quadruplicate60 • Two Only • Three Only</div>
+  </header>
+  
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
+    <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
+    <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
+  </div>
+
+  <div class="sticky-top-bar">
+    <div class="controls">
+      <div id="entryCount">Total spins: 0</div>
+      <input id="numberInput" placeholder="0-36 / 00" maxlength="2" inputmode="numeric" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo</button>
+      <button onclick="resetAll()">Reset All</button>
+      <div id="inputStatus" class="input-status"></div>
+    </div>
+    <div id="recentSpins"></div>
+  </div>
+
+  <div class="duplicate-section">
+    <!-- COMBINED (D30 + T40 + GroupD + TwoA + TwoB) - remains -->
+    <div class="combined-big-box">
+      <div style="font-weight:bold; margin-bottom:8px; font-size:1.1rem;">🔥 COMBINED (D30 + T40 + GroupD + TwoA + TwoB) – All active numbers</div>
+      <div id="combinedBigList" class="duplicate-list"><div class="no-duplicates">—</div></div>
+      <div class="misses-counter"><span>📉 Misses: <span id="combinedBigMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedBigMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedBigHitHistory()">Reset hit seq</button></div></div>
+      <div class="hitseq-mini-list" id="combinedBigHitSeqList"><div class="no-duplicates">No hits yet</div></div>
+      <div style="font-size:10px; text-align:center;">🎯 hits: <span id="combinedBigHitCount">0</span></div>
+      <div style="margin-top: 8px; font-size: 10px; text-align: center; background: rgba(255,170,68,0.25); border-radius: 12px; padding: 5px;">📌 D30 (dup≥2/30) | T40 (≥3/40) | GroupD (≥3/60) | TwoA (exact 2 in last60, GroupA) | TwoB (exact 2 in last60, GroupB)</div>
+    </div>
+
+    <!-- DUPLICATES20 -->
+    <div class="row-single"><div class="duplicates20-box"><div style="font-weight:bold; margin-bottom:8px;">🔴 DUPLICATES (20 RECENT SPINS) - count ≥ 2</div><div id="duplicates20List" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="duplicates20AutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="duplicates20NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates20Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates20HitSeqList"></div><div>hits: <span id="duplicates20HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates20NoAutoHitSeqList"></div><div>hits: <span id="duplicates20NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+
+    <!-- DUPLICATES30 -->
+    <div class="row-single"><div class="duplicates30-box"><div style="font-weight:bold; margin-bottom:8px;">🟠 DUPLICATES (30 RECENT SPINS) - count ≥ 2</div><div id="duplicates30List" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="duplicates30AutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="duplicates30NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates30Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates30HitSeqList"></div><div>hits: <span id="duplicates30HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates30NoAutoHitSeqList"></div><div>hits: <span id="duplicates30NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+
+    <!-- TRIPLICATES60 (all numbers) -->
+    <div class="row-single"><div class="triplicates60-box"><div style="font-weight:bold; margin-bottom:8px;">🧡 TRIPLICATES (60 RECENT SPINS) - count ≥ 3 (all numbers)</div><div id="triplicates60List" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="triplicates60AutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="triplicates60NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60HitSeqList"></div><div>hits: <span id="triplicates60HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60NoAutoHitSeqList"></div><div>hits: <span id="triplicates60NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+
+    <!-- TRIPLICATES A (60) - Group A -->
+    <div class="row-single"><div class="triplicates60a-box"><div style="font-weight:bold; margin-bottom:8px;">🔵 TRIPLICATES A (60 RECENT SPINS) - Group A (0,00,2,BLACK NUMBERS) count ≥ 3</div><div id="triplicates60AList" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="triplicates60AAutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="triplicates60ANoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60AMisses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60AHitSeqList"></div><div>hits: <span id="triplicates60AHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60AHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60ANoAutoHitSeqList"></div><div>hits: <span id="triplicates60ANoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60ANoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+
+    <!-- TRIPLICATES B (60) - Group B -->
+    <div class="row-single"><div class="triplicates60b-box"><div style="font-weight:bold; margin-bottom:8px;">🟠 TRIPLICATES B (60 RECENT SPINS) - Group B (0,00,RED NUMBERS) count ≥ 3</div><div id="triplicates60BList" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="triplicates60BAutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="triplicates60BNoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60BMisses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60BHitSeqList"></div><div>hits: <span id="triplicates60BHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60BHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60BNoAutoHitSeqList"></div><div>hits: <span id="triplicates60BNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60BNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+
+    <!-- COMBINED TWO ONLY (A ∪ B) -->
+    <div class="row-single"><div class="combined-twoonly-box"><div style="font-weight:bold">🔹 COMBINED TWO ONLY (A ∪ B)</div><div id="combinedTwoOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="combinedTwoOnlyMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedTwoOnlyMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedTwoOnlyHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="combinedTwoOnlyHitSeqList"></div><div>hits: <span id="combinedTwoOnlyHitCount">0</span></div></div></div>
+
+    <!-- Two Only A / Two Only B -->
+    <div class="row-double"><div class="twoonly-box twoonly-a-box"><div style="font-weight:bold">🔵 Two Only A</div><div id="twoOnlyAList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="twoOnlyAHitSeqList"></div></div><div class="twoonly-box twoonly-b-box"><div style="font-weight:bold">🟠 Two Only B</div><div id="twoOnlyBList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="twoOnlyBHitSeqList"></div></div></div>
+
+    <!-- Three Only (exactly 3 in last60) -->
+    <div class="row-single"><div class="three-only-box"><div style="font-weight:bold">🟣 Three Only (exactly 3 in last60)</div><div id="threeOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="threeOnlyMissesText">0</span></span><button class="misses-reset-btn" onclick="resetThreeOnlyMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="threeOnlyHitSeqList"></div></div></div>
+
+    <!-- Group C Quadruplicates (≥4 in last60) -->
+    <div class="row-single"><div class="group-c-box"><div style="font-weight:bold">🟣 Group C Quadruplicates (≥4 in last60) – Auto & No-Auto tracking</div><div id="groupCDuplicates60" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="groupCMissesAutoText60">0</span></span><span>🛡️ No Auto misses: <span id="groupCMissesNoAutoText60">0</span></span><div><button class="misses-reset-btn" onclick="resetQuadruplicateMisses()">Reset both misses</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="groupCAutoHitSeqList"></div><div>hits: <span id="groupCAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateAutoHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="groupCNoAutoHitSeqList"></div><div>hits: <span id="groupCNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+  </div>
+</div>
+
+<div id="alertModal" class="alert-modal"><div class="alert-content"><div id="alertTitle">🔔</div><div id="alertNumber">0</div><div id="alertMessage"></div><button class="close-alert" onclick="closeAlert()">OK</button></div></div>
+<div class="numpad"><button class="backspace" onclick="backspace()">⌫</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
+
+<script>
+  // ---------- CONFIGURATION ----------
+  const colors = { red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36], black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35], green: ["0","00"] };
+  const groupA = ["0","00","2","4","6","8","10","11","13","15","17","20","22","24","26","28","29","31","33","35"];
+  const groupB = ["0","00","1","3","5","7","9","12","14","16","18","19","21","23","25","27","30","32","34","36"];
+
+  let history = JSON.parse(localStorage.getItem("history") || "[]");
+  
+  // REMAINING counters
+  let missesC60 = parseInt(localStorage.getItem("missesC60") || "0");
+  let missesC60NoAuto = parseInt(localStorage.getItem("missesC60NoAuto") || "0");
+  let groupCAutoHitHistory = JSON.parse(localStorage.getItem("groupCAutoHitHistory") || "[]");
+  let groupCNoAutoHitHistory = JSON.parse(localStorage.getItem("groupCNoAutoHitHistory") || "[]");
+  let autoResetPrivilegeC60 = JSON.parse(localStorage.getItem("autoResetPrivilegeC60") || "[]");
+  
+  let missesThree60 = parseInt(localStorage.getItem("missesThree60") || "0");
+  let threeOnlyHitHistory = JSON.parse(localStorage.getItem("threeOnlyHitHistory") || "[]");
+  let missesTwoOnlyA60 = parseInt(localStorage.getItem("missesTwoOnlyA60") || "0"), missesTwoOnlyB60 = parseInt(localStorage.getItem("missesTwoOnlyB60") || "0");
+  let twoOnlyAHitHistory = JSON.parse(localStorage.getItem("twoOnlyAHitHistory") || "[]"), twoOnlyBHitHistory = JSON.parse(localStorage.getItem("twoOnlyBHitHistory") || "[]");
+  let combinedTwoOnlyMisses = parseInt(localStorage.getItem("combinedTwoOnlyMisses") || "0"), combinedTwoOnlyHitHistory = JSON.parse(localStorage.getItem("combinedTwoOnlyHitHistory") || "[]");
+  
+  let duplicates20AutoMisses = parseInt(localStorage.getItem("duplicates20AutoMisses") || "0"), duplicates20NoAutoMisses = parseInt(localStorage.getItem("duplicates20NoAutoMisses") || "0");
+  let autoResetDuplicates20 = JSON.parse(localStorage.getItem("autoResetDuplicates20") || "[]"), duplicates20HitHistory = JSON.parse(localStorage.getItem("duplicates20HitHistory") || "[]"), duplicates20NoAutoHitHistory = JSON.parse(localStorage.getItem("duplicates20NoAutoHitHistory") || "[]");
+  let duplicates30AutoMisses = parseInt(localStorage.getItem("duplicates30AutoMisses") || "0"), duplicates30NoAutoMisses = parseInt(localStorage.getItem("duplicates30NoAutoMisses") || "0");
+  let autoResetDuplicates30 = JSON.parse(localStorage.getItem("autoResetDuplicates30") || "[]"), duplicates30HitHistory = JSON.parse(localStorage.getItem("duplicates30HitHistory") || "[]"), duplicates30NoAutoHitHistory = JSON.parse(localStorage.getItem("duplicates30NoAutoHitHistory") || "[]");
+  let triplicates60AutoMisses = parseInt(localStorage.getItem("triplicates60AutoMisses") || "0"), triplicates60NoAutoMisses = parseInt(localStorage.getItem("triplicates60NoAutoMisses") || "0");
+  let autoResetTriplicates60 = JSON.parse(localStorage.getItem("autoResetTriplicates60") || "[]"), triplicates60HitHistory = JSON.parse(localStorage.getItem("triplicates60HitHistory") || "[]"), triplicates60NoAutoHitHistory = JSON.parse(localStorage.getItem("triplicates60NoAutoHitHistory") || "[]");
+  let triplicates60AAutoMisses = parseInt(localStorage.getItem("triplicates60AAutoMisses") || "0"), triplicates60ANoAutoMisses = parseInt(localStorage.getItem("triplicates60ANoAutoMisses") || "0");
+  let autoResetTriplicates60A = JSON.parse(localStorage.getItem("autoResetTriplicates60A") || "[]"), triplicates60AHitHistory = JSON.parse(localStorage.getItem("triplicates60AHitHistory") || "[]"), triplicates60ANoAutoHitHistory = JSON.parse(localStorage.getItem("triplicates60ANoAutoHitHistory") || "[]");
+  let triplicates60BAutoMisses = parseInt(localStorage.getItem("triplicates60BAutoMisses") || "0"), triplicates60BNoAutoMisses = parseInt(localStorage.getItem("triplicates60BNoAutoMisses") || "0");
+  let autoResetTriplicates60B = JSON.parse(localStorage.getItem("autoResetTriplicates60B") || "[]"), triplicates60BHitHistory = JSON.parse(localStorage.getItem("triplicates60BHitHistory") || "[]"), triplicates60BNoAutoHitHistory = JSON.parse(localStorage.getItem("triplicates60BNoAutoHitHistory") || "[]");
+  let combinedBigMisses = parseInt(localStorage.getItem("combinedBigMisses") || "0");
+  let combinedBigHitHistory = JSON.parse(localStorage.getItem("combinedBigHitHistory") || "[]");
+  let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
+
+  function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n,10); if (colors.red.includes(num)) return "red"; if (colors.black.includes(num)) return "black"; return ""; }
+  function getGroupCounts(spins) { const c={}; spins.forEach(n => { c[n]=(c[n]||0)+1; }); return { groupCCounts: c }; }
+  function getDuplicatesFromLastN(spins, N) { const lastN = spins.slice(-N); const freq = {}; lastN.forEach(n => freq[n] = (freq[n]||0)+1); return Object.keys(freq).filter(n => freq[n] >= 2); }
+  function getTriplesOrMoreFromLastN(spins, N) { const lastN = spins.slice(-N); const freq = {}; lastN.forEach(n => freq[n] = (freq[n]||0)+1); return Object.keys(freq).filter(n => freq[n] >= 3); }
+  function getCombinedBigSet(spins) { const last60 = spins.slice(-60); const counts = getGroupCounts(last60).groupCCounts; const dup30Set = new Set(getDuplicatesFromLastN(spins, 30)); const trip40Set = new Set(getTriplesOrMoreFromLastN(spins, 40)); const groupDSet = new Set(Object.keys(counts).filter(num => counts[num] >= 3)); const twoOnlyASet = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num] === 2)); const twoOnlyBSet = new Set(Object.keys(counts).filter(num => groupB.includes(num) && counts[num] === 2)); return new Set([...dup30Set, ...trip40Set, ...groupDSet, ...twoOnlyASet, ...twoOnlyBSet]); }
+
+  function calculateMissesAndPrivileges() {
+    if(history.length===0) return;
+    const lastSpin = history[history.length-1];
+    const prevSpins = history.slice(0,-1);
+    const prevLast60 = prevSpins.slice(-60);
+    const prevCounts = getGroupCounts(prevLast60);
+    
+    // Combined Big
+    const prevBigSet = getCombinedBigSet(prevSpins);
+    if(prevBigSet.size > 0) { if(prevBigSet.has(lastSpin)) { combinedBigHitHistory.push(combinedBigMisses); combinedBigMisses = 0; } else combinedBigMisses += prevBigSet.size; }
+    
+    // Duplicates20
+    const prevDuplicates20Set = new Set(getDuplicatesFromLastN(prevSpins, 20));
+    if(prevDuplicates20Set.size > 0) { if(prevDuplicates20Set.has(lastSpin)) { duplicates20HitHistory.push(duplicates20AutoMisses); duplicates20NoAutoHitHistory.push(duplicates20NoAutoMisses); duplicates20AutoMisses = 0; duplicates20NoAutoMisses = 0; if(!autoResetDuplicates20.includes(lastSpin)) autoResetDuplicates20.push(lastSpin); } else { duplicates20AutoMisses += prevDuplicates20Set.size; duplicates20NoAutoMisses += prevDuplicates20Set.size; } }
+    const currentDuplicates20Set = new Set(getDuplicatesFromLastN(history, 20));
+    if(autoResetDuplicates20.filter(n => !currentDuplicates20Set.has(n)).length) { duplicates20AutoMisses = 0; autoResetDuplicates20 = autoResetDuplicates20.filter(n => currentDuplicates20Set.has(n)); }
+    
+    // Duplicates30
+    const prevDuplicates30Set = new Set(getDuplicatesFromLastN(prevSpins, 30));
+    if(prevDuplicates30Set.size > 0) { if(prevDuplicates30Set.has(lastSpin)) { duplicates30HitHistory.push(duplicates30AutoMisses); duplicates30NoAutoHitHistory.push(duplicates30NoAutoMisses); duplicates30AutoMisses = 0; duplicates30NoAutoMisses = 0; if(!autoResetDuplicates30.includes(lastSpin)) autoResetDuplicates30.push(lastSpin); } else { duplicates30AutoMisses += prevDuplicates30Set.size; duplicates30NoAutoMisses += prevDuplicates30Set.size; } }
+    const currentDuplicates30Set = new Set(getDuplicatesFromLastN(history, 30));
+    if(autoResetDuplicates30.filter(n => !currentDuplicates30Set.has(n)).length) { duplicates30AutoMisses = 0; autoResetDuplicates30 = autoResetDuplicates30.filter(n => currentDuplicates30Set.has(n)); }
+    
+    // Triplicates60 all
+    const prevTriples60Set = new Set(getTriplesOrMoreFromLastN(prevSpins, 60));
+    if(prevTriples60Set.size > 0) { if(prevTriples60Set.has(lastSpin)) { triplicates60HitHistory.push(triplicates60AutoMisses); triplicates60NoAutoHitHistory.push(triplicates60NoAutoMisses); triplicates60AutoMisses = 0; triplicates60NoAutoMisses = 0; if(!autoResetTriplicates60.includes(lastSpin)) autoResetTriplicates60.push(lastSpin); } else { triplicates60AutoMisses += prevTriples60Set.size; triplicates60NoAutoMisses += prevTriples60Set.size; } }
+    const currentTriples60Set = new Set(getTriplesOrMoreFromLastN(history, 60));
+    if(autoResetTriplicates60.filter(n => !currentTriples60Set.has(n)).length) { triplicates60AutoMisses = 0; autoResetTriplicates60 = autoResetTriplicates60.filter(n => currentTriples60Set.has(n)); }
+    
+    // Triplicates A
+    const prevTriples60A = new Set(Object.keys(prevCounts.groupCCounts).filter(num => groupA.includes(num) && prevCounts.groupCCounts[num] >= 3));
+    if(prevTriples60A.size > 0) { if(prevTriples60A.has(lastSpin)) { triplicates60AHitHistory.push(triplicates60AAutoMisses); triplicates60ANoAutoHitHistory.push(triplicates60ANoAutoMisses); triplicates60AAutoMisses = 0; triplicates60ANoAutoMisses = 0; if(!autoResetTriplicates60A.includes(lastSpin)) autoResetTriplicates60A.push(lastSpin); } else { triplicates60AAutoMisses += prevTriples60A.size; triplicates60ANoAutoMisses += prevTriples60A.size; } }
+    const currentTriples60A = new Set(Object.keys(getGroupCounts(history.slice(-60)).groupCCounts).filter(num => groupA.includes(num) && getGroupCounts(history.slice(-60)).groupCCounts[num] >= 3));
+    if(autoResetTriplicates60A.filter(n => !currentTriples60A.has(n)).length) { triplicates60AAutoMisses = 0; autoResetTriplicates60A = autoResetTriplicates60A.filter(n => currentTriples60A.has(n)); }
+    
+    // Triplicates B
+    const prevTriples60B = new Set(Object.keys(prevCounts.groupCCounts).filter(num => groupB.includes(num) && prevCounts.groupCCounts[num] >= 3));
+    if(prevTriples60B.size > 0) { if(prevTriples60B.has(lastSpin)) { triplicates60BHitHistory.push(triplicates60BAutoMisses); triplicates60BNoAutoHitHistory.push(triplicates60BNoAutoMisses); triplicates60BAutoMisses = 0; triplicates60BNoAutoMisses = 0; if(!autoResetTriplicates60B.includes(lastSpin)) autoResetTriplicates60B.push(lastSpin); } else { triplicates60BAutoMisses += prevTriples60B.size; triplicates60BNoAutoMisses += prevTriples60B.size; } }
+    const currentTriples60B = new Set(Object.keys(getGroupCounts(history.slice(-60)).groupCCounts).filter(num => groupB.includes(num) && getGroupCounts(history.slice(-60)).groupCCounts[num] >= 3));
+    if(autoResetTriplicates60B.filter(n => !currentTriples60B.has(n)).length) { triplicates60BAutoMisses = 0; autoResetTriplicates60B = autoResetTriplicates60B.filter(n => currentTriples60B.has(n)); }
+    
+    // Two Only A / B
+    const prevTwoOnlyASet = new Set(); for(let [num, cnt] of Object.entries(prevCounts.groupCCounts)) { if(groupA.includes(num) && cnt === 2) prevTwoOnlyASet.add(num); }
+    const prevTwoOnlyBSet = new Set(); for(let [num, cnt] of Object.entries(prevCounts.groupCCounts)) { if(groupB.includes(num) && cnt === 2) prevTwoOnlyBSet.add(num); }
+    if(prevTwoOnlyASet.size > 0) { if(prevTwoOnlyASet.has(lastSpin)) { twoOnlyAHitHistory.push(missesTwoOnlyA60); missesTwoOnlyA60 = 0; } else missesTwoOnlyA60 += prevTwoOnlyASet.size; }
+    if(prevTwoOnlyBSet.size > 0) { if(prevTwoOnlyBSet.has(lastSpin)) { twoOnlyBHitHistory.push(missesTwoOnlyB60); missesTwoOnlyB60 = 0; } else missesTwoOnlyB60 += prevTwoOnlyBSet.size; }
+    
+    // Combined Two Only
+    const combinedPrevSetTwo = new Set([...prevTwoOnlyASet, ...prevTwoOnlyBSet]);
+    if(combinedPrevSetTwo.size > 0) { if(combinedPrevSetTwo.has(lastSpin)) { combinedTwoOnlyHitHistory.push(combinedTwoOnlyMisses); combinedTwoOnlyMisses = 0; } else combinedTwoOnlyMisses += combinedPrevSetTwo.size; }
+    
+    // Three Only (exactly 3)
+    const prevExactThree = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c === 3).map(([n])=>n);
+    if(prevExactThree.length > 0) { if(prevExactThree.includes(lastSpin)) { threeOnlyHitHistory.push(missesThree60); missesThree60 = 0; } else missesThree60 += prevExactThree.length; }
+    
+    // Quadruplicates
+    const prevQuadSet = new Set(Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c >= 4).map(([n])=>n));
+    if(prevQuadSet.size > 0) { if(prevQuadSet.has(lastSpin)) { groupCAutoHitHistory.push(missesC60); groupCNoAutoHitHistory.push(missesC60NoAuto); missesC60 = 0; missesC60NoAuto = 0; if(!autoResetPrivilegeC60.includes(lastSpin)) autoResetPrivilegeC60.push(lastSpin); } else { missesC60 += prevQuadSet.size; missesC60NoAuto += prevQuadSet.size; } }
+    const currentQuadSet = new Set(Object.keys(getGroupCounts(history.slice(-60)).groupCCounts).filter(num => getGroupCounts(history.slice(-60)).groupCCounts[num] >= 4));
+    if(autoResetPrivilegeC60.filter(n => !currentQuadSet.has(n)).length) { missesC60 = 0; autoResetPrivilegeC60 = autoResetPrivilegeC60.filter(n => currentQuadSet.has(n)); }
+  }
+
+  // updateDisplay and persist logic (unchanged except removal of obsolete references)
+  function persistAll() { /* simplified storage but complete for remaining vars */
+    localStorage.setItem("history",JSON.stringify(history));
+    localStorage.setItem("missesC60",missesC60); localStorage.setItem("missesC60NoAuto",missesC60NoAuto);
+    localStorage.setItem("groupCAutoHitHistory",JSON.stringify(groupCAutoHitHistory)); localStorage.setItem("groupCNoAutoHitHistory",JSON.stringify(groupCNoAutoHitHistory));
+    localStorage.setItem("autoResetPrivilegeC60",JSON.stringify(autoResetPrivilegeC60));
+    localStorage.setItem("missesThree60",missesThree60); localStorage.setItem("threeOnlyHitHistory",JSON.stringify(threeOnlyHitHistory));
+    localStorage.setItem("missesTwoOnlyA60",missesTwoOnlyA60); localStorage.setItem("missesTwoOnlyB60",missesTwoOnlyB60);
+    localStorage.setItem("twoOnlyAHitHistory",JSON.stringify(twoOnlyAHitHistory)); localStorage.setItem("twoOnlyBHitHistory",JSON.stringify(twoOnlyBHitHistory));
+    localStorage.setItem("combinedTwoOnlyMisses",combinedTwoOnlyMisses); localStorage.setItem("combinedTwoOnlyHitHistory",JSON.stringify(combinedTwoOnlyHitHistory));
+    localStorage.setItem("duplicates20AutoMisses",duplicates20AutoMisses); localStorage.setItem("duplicates20NoAutoMisses",duplicates20NoAutoMisses);
+    localStorage.setItem("autoResetDuplicates20",JSON.stringify(autoResetDuplicates20)); localStorage.setItem("duplicates20HitHistory",JSON.stringify(duplicates20HitHistory));
+    localStorage.setItem("duplicates20NoAutoHitHistory",JSON.stringify(duplicates20NoAutoHitHistory));
+    localStorage.setItem("duplicates30AutoMisses",duplicates30AutoMisses); localStorage.setItem("duplicates30NoAutoMisses",duplicates30NoAutoMisses);
+    localStorage.setItem("autoResetDuplicates30",JSON.stringify(autoResetDuplicates30)); localStorage.setItem("duplicates30HitHistory",JSON.stringify(duplicates30HitHistory));
+    localStorage.setItem("duplicates30NoAutoHitHistory",JSON.stringify(duplicates30NoAutoHitHistory));
+    localStorage.setItem("triplicates60AutoMisses",triplicates60AutoMisses); localStorage.setItem("triplicates60NoAutoMisses",triplicates60NoAutoMisses);
+    localStorage.setItem("autoResetTriplicates60",JSON.stringify(autoResetTriplicates60)); localStorage.setItem("triplicates60HitHistory",JSON.stringify(triplicates60HitHistory));
+    localStorage.setItem("triplicates60NoAutoHitHistory",JSON.stringify(triplicates60NoAutoHitHistory));
+    localStorage.setItem("triplicates60AAutoMisses",triplicates60AAutoMisses); localStorage.setItem("triplicates60ANoAutoMisses",triplicates60ANoAutoMisses);
+    localStorage.setItem("autoResetTriplicates60A",JSON.stringify(autoResetTriplicates60A)); localStorage.setItem("triplicates60AHitHistory",JSON.stringify(triplicates60AHitHistory));
+    localStorage.setItem("triplicates60ANoAutoHitHistory",JSON.stringify(triplicates60ANoAutoHitHistory));
+    localStorage.setItem("triplicates60BAutoMisses",triplicates60BAutoMisses); localStorage.setItem("triplicates60BNoAutoMisses",triplicates60BNoAutoMisses);
+    localStorage.setItem("autoResetTriplicates60B",JSON.stringify(autoResetTriplicates60B)); localStorage.setItem("triplicates60BHitHistory",JSON.stringify(triplicates60BHitHistory));
+    localStorage.setItem("triplicates60BNoAutoHitHistory",JSON.stringify(triplicates60BNoAutoHitHistory));
+    localStorage.setItem("combinedBigMisses",combinedBigMisses); localStorage.setItem("combinedBigHitHistory",JSON.stringify(combinedBigHitHistory));
+    localStorage.setItem("stateHistory",JSON.stringify(stateHistory));
+  }
+  
+  function saveStateToHistory() {
+    const snap = { history:[...history], missesC60, missesC60NoAuto, groupCAutoHitHistory:[...groupCAutoHitHistory], groupCNoAutoHitHistory:[...groupCNoAutoHitHistory], autoResetPrivilegeC60:[...autoResetPrivilegeC60], missesThree60, threeOnlyHitHistory:[...threeOnlyHitHistory], missesTwoOnlyA60, missesTwoOnlyB60, twoOnlyAHitHistory:[...twoOnlyAHitHistory], twoOnlyBHitHistory:[...twoOnlyBHitHistory], combinedTwoOnlyMisses, combinedTwoOnlyHitHistory:[...combinedTwoOnlyHitHistory], duplicates20AutoMisses, duplicates20NoAutoMisses, autoResetDuplicates20:[...autoResetDuplicates20], duplicates20HitHistory:[...duplicates20HitHistory], duplicates20NoAutoHitHistory:[...duplicates20NoAutoHitHistory], duplicates30AutoMisses, duplicates30NoAutoMisses, autoResetDuplicates30:[...autoResetDuplicates30], duplicates30HitHistory:[...duplicates30HitHistory], duplicates30NoAutoHitHistory:[...duplicates30NoAutoHitHistory], triplicates60AutoMisses, triplicates60NoAutoMisses, autoResetTriplicates60:[...autoResetTriplicates60], triplicates60HitHistory:[...triplicates60HitHistory], triplicates60NoAutoHitHistory:[...triplicates60NoAutoHitHistory], triplicates60AAutoMisses, triplicates60ANoAutoMisses, autoResetTriplicates60A:[...autoResetTriplicates60A], triplicates60AHitHistory:[...triplicates60AHitHistory], triplicates60ANoAutoHitHistory:[...triplicates60ANoAutoHitHistory], triplicates60BAutoMisses, triplicates60BNoAutoMisses, autoResetTriplicates60B:[...autoResetTriplicates60B], triplicates60BHitHistory:[...triplicates60BHitHistory], triplicates60BNoAutoHitHistory:[...triplicates60BNoAutoHitHistory], combinedBigMisses, combinedBigHitHistory:[...combinedBigHitHistory] };
+    stateHistory.push(snap);
+    if(stateHistory.length>50) stateHistory=stateHistory.slice(-50);
+    persistAll();
+  }
+  
+  function restoreFromHistory() {
+    if(stateHistory.length===0) return false;
+    const prev = stateHistory.pop();
+    history = prev.history; missesC60=prev.missesC60; missesC60NoAuto=prev.missesC60NoAuto; groupCAutoHitHistory=prev.groupCAutoHitHistory||[]; groupCNoAutoHitHistory=prev.groupCNoAutoHitHistory||[]; autoResetPrivilegeC60=prev.autoResetPrivilegeC60||[];
+    missesThree60=prev.missesThree60; threeOnlyHitHistory=prev.threeOnlyHitHistory||[];
+    missesTwoOnlyA60=prev.missesTwoOnlyA60; missesTwoOnlyB60=prev.missesTwoOnlyB60; twoOnlyAHitHistory=prev.twoOnlyAHitHistory||[]; twoOnlyBHitHistory=prev.twoOnlyBHitHistory||[];
+    combinedTwoOnlyMisses=prev.combinedTwoOnlyMisses; combinedTwoOnlyHitHistory=prev.combinedTwoOnlyHitHistory||[];
+    duplicates20AutoMisses=prev.duplicates20AutoMisses; duplicates20NoAutoMisses=prev.duplicates20NoAutoMisses; autoResetDuplicates20=prev.autoResetDuplicates20||[]; duplicates20HitHistory=prev.duplicates20HitHistory||[]; duplicates20NoAutoHitHistory=prev.duplicates20NoAutoHitHistory||[];
+    duplicates30AutoMisses=prev.duplicates30AutoMisses||0; duplicates30NoAutoMisses=prev.duplicates30NoAutoMisses||0; autoResetDuplicates30=prev.autoResetDuplicates30||[]; duplicates30HitHistory=prev.duplicates30HitHistory||[]; duplicates30NoAutoHitHistory=prev.duplicates30NoAutoHitHistory||[];
+    triplicates60AutoMisses=prev.triplicates60AutoMisses||0; triplicates60NoAutoMisses=prev.triplicates60NoAutoMisses||0; autoResetTriplicates60=prev.autoResetTriplicates60||[]; triplicates60HitHistory=prev.triplicates60HitHistory||[]; triplicates60NoAutoHitHistory=prev.triplicates60NoAutoHitHistory||[];
+    triplicates60AAutoMisses=prev.triplicates60AAutoMisses||0; triplicates60ANoAutoMisses=prev.triplicates60ANoAutoMisses||0; autoResetTriplicates60A=prev.autoResetTriplicates60A||[]; triplicates60AHitHistory=prev.triplicates60AHitHistory||[]; triplicates60ANoAutoHitHistory=prev.triplicates60ANoAutoHitHistory||[];
+    triplicates60BAutoMisses=prev.triplicates60BAutoMisses||0; triplicates60BNoAutoMisses=prev.triplicates60BNoAutoMisses||0; autoResetTriplicates60B=prev.autoResetTriplicates60B||[]; triplicates60BHitHistory=prev.triplicates60BHitHistory||[]; triplicates60BNoAutoHitHistory=prev.triplicates60BNoAutoHitHistory||[];
+    combinedBigMisses=prev.combinedBigMisses||0; combinedBigHitHistory=prev.combinedBigHitHistory||[];
+    persistAll(); return true;
+  }
+  
+  // updateDisplay implementation (kept compact, only remaining sections)
+  function updateDisplay() {
+    const container = document.getElementById("recentSpins"); container.innerHTML = "";
+    for(let i=0;i<60;i++) { const idx = history.length-1-i; const div = document.createElement("div"); if(idx>=0) { div.className = `spin-box ${getColor(history[idx])}`; div.textContent = history[idx]; } else { div.className = "spin-box empty"; div.textContent = ""; } container.appendChild(div); }
+    document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+    const last60 = history.slice(-60);
+    const counts = getGroupCounts(last60).groupCCounts;
+    
+    function renderList(containerId, numberSet, label, autoList) {
+      const div = document.getElementById(containerId); div.innerHTML = numberSet.size ? "" : '<div class="no-duplicates">—</div>';
+      numberSet.forEach(num => { let item=document.createElement("div"); item.className="duplicate-item"; let inner=`<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${label}</div>`; if(autoList && autoList.includes(num)) inner+=`<div class="auto-badge">auto</div>`; item.innerHTML=inner; div.appendChild(item); });
+    }
+    function renderHitSeq(containerId, historyArray, countId) {
+      const div = document.getElementById(containerId); div.innerHTML = historyArray.length ? "" : '<div class="no-duplicates">No hits yet</div>';
+      historyArray.forEach(v=>{ let span=document.createElement("span"); span.className="hitseq-mini-item"; span.textContent=v; div.appendChild(span); });
+      if(countId) document.getElementById(countId).textContent = historyArray.length;
+    }
+    // Combined Big
+    const bigSet = getCombinedBigSet(history);
+    const bigContainer = document.getElementById("combinedBigList"); bigContainer.innerHTML = bigSet.size ? "" : '<div class="no-duplicates">—</div>';
+    if(bigSet.size) { Array.from(bigSet).sort((a,b)=>{ let av=a==="00"?100:parseInt(a), bv=b==="00"?100:parseInt(b); return av-bv; }).forEach(num => { let badges=[]; if(getDuplicatesFromLastN(history,30).includes(num)) badges.push("D30"); if(getTriplesOrMoreFromLastN(history,40).includes(num)) badges.push("T40"); if((counts[num]||0)>=3) badges.push("GpD"); if(groupA.includes(num) && counts[num]===2) badges.push("2A"); if(groupB.includes(num) && counts[num]===2) badges.push("2B"); let item=document.createElement("div"); item.className="duplicate-item"; item.innerHTML=`<div class="duplicate-number ${getColor(num)}">${num}</div><div class="badge-combined">${badges.join(",")}</div>`; bigContainer.appendChild(item); }); }
+    document.getElementById("combinedBigMissesText").textContent = combinedBigMisses; renderHitSeq("combinedBigHitSeqList", combinedBigHitHistory, "combinedBigHitCount");
+    // Duplicates20,30, Triples60, A, B, TwoOnly, CombinedTwoOnly, ThreeOnly, Quad
+    const dup20 = new Set(getDuplicatesFromLastN(history,20)); renderList("duplicates20List", dup20, "dup20", autoResetDuplicates20);
+    document.getElementById("duplicates20AutoMissesText").textContent = duplicates20AutoMisses; document.getElementById("duplicates20NoAutoMissesText").textContent = duplicates20NoAutoMisses;
+    renderHitSeq("duplicates20HitSeqList", duplicates20HitHistory, "duplicates20HitCount"); renderHitSeq("duplicates20NoAutoHitSeqList", duplicates20NoAutoHitHistory, "duplicates20NoAutoHitCount");
+    const dup30 = new Set(getDuplicatesFromLastN(history,30)); renderList("duplicates30List", dup30, "dup30", autoResetDuplicates30);
+    document.getElementById("duplicates30AutoMissesText").textContent = duplicates30AutoMisses; document.getElementById("duplicates30NoAutoMissesText").textContent = duplicates30NoAutoMisses;
+    renderHitSeq("duplicates30HitSeqList", duplicates30HitHistory, "duplicates30HitCount"); renderHitSeq("duplicates30NoAutoHitSeqList", duplicates30NoAutoHitHistory, "duplicates30NoAutoHitCount");
+    const trip60 = new Set(getTriplesOrMoreFromLastN(history,60)); renderList("triplicates60List", trip60, "≥3/60", autoResetTriplicates60);
+    document.getElementById("triplicates60AutoMissesText").textContent = triplicates60AutoMisses; document.getElementById("triplicates60NoAutoMissesText").textContent = triplicates60NoAutoMisses;
+    renderHitSeq("triplicates60HitSeqList", triplicates60HitHistory, "triplicates60HitCount"); renderHitSeq("triplicates60NoAutoHitSeqList", triplicates60NoAutoHitHistory, "triplicates60NoAutoHitCount");
+    const trip60A = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num] >= 3)); renderList("triplicates60AList", trip60A, "≥3/60A", autoResetTriplicates60A);
+    document.getElementById("triplicates60AAutoMissesText").textContent = triplicates60AAutoMisses; document.getElementById("triplicates60ANoAutoMissesText").textContent = triplicates60ANoAutoMisses;
+    renderHitSeq("triplicates60AHitSeqList", triplicates60AHitHistory, "triplicates60AHitCount"); renderHitSeq("triplicates60ANoAutoHitSeqList", triplicates60ANoAutoHitHistory, "triplicates60ANoAutoHitCount");
+    const trip60B = new Set(Object.keys(counts).filter(num => groupB.includes(num) && counts[num] >= 3)); renderList("triplicates60BList", trip60B, "≥3/60B", autoResetTriplicates60B);
+    document.getElementById("triplicates60BAutoMissesText").textContent = triplicates60BAutoMisses; document.getElementById("triplicates60BNoAutoMissesText").textContent = triplicates60BNoAutoMisses;
+    renderHitSeq("triplicates60BHitSeqList", triplicates60BHitHistory, "triplicates60BHitCount"); renderHitSeq("triplicates60BNoAutoHitSeqList", triplicates60BNoAutoHitHistory, "triplicates60BNoAutoHitCount");
+    const twoA = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num]===2)); renderList("twoOnlyAList", twoA, "2", []); document.getElementById("twoOnlyAMissesText").textContent = missesTwoOnlyA60; renderHitSeq("twoOnlyAHitSeqList", twoOnlyAHitHistory, null);
+    const twoB = new Set(Object.keys(counts).filter(num => groupB.includes(num) && counts[num]===2)); renderList("twoOnlyBList", twoB, "2", []); document.getElementById("twoOnlyBMissesText").textContent = missesTwoOnlyB60; renderHitSeq("twoOnlyBHitSeqList", twoOnlyBHitHistory, null);
+    const twoComb = new Set([...twoA, ...twoB]); renderList("combinedTwoOnlyList", twoComb, "2", []); document.getElementById("combinedTwoOnlyMissesText").textContent = combinedTwoOnlyMisses; renderHitSeq("combinedTwoOnlyHitSeqList", combinedTwoOnlyHitHistory, "combinedTwoOnlyHitCount");
+    const threeOnlySet = new Set(Object.keys(counts).filter(num => counts[num]===3)); renderList("threeOnlyList", threeOnlySet, "3", []); document.getElementById("threeOnlyMissesText").textContent = missesThree60; renderHitSeq("threeOnlyHitSeqList", threeOnlyHitHistory, null);
+    const quad = new Set(Object.keys(counts).filter(num => counts[num] >= 4)); renderList("groupCDuplicates60", quad, (num)=>counts[num], autoResetPrivilegeC60);
+    document.getElementById("groupCMissesAutoText60").textContent = missesC60; document.getElementById("groupCMissesNoAutoText60").textContent = missesC60NoAuto;
+    renderHitSeq("groupCAutoHitSeqList", groupCAutoHitHistory, "groupCAutoHitCount"); renderHitSeq("groupCNoAutoHitSeqList", groupCNoAutoHitHistory, "groupCNoAutoHitCount");
+  }
+  
+  function addNumber() {
+    let val = document.getElementById("numberInput").value.trim();
+    if(!val) { document.getElementById("inputStatus").textContent = "Enter number"; return; }
+    if(val === "00") { /* ok */ } else { let num = parseInt(val,10); if(isNaN(num) || num<0 || num>36) { document.getElementById("inputStatus").textContent = "0-36 or 00"; return; } val = num.toString(); }
+    saveStateToHistory(); history.push(val); calculateMissesAndPrivileges(); document.getElementById("numberInput").value = ""; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = `Added ${val}`;
+  }
+  function undo() { if(history.length===0) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; } if(restoreFromHistory()) { updateDisplay(); document.getElementById("inputStatus").textContent = "Undo done"; } else { history.pop(); resetAllInternal(); persistAll(); updateDisplay(); } }
+  function resetAllInternal() { history=[]; missesC60=missesC60NoAuto=0; groupCAutoHitHistory=[]; groupCNoAutoHitHistory=[]; autoResetPrivilegeC60=[]; missesThree60=0; threeOnlyHitHistory=[]; missesTwoOnlyA60=missesTwoOnlyB60=0; twoOnlyAHitHistory=[]; twoOnlyBHitHistory=[]; combinedTwoOnlyMisses=0; combinedTwoOnlyHitHistory=[]; duplicates20AutoMisses=duplicates20NoAutoMisses=0; autoResetDuplicates20=[]; duplicates20HitHistory=[]; duplicates20NoAutoHitHistory=[]; duplicates30AutoMisses=duplicates30NoAutoMisses=0; autoResetDuplicates30=[]; duplicates30HitHistory=[]; duplicates30NoAutoHitHistory=[]; triplicates60AutoMisses=triplicates60NoAutoMisses=0; autoResetTriplicates60=[]; triplicates60HitHistory=[]; triplicates60NoAutoHitHistory=[]; triplicates60AAutoMisses=triplicates60ANoAutoMisses=0; autoResetTriplicates60A=[]; triplicates60AHitHistory=[]; triplicates60ANoAutoHitHistory=[]; triplicates60BAutoMisses=triplicates60BNoAutoMisses=0; autoResetTriplicates60B=[]; triplicates60BHitHistory=[]; triplicates60BNoAutoHitHistory=[]; combinedBigMisses=0; combinedBigHitHistory=[]; stateHistory=[]; }
+  function resetAll() { if(confirm("Reset everything?")) { resetAllInternal(); persistAll(); updateDisplay(); } }
+  window.resetCombinedBigMisses = () => { if(confirm("Reset Combined misses?")){ saveStateToHistory(); combinedBigMisses=0; persistAll(); updateDisplay(); } };
+  window.resetCombinedBigHitHistory = () => { if(confirm("Reset Combined hit seq?")){ saveStateToHistory(); combinedBigHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetDuplicates20Misses = () => { if(confirm("Reset Duplicates20 misses?")){ saveStateToHistory(); duplicates20AutoMisses=0; duplicates20NoAutoMisses=0; persistAll(); updateDisplay(); } };
+  window.resetDuplicates20HitHistory = () => { if(confirm("Reset auto hit seq?")){ saveStateToHistory(); duplicates20HitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetDuplicates20NoAutoHitHistory = () => { if(confirm("Reset no-auto hit seq?")){ saveStateToHistory(); duplicates20NoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetDuplicates30Misses = () => { if(confirm("Reset Duplicates30 misses?")){ saveStateToHistory(); duplicates30AutoMisses=0; duplicates30NoAutoMisses=0; persistAll(); updateDisplay(); } };
+  window.resetDuplicates30HitHistory = () => { if(confirm("Reset auto hit seq?")){ saveStateToHistory(); duplicates30HitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetDuplicates30NoAutoHitHistory = () => { if(confirm("Reset no-auto hit seq?")){ saveStateToHistory(); duplicates30NoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60Misses = () => { if(confirm("Reset Triplicates60 misses?")){ saveStateToHistory(); triplicates60AutoMisses=0; triplicates60NoAutoMisses=0; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60HitHistory = () => { if(confirm("Reset auto hit seq?")){ saveStateToHistory(); triplicates60HitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60NoAutoHitHistory = () => { if(confirm("Reset no-auto hit seq?")){ saveStateToHistory(); triplicates60NoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60AMisses = () => { if(confirm("Reset Triplicates A misses?")){ saveStateToHistory(); triplicates60AAutoMisses=0; triplicates60ANoAutoMisses=0; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60AHitHistory = () => { if(confirm("Reset auto hit seq?")){ saveStateToHistory(); triplicates60AHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60ANoAutoHitHistory = () => { if(confirm("Reset no-auto hit seq?")){ saveStateToHistory(); triplicates60ANoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60BMisses = () => { if(confirm("Reset Triplicates B misses?")){ saveStateToHistory(); triplicates60BAutoMisses=0; triplicates60BNoAutoMisses=0; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60BHitHistory = () => { if(confirm("Reset auto hit seq?")){ saveStateToHistory(); triplicates60BHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTriplicates60BNoAutoHitHistory = () => { if(confirm("Reset no-auto hit seq?")){ saveStateToHistory(); triplicates60BNoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTwoOnlyAMisses = () => { if(confirm("Reset Two Only A misses?")){ saveStateToHistory(); missesTwoOnlyA60=0; persistAll(); updateDisplay(); } };
+  window.resetTwoOnlyBMisses = () => { if(confirm("Reset Two Only B misses?")){ saveStateToHistory(); missesTwoOnlyB60=0; persistAll(); updateDisplay(); } };
+  window.resetTwoOnlyAHitHistory = () => { if(confirm("Reset Two Only A hits?")){ saveStateToHistory(); twoOnlyAHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetTwoOnlyBHitHistory = () => { if(confirm("Reset Two Only B hits?")){ saveStateToHistory(); twoOnlyBHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetCombinedTwoOnlyMisses = () => { if(confirm("Reset Combined Two Only misses?")){ saveStateToHistory(); combinedTwoOnlyMisses=0; persistAll(); updateDisplay(); } };
+  window.resetCombinedTwoOnlyHitHistory = () => { if(confirm("Reset Combined Two Only hit seq?")){ saveStateToHistory(); combinedTwoOnlyHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetThreeOnlyMisses = () => { if(confirm("Reset Three Only misses?")){ saveStateToHistory(); missesThree60=0; persistAll(); updateDisplay(); } };
+  window.resetThreeOnlyHitHistory = () => { if(confirm("Reset Three Only hit seq?")){ saveStateToHistory(); threeOnlyHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetQuadruplicateMisses = () => { if(confirm("Reset Quadruplicate misses?")){ saveStateToHistory(); missesC60=0; missesC60NoAuto=0; persistAll(); updateDisplay(); } };
+  window.resetQuadruplicateAutoHitHistory = () => { if(confirm("Reset Quad auto seq?")){ saveStateToHistory(); groupCAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetQuadruplicateNoAutoHitHistory = () => { if(confirm("Reset Quad no-auto seq?")){ saveStateToHistory(); groupCNoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
+  window.numpadClick=(v)=>{ let inp = document.getElementById("numberInput"); if(v==='00') inp.value='00'; else if(inp.value.length<2) inp.value+=v; };
+  window.backspace=()=>{ let inp = document.getElementById("numberInput"); inp.value = inp.value.slice(0,-1); };
+  window.closeAlert=()=>{ document.getElementById("alertModal").style.display = "none"; };
+  document.addEventListener("DOMContentLoaded",()=>{ document.getElementById("numberInput").addEventListener("keydown",e=>{ if(e.key==="Enter") addNumber(); }); if(stateHistory.length===0 && history.length>0) saveStateToHistory(); updateDisplay(); });
+</script>
+</body>
+</html>

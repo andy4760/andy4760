@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Pink Roulette Tracker • Triplicates A/B 60 • Core Tracking</title>
+  <title>Pink Roulette Tracker • Triplicates A/B 60 • Core Tracking • Option B</title>
   <style>
     * {
       box-sizing: border-box;
@@ -186,13 +186,14 @@
         grid-template-columns: 1fr;
       }
     }
-    .group-box, .duplicates20-box, .duplicates30-box, .triplicates60-box, .triplicates60a-box, .triplicates60b-box, .twoonly-box, .combined-twoonly-box, .three-only-box, .group-c-box {
+    .group-box, .duplicates20-box, .duplicates30-box, .duplicates60-box, .triplicates60-box, .triplicates60a-box, .triplicates60b-box, .twoonly-box, .combined-twoonly-box, .three-only-box, .group-c-box {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 14px;
       padding: 12px;
     }
     .duplicates20-box { border: 2px solid #ffaa44; background: rgba(255, 170, 68, 0.12); }
     .duplicates30-box { border: 2px solid #ff8844; background: rgba(255, 136, 68, 0.12); }
+    .duplicates60-box { border: 3px solid #33cc99; background: rgba(51, 204, 153, 0.12); }
     .triplicates60-box { border: 2px solid #ff9966; background: rgba(255, 153, 102, 0.12); }
     .triplicates60a-box { border: 2px solid #4caf50; background: rgba(76, 175, 80, 0.12); }
     .triplicates60b-box { border: 2px solid #ffa726; background: rgba(255, 167, 38, 0.12); }
@@ -340,7 +341,7 @@
 <div class="container">
   <header>
     <h1>Pink Roulette Tracker</h1>
-    <div class="tagline">Duplicates20 • Duplicates30 • Triplicates60 • Triplicates A/B 60 • Quadruplicate60 • Two Only • Three Only</div>
+    <div class="tagline">Duplicates20 • Duplicates30 • Duplicates60 • Triplicates60 • Triplicates A/B 60 • Quadruplicate60 • Two Only • Three Only • Option B (hit counts as last miss)</div>
   </header>
   
   <div class="legend">
@@ -362,47 +363,50 @@
   </div>
 
   <div class="duplicate-section">
-    <!-- COMBINED (D30 + T40 + GroupD + TwoA + TwoB) - remains -->
+    <!-- COMBINED (D30 + T40 + GroupD + TwoA + TwoB) -->
     <div class="combined-big-box">
-      <div style="font-weight:bold; margin-bottom:8px; font-size:1.1rem;">🔥 COMBINED (D30 + T40 + GroupD + TwoA + TwoB) – All active numbers</div>
+      <div style="font-weight:bold; margin-bottom:8px; font-size:1.1rem;">?? COMBINED (D30 + T40 + GroupD + TwoA + TwoB) – All active numbers</div>
       <div id="combinedBigList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-      <div class="misses-counter"><span>📉 Misses: <span id="combinedBigMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedBigMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedBigHitHistory()">Reset hit seq</button></div></div>
+      <div class="misses-counter"><span>?? Misses: <span id="combinedBigMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedBigMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedBigHitHistory()">Reset hit seq</button></div></div>
       <div class="hitseq-mini-list" id="combinedBigHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-      <div style="font-size:10px; text-align:center;">🎯 hits: <span id="combinedBigHitCount">0</span></div>
-      <div style="margin-top: 8px; font-size: 10px; text-align: center; background: rgba(255,170,68,0.25); border-radius: 12px; padding: 5px;">📌 D30 (dup≥2/30) | T40 (≥3/40) | GroupD (≥3/60) | TwoA (exact 2 in last60, GroupA) | TwoB (exact 2 in last60, GroupB)</div>
+      <div style="font-size:10px; text-align:center;">?? hits: <span id="combinedBigHitCount">0</span></div>
+      <div style="margin-top: 8px; font-size: 10px; text-align: center; background: rgba(255,170,68,0.25); border-radius: 12px; padding: 5px;">?? D30 (dup=2/30) | T40 (=3/40) | GroupD (=3/60) | TwoA (exact 2 in last60, GroupA) | TwoB (exact 2 in last60, GroupB)</div>
     </div>
 
     <!-- DUPLICATES20 -->
-    <div class="row-single"><div class="duplicates20-box"><div style="font-weight:bold; margin-bottom:8px;">🔴 DUPLICATES (20 RECENT SPINS) - count ≥ 2</div><div id="duplicates20List" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="duplicates20AutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="duplicates20NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates20Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates20HitSeqList"></div><div>hits: <span id="duplicates20HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates20NoAutoHitSeqList"></div><div>hits: <span id="duplicates20NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+    <div class="row-single"><div class="duplicates20-box"><div style="font-weight:bold; margin-bottom:8px;">?? DUPLICATES (20 RECENT SPINS) - count = 2</div><div id="duplicates20List" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="duplicates20AutoMissesText">0</span></span><span>??? No Auto misses: <span id="duplicates20NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates20Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates20HitSeqList"></div><div>hits: <span id="duplicates20HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates20NoAutoHitSeqList"></div><div>hits: <span id="duplicates20NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
 
     <!-- DUPLICATES30 -->
-    <div class="row-single"><div class="duplicates30-box"><div style="font-weight:bold; margin-bottom:8px;">🟠 DUPLICATES (30 RECENT SPINS) - count ≥ 2</div><div id="duplicates30List" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="duplicates30AutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="duplicates30NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates30Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates30HitSeqList"></div><div>hits: <span id="duplicates30HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates30NoAutoHitSeqList"></div><div>hits: <span id="duplicates30NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+    <div class="row-single"><div class="duplicates30-box"><div style="font-weight:bold; margin-bottom:8px;">?? DUPLICATES (30 RECENT SPINS) - count = 2</div><div id="duplicates30List" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="duplicates30AutoMissesText">0</span></span><span>??? No Auto misses: <span id="duplicates30NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates30Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates30HitSeqList"></div><div>hits: <span id="duplicates30HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates30NoAutoHitSeqList"></div><div>hits: <span id="duplicates30NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+
+    <!-- DUPLICATES60 -->
+    <div class="row-single"><div class="duplicates60-box"><div style="font-weight:bold; margin-bottom:8px;">?? DUPLICATES (60 RECENT SPINS) - count = 2</div><div id="duplicates60List" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="duplicates60AutoMissesText">0</span></span><span>??? No Auto misses: <span id="duplicates60NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates60Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates60HitSeqList"></div><div>hits: <span id="duplicates60HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates60HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates60NoAutoHitSeqList"></div><div>hits: <span id="duplicates60NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates60NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
 
     <!-- TRIPLICATES60 (all numbers) -->
-    <div class="row-single"><div class="triplicates60-box"><div style="font-weight:bold; margin-bottom:8px;">🧡 TRIPLICATES (60 RECENT SPINS) - count ≥ 3 (all numbers)</div><div id="triplicates60List" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="triplicates60AutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="triplicates60NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60HitSeqList"></div><div>hits: <span id="triplicates60HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60NoAutoHitSeqList"></div><div>hits: <span id="triplicates60NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+    <div class="row-single"><div class="triplicates60-box"><div style="font-weight:bold; margin-bottom:8px;">?? TRIPLICATES (60 RECENT SPINS) - count = 3 (all numbers)</div><div id="triplicates60List" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="triplicates60AutoMissesText">0</span></span><span>??? No Auto misses: <span id="triplicates60NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60HitSeqList"></div><div>hits: <span id="triplicates60HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60NoAutoHitSeqList"></div><div>hits: <span id="triplicates60NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
 
     <!-- TRIPLICATES A (60) - Group A -->
-    <div class="row-single"><div class="triplicates60a-box"><div style="font-weight:bold; margin-bottom:8px;">🔵 TRIPLICATES A (60 RECENT SPINS) - Group A (0,00,2,BLACK NUMBERS) count ≥ 3</div><div id="triplicates60AList" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="triplicates60AAutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="triplicates60ANoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60AMisses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60AHitSeqList"></div><div>hits: <span id="triplicates60AHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60AHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60ANoAutoHitSeqList"></div><div>hits: <span id="triplicates60ANoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60ANoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+    <div class="row-single"><div class="triplicates60a-box"><div style="font-weight:bold; margin-bottom:8px;">?? TRIPLICATES A (60 RECENT SPINS) - Group A (0,00,2,BLACK NUMBERS) count = 3</div><div id="triplicates60AList" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="triplicates60AAutoMissesText">0</span></span><span>??? No Auto misses: <span id="triplicates60ANoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60AMisses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60AHitSeqList"></div><div>hits: <span id="triplicates60AHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60AHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60ANoAutoHitSeqList"></div><div>hits: <span id="triplicates60ANoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60ANoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
 
     <!-- TRIPLICATES B (60) - Group B -->
-    <div class="row-single"><div class="triplicates60b-box"><div style="font-weight:bold; margin-bottom:8px;">🟠 TRIPLICATES B (60 RECENT SPINS) - Group B (0,00,RED NUMBERS) count ≥ 3</div><div id="triplicates60BList" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="triplicates60BAutoMissesText">0</span></span><span>🛡️ No Auto misses: <span id="triplicates60BNoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60BMisses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60BHitSeqList"></div><div>hits: <span id="triplicates60BHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60BHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60BNoAutoHitSeqList"></div><div>hits: <span id="triplicates60BNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60BNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+    <div class="row-single"><div class="triplicates60b-box"><div style="font-weight:bold; margin-bottom:8px;">?? TRIPLICATES B (60 RECENT SPINS) - Group B (0,00,RED NUMBERS) count = 3</div><div id="triplicates60BList" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="triplicates60BAutoMissesText">0</span></span><span>??? No Auto misses: <span id="triplicates60BNoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetTriplicates60BMisses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="triplicates60BHitSeqList"></div><div>hits: <span id="triplicates60BHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60BHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="triplicates60BNoAutoHitSeqList"></div><div>hits: <span id="triplicates60BNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetTriplicates60BNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
 
-    <!-- COMBINED TWO ONLY (A ∪ B) -->
-    <div class="row-single"><div class="combined-twoonly-box"><div style="font-weight:bold">🔹 COMBINED TWO ONLY (A ∪ B)</div><div id="combinedTwoOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="combinedTwoOnlyMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedTwoOnlyMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedTwoOnlyHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="combinedTwoOnlyHitSeqList"></div><div>hits: <span id="combinedTwoOnlyHitCount">0</span></div></div></div>
+    <!-- COMBINED TWO ONLY (A ? B) -->
+    <div class="row-single"><div class="combined-twoonly-box"><div style="font-weight:bold">?? COMBINED TWO ONLY (A ? B)</div><div id="combinedTwoOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="combinedTwoOnlyMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedTwoOnlyMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedTwoOnlyHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="combinedTwoOnlyHitSeqList"></div><div>hits: <span id="combinedTwoOnlyHitCount">0</span></div></div></div>
 
     <!-- Two Only A / Two Only B -->
-    <div class="row-double"><div class="twoonly-box twoonly-a-box"><div style="font-weight:bold">🔵 Two Only A</div><div id="twoOnlyAList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="twoOnlyAHitSeqList"></div></div><div class="twoonly-box twoonly-b-box"><div style="font-weight:bold">🟠 Two Only B</div><div id="twoOnlyBList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="twoOnlyBHitSeqList"></div></div></div>
+    <div class="row-double"><div class="twoonly-box twoonly-a-box"><div style="font-weight:bold">?? Two Only A</div><div id="twoOnlyAList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="twoOnlyAMissesText">0</span></span><button class="misses-reset-btn" onclick="resetTwoOnlyAMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyAHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="twoOnlyAHitSeqList"></div></div><div class="twoonly-box twoonly-b-box"><div style="font-weight:bold">?? Two Only B</div><div id="twoOnlyBList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="twoOnlyBMissesText">0</span></span><button class="misses-reset-btn" onclick="resetTwoOnlyBMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetTwoOnlyBHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="twoOnlyBHitSeqList"></div></div></div>
 
     <!-- Three Only (exactly 3 in last60) -->
-    <div class="row-single"><div class="three-only-box"><div style="font-weight:bold">🟣 Three Only (exactly 3 in last60)</div><div id="threeOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="threeOnlyMissesText">0</span></span><button class="misses-reset-btn" onclick="resetThreeOnlyMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="threeOnlyHitSeqList"></div></div></div>
+    <div class="row-single"><div class="three-only-box"><div style="font-weight:bold">?? Three Only (exactly 3 in last60)</div><div id="threeOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="threeOnlyMissesText">0</span></span><button class="misses-reset-btn" onclick="resetThreeOnlyMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="threeOnlyHitSeqList"></div></div></div>
 
-    <!-- Group C Quadruplicates (≥4 in last60) -->
-    <div class="row-single"><div class="group-c-box"><div style="font-weight:bold">🟣 Group C Quadruplicates (≥4 in last60) – Auto & No-Auto tracking</div><div id="groupCDuplicates60" class="duplicate-list"></div><div class="misses-counter"><span>⚡ Auto misses: <span id="groupCMissesAutoText60">0</span></span><span>🛡️ No Auto misses: <span id="groupCMissesNoAutoText60">0</span></span><div><button class="misses-reset-btn" onclick="resetQuadruplicateMisses()">Reset both misses</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">⚡ Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="groupCAutoHitSeqList"></div><div>hits: <span id="groupCAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateAutoHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">🛡️ No Auto hit sequence</div><div class="hitseq-mini-list" id="groupCNoAutoHitSeqList"></div><div>hits: <span id="groupCNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
+    <!-- Group C Quadruplicates (=4 in last60) -->
+    <div class="row-single"><div class="group-c-box"><div style="font-weight:bold">?? Group C Quadruplicates (=4 in last60) – Auto & No-Auto tracking</div><div id="groupCDuplicates60" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="groupCMissesAutoText60">0</span></span><span>??? No Auto misses: <span id="groupCMissesNoAutoText60">0</span></span><div><button class="misses-reset-btn" onclick="resetQuadruplicateMisses()">Reset both misses</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="groupCAutoHitSeqList"></div><div>hits: <span id="groupCAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateAutoHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="groupCNoAutoHitSeqList"></div><div>hits: <span id="groupCNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
   </div>
 </div>
 
-<div id="alertModal" class="alert-modal"><div class="alert-content"><div id="alertTitle">🔔</div><div id="alertNumber">0</div><div id="alertMessage"></div><button class="close-alert" onclick="closeAlert()">OK</button></div></div>
-<div class="numpad"><button class="backspace" onclick="backspace()">⌫</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
+<div id="alertModal" class="alert-modal"><div class="alert-content"><div id="alertTitle">??</div><div id="alertNumber">0</div><div id="alertMessage"></div><button class="close-alert" onclick="closeAlert()">OK</button></div></div>
+<div class="numpad"><button class="backspace" onclick="backspace()">?</button><button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button><button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button><button class="enter" onclick="addNumber()">Enter</button></div>
 
 <script>
   // ---------- CONFIGURATION ----------
@@ -412,7 +416,12 @@
 
   let history = JSON.parse(localStorage.getItem("history") || "[]");
   
-  // REMAINING counters
+  let duplicates60AutoMisses = parseInt(localStorage.getItem("duplicates60AutoMisses") || "0");
+  let duplicates60NoAutoMisses = parseInt(localStorage.getItem("duplicates60NoAutoMisses") || "0");
+  let autoResetDuplicates60 = JSON.parse(localStorage.getItem("autoResetDuplicates60") || "[]");
+  let duplicates60HitHistory = JSON.parse(localStorage.getItem("duplicates60HitHistory") || "[]");
+  let duplicates60NoAutoHitHistory = JSON.parse(localStorage.getItem("duplicates60NoAutoHitHistory") || "[]");
+  
   let missesC60 = parseInt(localStorage.getItem("missesC60") || "0");
   let missesC60NoAuto = parseInt(localStorage.getItem("missesC60NoAuto") || "0");
   let groupCAutoHitHistory = JSON.parse(localStorage.getItem("groupCAutoHitHistory") || "[]");
@@ -440,9 +449,9 @@
   let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
   function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n,10); if (colors.red.includes(num)) return "red"; if (colors.black.includes(num)) return "black"; return ""; }
-  function getGroupCounts(spins) { const c={}; spins.forEach(n => { c[n]=(c[n]||0)+1; }); return { groupCCounts: c }; }
   function getDuplicatesFromLastN(spins, N) { const lastN = spins.slice(-N); const freq = {}; lastN.forEach(n => freq[n] = (freq[n]||0)+1); return Object.keys(freq).filter(n => freq[n] >= 2); }
   function getTriplesOrMoreFromLastN(spins, N) { const lastN = spins.slice(-N); const freq = {}; lastN.forEach(n => freq[n] = (freq[n]||0)+1); return Object.keys(freq).filter(n => freq[n] >= 3); }
+  function getGroupCounts(spins) { const c={}; spins.forEach(n => { c[n]=(c[n]||0)+1; }); return { groupCCounts: c }; }
   function getCombinedBigSet(spins) { const last60 = spins.slice(-60); const counts = getGroupCounts(last60).groupCCounts; const dup30Set = new Set(getDuplicatesFromLastN(spins, 30)); const trip40Set = new Set(getTriplesOrMoreFromLastN(spins, 40)); const groupDSet = new Set(Object.keys(counts).filter(num => counts[num] >= 3)); const twoOnlyASet = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num] === 2)); const twoOnlyBSet = new Set(Object.keys(counts).filter(num => groupB.includes(num) && counts[num] === 2)); return new Set([...dup30Set, ...trip40Set, ...groupDSet, ...twoOnlyASet, ...twoOnlyBSet]); }
 
   function calculateMissesAndPrivileges() {
@@ -450,66 +459,245 @@
     const lastSpin = history[history.length-1];
     const prevSpins = history.slice(0,-1);
     const prevLast60 = prevSpins.slice(-60);
-    const prevCounts = getGroupCounts(prevLast60);
+    const prevCounts = getGroupCounts(prevLast60).groupCCounts;
     
-    // Combined Big
-    const prevBigSet = getCombinedBigSet(prevSpins);
-    if(prevBigSet.size > 0) { if(prevBigSet.has(lastSpin)) { combinedBigHitHistory.push(combinedBigMisses); combinedBigMisses = 0; } else combinedBigMisses += prevBigSet.size; }
-    
-    // Duplicates20
-    const prevDuplicates20Set = new Set(getDuplicatesFromLastN(prevSpins, 20));
-    if(prevDuplicates20Set.size > 0) { if(prevDuplicates20Set.has(lastSpin)) { duplicates20HitHistory.push(duplicates20AutoMisses); duplicates20NoAutoHitHistory.push(duplicates20NoAutoMisses); duplicates20AutoMisses = 0; duplicates20NoAutoMisses = 0; if(!autoResetDuplicates20.includes(lastSpin)) autoResetDuplicates20.push(lastSpin); } else { duplicates20AutoMisses += prevDuplicates20Set.size; duplicates20NoAutoMisses += prevDuplicates20Set.size; } }
-    const currentDuplicates20Set = new Set(getDuplicatesFromLastN(history, 20));
-    if(autoResetDuplicates20.filter(n => !currentDuplicates20Set.has(n)).length) { duplicates20AutoMisses = 0; autoResetDuplicates20 = autoResetDuplicates20.filter(n => currentDuplicates20Set.has(n)); }
-    
-    // Duplicates30
-    const prevDuplicates30Set = new Set(getDuplicatesFromLastN(prevSpins, 30));
-    if(prevDuplicates30Set.size > 0) { if(prevDuplicates30Set.has(lastSpin)) { duplicates30HitHistory.push(duplicates30AutoMisses); duplicates30NoAutoHitHistory.push(duplicates30NoAutoMisses); duplicates30AutoMisses = 0; duplicates30NoAutoMisses = 0; if(!autoResetDuplicates30.includes(lastSpin)) autoResetDuplicates30.push(lastSpin); } else { duplicates30AutoMisses += prevDuplicates30Set.size; duplicates30NoAutoMisses += prevDuplicates30Set.size; } }
-    const currentDuplicates30Set = new Set(getDuplicatesFromLastN(history, 30));
-    if(autoResetDuplicates30.filter(n => !currentDuplicates30Set.has(n)).length) { duplicates30AutoMisses = 0; autoResetDuplicates30 = autoResetDuplicates30.filter(n => currentDuplicates30Set.has(n)); }
-    
-    // Triplicates60 all
-    const prevTriples60Set = new Set(getTriplesOrMoreFromLastN(prevSpins, 60));
-    if(prevTriples60Set.size > 0) { if(prevTriples60Set.has(lastSpin)) { triplicates60HitHistory.push(triplicates60AutoMisses); triplicates60NoAutoHitHistory.push(triplicates60NoAutoMisses); triplicates60AutoMisses = 0; triplicates60NoAutoMisses = 0; if(!autoResetTriplicates60.includes(lastSpin)) autoResetTriplicates60.push(lastSpin); } else { triplicates60AutoMisses += prevTriples60Set.size; triplicates60NoAutoMisses += prevTriples60Set.size; } }
-    const currentTriples60Set = new Set(getTriplesOrMoreFromLastN(history, 60));
-    if(autoResetTriplicates60.filter(n => !currentTriples60Set.has(n)).length) { triplicates60AutoMisses = 0; autoResetTriplicates60 = autoResetTriplicates60.filter(n => currentTriples60Set.has(n)); }
-    
-    // Triplicates A
-    const prevTriples60A = new Set(Object.keys(prevCounts.groupCCounts).filter(num => groupA.includes(num) && prevCounts.groupCCounts[num] >= 3));
-    if(prevTriples60A.size > 0) { if(prevTriples60A.has(lastSpin)) { triplicates60AHitHistory.push(triplicates60AAutoMisses); triplicates60ANoAutoHitHistory.push(triplicates60ANoAutoMisses); triplicates60AAutoMisses = 0; triplicates60ANoAutoMisses = 0; if(!autoResetTriplicates60A.includes(lastSpin)) autoResetTriplicates60A.push(lastSpin); } else { triplicates60AAutoMisses += prevTriples60A.size; triplicates60ANoAutoMisses += prevTriples60A.size; } }
-    const currentTriples60A = new Set(Object.keys(getGroupCounts(history.slice(-60)).groupCCounts).filter(num => groupA.includes(num) && getGroupCounts(history.slice(-60)).groupCCounts[num] >= 3));
-    if(autoResetTriplicates60A.filter(n => !currentTriples60A.has(n)).length) { triplicates60AAutoMisses = 0; autoResetTriplicates60A = autoResetTriplicates60A.filter(n => currentTriples60A.has(n)); }
-    
-    // Triplicates B
-    const prevTriples60B = new Set(Object.keys(prevCounts.groupCCounts).filter(num => groupB.includes(num) && prevCounts.groupCCounts[num] >= 3));
-    if(prevTriples60B.size > 0) { if(prevTriples60B.has(lastSpin)) { triplicates60BHitHistory.push(triplicates60BAutoMisses); triplicates60BNoAutoHitHistory.push(triplicates60BNoAutoMisses); triplicates60BAutoMisses = 0; triplicates60BNoAutoMisses = 0; if(!autoResetTriplicates60B.includes(lastSpin)) autoResetTriplicates60B.push(lastSpin); } else { triplicates60BAutoMisses += prevTriples60B.size; triplicates60BNoAutoMisses += prevTriples60B.size; } }
-    const currentTriples60B = new Set(Object.keys(getGroupCounts(history.slice(-60)).groupCCounts).filter(num => groupB.includes(num) && getGroupCounts(history.slice(-60)).groupCCounts[num] >= 3));
-    if(autoResetTriplicates60B.filter(n => !currentTriples60B.has(n)).length) { triplicates60BAutoMisses = 0; autoResetTriplicates60B = autoResetTriplicates60B.filter(n => currentTriples60B.has(n)); }
-    
-    // Two Only A / B
-    const prevTwoOnlyASet = new Set(); for(let [num, cnt] of Object.entries(prevCounts.groupCCounts)) { if(groupA.includes(num) && cnt === 2) prevTwoOnlyASet.add(num); }
-    const prevTwoOnlyBSet = new Set(); for(let [num, cnt] of Object.entries(prevCounts.groupCCounts)) { if(groupB.includes(num) && cnt === 2) prevTwoOnlyBSet.add(num); }
-    if(prevTwoOnlyASet.size > 0) { if(prevTwoOnlyASet.has(lastSpin)) { twoOnlyAHitHistory.push(missesTwoOnlyA60); missesTwoOnlyA60 = 0; } else missesTwoOnlyA60 += prevTwoOnlyASet.size; }
-    if(prevTwoOnlyBSet.size > 0) { if(prevTwoOnlyBSet.has(lastSpin)) { twoOnlyBHitHistory.push(missesTwoOnlyB60); missesTwoOnlyB60 = 0; } else missesTwoOnlyB60 += prevTwoOnlyBSet.size; }
-    
-    // Combined Two Only
-    const combinedPrevSetTwo = new Set([...prevTwoOnlyASet, ...prevTwoOnlyBSet]);
-    if(combinedPrevSetTwo.size > 0) { if(combinedPrevSetTwo.has(lastSpin)) { combinedTwoOnlyHitHistory.push(combinedTwoOnlyMisses); combinedTwoOnlyMisses = 0; } else combinedTwoOnlyMisses += combinedPrevSetTwo.size; }
-    
-    // Three Only (exactly 3)
-    const prevExactThree = Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c === 3).map(([n])=>n);
-    if(prevExactThree.length > 0) { if(prevExactThree.includes(lastSpin)) { threeOnlyHitHistory.push(missesThree60); missesThree60 = 0; } else missesThree60 += prevExactThree.length; }
-    
-    // Quadruplicates
-    const prevQuadSet = new Set(Object.entries(prevCounts.groupCCounts).filter(([_,c]) => c >= 4).map(([n])=>n));
-    if(prevQuadSet.size > 0) { if(prevQuadSet.has(lastSpin)) { groupCAutoHitHistory.push(missesC60); groupCNoAutoHitHistory.push(missesC60NoAuto); missesC60 = 0; missesC60NoAuto = 0; if(!autoResetPrivilegeC60.includes(lastSpin)) autoResetPrivilegeC60.push(lastSpin); } else { missesC60 += prevQuadSet.size; missesC60NoAuto += prevQuadSet.size; } }
-    const currentQuadSet = new Set(Object.keys(getGroupCounts(history.slice(-60)).groupCCounts).filter(num => getGroupCounts(history.slice(-60)).groupCCounts[num] >= 4));
-    if(autoResetPrivilegeC60.filter(n => !currentQuadSet.has(n)).length) { missesC60 = 0; autoResetPrivilegeC60 = autoResetPrivilegeC60.filter(n => currentQuadSet.has(n)); }
-  }
+    // Helper to apply Option B logic: on hit, add set size to counters before recording and resetting
+    // For auto/no-auto pairs (Duplicates20,30,60, Triples60, TriplesA/B, Quad)
+    function handleHitWithSetSize(prevSet, isHit, autoMissesVar, noAutoMissesVar, hitHistoryArr, noAutoHitHistoryArr, autoResetArr, spin) {
+      if(!isHit) return { autoInc: prevSet.size, noAutoInc: prevSet.size, hitOccurred: false };
+      // Hit: add set size to both counters, record, then reset
+      let newAuto = autoMissesVar + prevSet.size;
+      let newNoAuto = noAutoMissesVar + prevSet.size;
+      hitHistoryArr.push(newAuto);
+      noAutoHitHistoryArr.push(newNoAuto);
+      if(!autoResetArr.includes(spin)) autoResetArr.push(spin);
+      return { autoResetVal: 0, noAutoResetVal: 0, autoInc: 0, noAutoInc: 0, hitOccurred: true, recorded: true };
+    }
+    // For single miss counters (TwoOnly, ThreeOnly, CombinedBig, CombinedTwoOnly)
+    function handleSingleHit(prevSet, isHit, missVar, hitHistoryArr) {
+      if(!isHit) return { inc: prevSet.size, hitOccurred: false };
+      let newMiss = missVar + prevSet.size;
+      hitHistoryArr.push(newMiss);
+      return { resetVal: 0, inc: 0, hitOccurred: true };
+    }
 
-  // updateDisplay and persist logic (unchanged except removal of obsolete references)
-  function persistAll() { /* simplified storage but complete for remaining vars */
+    // ---- Duplicates60 ----
+    let prevD60Set = new Set(getDuplicatesFromLastN(prevSpins, 60));
+    let isHit60 = prevD60Set.has(lastSpin);
+    if(!isHit60) {
+      duplicates60AutoMisses += prevD60Set.size;
+      duplicates60NoAutoMisses += prevD60Set.size;
+    } else {
+      duplicates60AutoMisses += prevD60Set.size;
+      duplicates60NoAutoMisses += prevD60Set.size;
+      duplicates60HitHistory.push(duplicates60AutoMisses);
+      duplicates60NoAutoHitHistory.push(duplicates60NoAutoMisses);
+      duplicates60AutoMisses = 0;
+      duplicates60NoAutoMisses = 0;
+      if(!autoResetDuplicates60.includes(lastSpin)) autoResetDuplicates60.push(lastSpin);
+    }
+    let currentD60Set = new Set(getDuplicatesFromLastN(history, 60));
+    if(autoResetDuplicates60.filter(n => !currentD60Set.has(n)).length) {
+      duplicates60AutoMisses = 0;
+      autoResetDuplicates60 = autoResetDuplicates60.filter(n => currentD60Set.has(n));
+    }
+
+    // ---- Combined Big ----
+    let prevBigSet = getCombinedBigSet(prevSpins);
+    if(prevBigSet.size > 0) {
+      if(prevBigSet.has(lastSpin)) {
+        combinedBigMisses += prevBigSet.size;
+        combinedBigHitHistory.push(combinedBigMisses);
+        combinedBigMisses = 0;
+      } else {
+        combinedBigMisses += prevBigSet.size;
+      }
+    }
+
+    // ---- Duplicates20 ----
+    let prevD20Set = new Set(getDuplicatesFromLastN(prevSpins, 20));
+    if(prevD20Set.size > 0) {
+      if(prevD20Set.has(lastSpin)) {
+        duplicates20AutoMisses += prevD20Set.size;
+        duplicates20NoAutoMisses += prevD20Set.size;
+        duplicates20HitHistory.push(duplicates20AutoMisses);
+        duplicates20NoAutoHitHistory.push(duplicates20NoAutoMisses);
+        duplicates20AutoMisses = 0;
+        duplicates20NoAutoMisses = 0;
+        if(!autoResetDuplicates20.includes(lastSpin)) autoResetDuplicates20.push(lastSpin);
+      } else {
+        duplicates20AutoMisses += prevD20Set.size;
+        duplicates20NoAutoMisses += prevD20Set.size;
+      }
+    }
+    let currentD20Set = new Set(getDuplicatesFromLastN(history, 20));
+    if(autoResetDuplicates20.filter(n => !currentD20Set.has(n)).length) {
+      duplicates20AutoMisses = 0;
+      autoResetDuplicates20 = autoResetDuplicates20.filter(n => currentD20Set.has(n));
+    }
+
+    // ---- Duplicates30 ----
+    let prevD30Set = new Set(getDuplicatesFromLastN(prevSpins, 30));
+    if(prevD30Set.size > 0) {
+      if(prevD30Set.has(lastSpin)) {
+        duplicates30AutoMisses += prevD30Set.size;
+        duplicates30NoAutoMisses += prevD30Set.size;
+        duplicates30HitHistory.push(duplicates30AutoMisses);
+        duplicates30NoAutoHitHistory.push(duplicates30NoAutoMisses);
+        duplicates30AutoMisses = 0;
+        duplicates30NoAutoMisses = 0;
+        if(!autoResetDuplicates30.includes(lastSpin)) autoResetDuplicates30.push(lastSpin);
+      } else {
+        duplicates30AutoMisses += prevD30Set.size;
+        duplicates30NoAutoMisses += prevD30Set.size;
+      }
+    }
+    let currentD30Set = new Set(getDuplicatesFromLastN(history, 30));
+    if(autoResetDuplicates30.filter(n => !currentD30Set.has(n)).length) {
+      duplicates30AutoMisses = 0;
+      autoResetDuplicates30 = autoResetDuplicates30.filter(n => currentD30Set.has(n));
+    }
+
+    // ---- Triplicates60 ----
+    let prevTriple60Set = new Set(getTriplesOrMoreFromLastN(prevSpins, 60));
+    if(prevTriple60Set.size > 0) {
+      if(prevTriple60Set.has(lastSpin)) {
+        triplicates60AutoMisses += prevTriple60Set.size;
+        triplicates60NoAutoMisses += prevTriple60Set.size;
+        triplicates60HitHistory.push(triplicates60AutoMisses);
+        triplicates60NoAutoHitHistory.push(triplicates60NoAutoMisses);
+        triplicates60AutoMisses = 0;
+        triplicates60NoAutoMisses = 0;
+        if(!autoResetTriplicates60.includes(lastSpin)) autoResetTriplicates60.push(lastSpin);
+      } else {
+        triplicates60AutoMisses += prevTriple60Set.size;
+        triplicates60NoAutoMisses += prevTriple60Set.size;
+      }
+    }
+    let currentTriple60Set = new Set(getTriplesOrMoreFromLastN(history, 60));
+    if(autoResetTriplicates60.filter(n => !currentTriple60Set.has(n)).length) {
+      triplicates60AutoMisses = 0;
+      autoResetTriplicates60 = autoResetTriplicates60.filter(n => currentTriple60Set.has(n));
+    }
+
+    // ---- Triplicates A ----
+    let prevTripleASet = new Set(Object.keys(prevCounts).filter(num => groupA.includes(num) && prevCounts[num] >= 3));
+    if(prevTripleASet.size > 0) {
+      if(prevTripleASet.has(lastSpin)) {
+        triplicates60AAutoMisses += prevTripleASet.size;
+        triplicates60ANoAutoMisses += prevTripleASet.size;
+        triplicates60AHitHistory.push(triplicates60AAutoMisses);
+        triplicates60ANoAutoHitHistory.push(triplicates60ANoAutoMisses);
+        triplicates60AAutoMisses = 0;
+        triplicates60ANoAutoMisses = 0;
+        if(!autoResetTriplicates60A.includes(lastSpin)) autoResetTriplicates60A.push(lastSpin);
+      } else {
+        triplicates60AAutoMisses += prevTripleASet.size;
+        triplicates60ANoAutoMisses += prevTripleASet.size;
+      }
+    }
+    let currentCounts = getGroupCounts(history.slice(-60)).groupCCounts;
+    let currentTripleASet = new Set(Object.keys(currentCounts).filter(num => groupA.includes(num) && currentCounts[num] >= 3));
+    if(autoResetTriplicates60A.filter(n => !currentTripleASet.has(n)).length) {
+      triplicates60AAutoMisses = 0;
+      autoResetTriplicates60A = autoResetTriplicates60A.filter(n => currentTripleASet.has(n));
+    }
+
+    // ---- Triplicates B ----
+    let prevTripleBSet = new Set(Object.keys(prevCounts).filter(num => groupB.includes(num) && prevCounts[num] >= 3));
+    if(prevTripleBSet.size > 0) {
+      if(prevTripleBSet.has(lastSpin)) {
+        triplicates60BAutoMisses += prevTripleBSet.size;
+        triplicates60BNoAutoMisses += prevTripleBSet.size;
+        triplicates60BHitHistory.push(triplicates60BAutoMisses);
+        triplicates60BNoAutoHitHistory.push(triplicates60BNoAutoMisses);
+        triplicates60BAutoMisses = 0;
+        triplicates60BNoAutoMisses = 0;
+        if(!autoResetTriplicates60B.includes(lastSpin)) autoResetTriplicates60B.push(lastSpin);
+      } else {
+        triplicates60BAutoMisses += prevTripleBSet.size;
+        triplicates60BNoAutoMisses += prevTripleBSet.size;
+      }
+    }
+    let currentTripleBSet = new Set(Object.keys(currentCounts).filter(num => groupB.includes(num) && currentCounts[num] >= 3));
+    if(autoResetTriplicates60B.filter(n => !currentTripleBSet.has(n)).length) {
+      triplicates60BAutoMisses = 0;
+      autoResetTriplicates60B = autoResetTriplicates60B.filter(n => currentTripleBSet.has(n));
+    }
+
+    // ---- Two Only A & B (single miss counters) ----
+    let prevTwoOnlyASet = new Set(); for(let [num, cnt] of Object.entries(prevCounts)) { if(groupA.includes(num) && cnt === 2) prevTwoOnlyASet.add(num); }
+    if(prevTwoOnlyASet.size > 0) {
+      if(prevTwoOnlyASet.has(lastSpin)) {
+        missesTwoOnlyA60 += prevTwoOnlyASet.size;
+        twoOnlyAHitHistory.push(missesTwoOnlyA60);
+        missesTwoOnlyA60 = 0;
+      } else {
+        missesTwoOnlyA60 += prevTwoOnlyASet.size;
+      }
+    }
+    let prevTwoOnlyBSet = new Set(); for(let [num, cnt] of Object.entries(prevCounts)) { if(groupB.includes(num) && cnt === 2) prevTwoOnlyBSet.add(num); }
+    if(prevTwoOnlyBSet.size > 0) {
+      if(prevTwoOnlyBSet.has(lastSpin)) {
+        missesTwoOnlyB60 += prevTwoOnlyBSet.size;
+        twoOnlyBHitHistory.push(missesTwoOnlyB60);
+        missesTwoOnlyB60 = 0;
+      } else {
+        missesTwoOnlyB60 += prevTwoOnlyBSet.size;
+      }
+    }
+
+    // ---- Combined Two Only ----
+    let combinedPrevSetTwo = new Set([...prevTwoOnlyASet, ...prevTwoOnlyBSet]);
+    if(combinedPrevSetTwo.size > 0) {
+      if(combinedPrevSetTwo.has(lastSpin)) {
+        combinedTwoOnlyMisses += combinedPrevSetTwo.size;
+        combinedTwoOnlyHitHistory.push(combinedTwoOnlyMisses);
+        combinedTwoOnlyMisses = 0;
+      } else {
+        combinedTwoOnlyMisses += combinedPrevSetTwo.size;
+      }
+    }
+
+    // ---- Three Only (exactly 3) ----
+    let prevExactThree = Object.entries(prevCounts).filter(([_,c]) => c === 3).map(([n])=>n);
+    if(prevExactThree.length > 0) {
+      if(prevExactThree.includes(lastSpin)) {
+        missesThree60 += prevExactThree.length;
+        threeOnlyHitHistory.push(missesThree60);
+        missesThree60 = 0;
+      } else {
+        missesThree60 += prevExactThree.length;
+      }
+    }
+
+    // ---- Group C Quadruplicates (>=4) with auto/no-auto ----
+    let prevQuadSet = new Set(Object.entries(prevCounts).filter(([_,c]) => c >= 4).map(([n])=>n));
+    if(prevQuadSet.size > 0) {
+      if(prevQuadSet.has(lastSpin)) {
+        missesC60 += prevQuadSet.size;
+        missesC60NoAuto += prevQuadSet.size;
+        groupCAutoHitHistory.push(missesC60);
+        groupCNoAutoHitHistory.push(missesC60NoAuto);
+        missesC60 = 0;
+        missesC60NoAuto = 0;
+        if(!autoResetPrivilegeC60.includes(lastSpin)) autoResetPrivilegeC60.push(lastSpin);
+      } else {
+        missesC60 += prevQuadSet.size;
+        missesC60NoAuto += prevQuadSet.size;
+      }
+    }
+    let currentQuadSet = new Set(Object.keys(currentCounts).filter(num => currentCounts[num] >= 4));
+    if(autoResetPrivilegeC60.filter(n => !currentQuadSet.has(n)).length) {
+      missesC60 = 0;
+      autoResetPrivilegeC60 = autoResetPrivilegeC60.filter(n => currentQuadSet.has(n));
+    }
+  }
+  
+  function persistAll() {
     localStorage.setItem("history",JSON.stringify(history));
+    localStorage.setItem("duplicates60AutoMisses",duplicates60AutoMisses); localStorage.setItem("duplicates60NoAutoMisses",duplicates60NoAutoMisses);
+    localStorage.setItem("autoResetDuplicates60",JSON.stringify(autoResetDuplicates60)); localStorage.setItem("duplicates60HitHistory",JSON.stringify(duplicates60HitHistory)); localStorage.setItem("duplicates60NoAutoHitHistory",JSON.stringify(duplicates60NoAutoHitHistory));
     localStorage.setItem("missesC60",missesC60); localStorage.setItem("missesC60NoAuto",missesC60NoAuto);
     localStorage.setItem("groupCAutoHitHistory",JSON.stringify(groupCAutoHitHistory)); localStorage.setItem("groupCNoAutoHitHistory",JSON.stringify(groupCNoAutoHitHistory));
     localStorage.setItem("autoResetPrivilegeC60",JSON.stringify(autoResetPrivilegeC60));
@@ -537,7 +725,7 @@
   }
   
   function saveStateToHistory() {
-    const snap = { history:[...history], missesC60, missesC60NoAuto, groupCAutoHitHistory:[...groupCAutoHitHistory], groupCNoAutoHitHistory:[...groupCNoAutoHitHistory], autoResetPrivilegeC60:[...autoResetPrivilegeC60], missesThree60, threeOnlyHitHistory:[...threeOnlyHitHistory], missesTwoOnlyA60, missesTwoOnlyB60, twoOnlyAHitHistory:[...twoOnlyAHitHistory], twoOnlyBHitHistory:[...twoOnlyBHitHistory], combinedTwoOnlyMisses, combinedTwoOnlyHitHistory:[...combinedTwoOnlyHitHistory], duplicates20AutoMisses, duplicates20NoAutoMisses, autoResetDuplicates20:[...autoResetDuplicates20], duplicates20HitHistory:[...duplicates20HitHistory], duplicates20NoAutoHitHistory:[...duplicates20NoAutoHitHistory], duplicates30AutoMisses, duplicates30NoAutoMisses, autoResetDuplicates30:[...autoResetDuplicates30], duplicates30HitHistory:[...duplicates30HitHistory], duplicates30NoAutoHitHistory:[...duplicates30NoAutoHitHistory], triplicates60AutoMisses, triplicates60NoAutoMisses, autoResetTriplicates60:[...autoResetTriplicates60], triplicates60HitHistory:[...triplicates60HitHistory], triplicates60NoAutoHitHistory:[...triplicates60NoAutoHitHistory], triplicates60AAutoMisses, triplicates60ANoAutoMisses, autoResetTriplicates60A:[...autoResetTriplicates60A], triplicates60AHitHistory:[...triplicates60AHitHistory], triplicates60ANoAutoHitHistory:[...triplicates60ANoAutoHitHistory], triplicates60BAutoMisses, triplicates60BNoAutoMisses, autoResetTriplicates60B:[...autoResetTriplicates60B], triplicates60BHitHistory:[...triplicates60BHitHistory], triplicates60BNoAutoHitHistory:[...triplicates60BNoAutoHitHistory], combinedBigMisses, combinedBigHitHistory:[...combinedBigHitHistory] };
+    const snap = { history:[...history], duplicates60AutoMisses, duplicates60NoAutoMisses, autoResetDuplicates60:[...autoResetDuplicates60], duplicates60HitHistory:[...duplicates60HitHistory], duplicates60NoAutoHitHistory:[...duplicates60NoAutoHitHistory], missesC60, missesC60NoAuto, groupCAutoHitHistory:[...groupCAutoHitHistory], groupCNoAutoHitHistory:[...groupCNoAutoHitHistory], autoResetPrivilegeC60:[...autoResetPrivilegeC60], missesThree60, threeOnlyHitHistory:[...threeOnlyHitHistory], missesTwoOnlyA60, missesTwoOnlyB60, twoOnlyAHitHistory:[...twoOnlyAHitHistory], twoOnlyBHitHistory:[...twoOnlyBHitHistory], combinedTwoOnlyMisses, combinedTwoOnlyHitHistory:[...combinedTwoOnlyHitHistory], duplicates20AutoMisses, duplicates20NoAutoMisses, autoResetDuplicates20:[...autoResetDuplicates20], duplicates20HitHistory:[...duplicates20HitHistory], duplicates20NoAutoHitHistory:[...duplicates20NoAutoHitHistory], duplicates30AutoMisses, duplicates30NoAutoMisses, autoResetDuplicates30:[...autoResetDuplicates30], duplicates30HitHistory:[...duplicates30HitHistory], duplicates30NoAutoHitHistory:[...duplicates30NoAutoHitHistory], triplicates60AutoMisses, triplicates60NoAutoMisses, autoResetTriplicates60:[...autoResetTriplicates60], triplicates60HitHistory:[...triplicates60HitHistory], triplicates60NoAutoHitHistory:[...triplicates60NoAutoHitHistory], triplicates60AAutoMisses, triplicates60ANoAutoMisses, autoResetTriplicates60A:[...autoResetTriplicates60A], triplicates60AHitHistory:[...triplicates60AHitHistory], triplicates60ANoAutoHitHistory:[...triplicates60ANoAutoHitHistory], triplicates60BAutoMisses, triplicates60BNoAutoMisses, autoResetTriplicates60B:[...autoResetTriplicates60B], triplicates60BHitHistory:[...triplicates60BHitHistory], triplicates60BNoAutoHitHistory:[...triplicates60BNoAutoHitHistory], combinedBigMisses, combinedBigHitHistory:[...combinedBigHitHistory] };
     stateHistory.push(snap);
     if(stateHistory.length>50) stateHistory=stateHistory.slice(-50);
     persistAll();
@@ -546,7 +734,9 @@
   function restoreFromHistory() {
     if(stateHistory.length===0) return false;
     const prev = stateHistory.pop();
-    history = prev.history; missesC60=prev.missesC60; missesC60NoAuto=prev.missesC60NoAuto; groupCAutoHitHistory=prev.groupCAutoHitHistory||[]; groupCNoAutoHitHistory=prev.groupCNoAutoHitHistory||[]; autoResetPrivilegeC60=prev.autoResetPrivilegeC60||[];
+    history = prev.history;
+    duplicates60AutoMisses=prev.duplicates60AutoMisses||0; duplicates60NoAutoMisses=prev.duplicates60NoAutoMisses||0; autoResetDuplicates60=prev.autoResetDuplicates60||[]; duplicates60HitHistory=prev.duplicates60HitHistory||[]; duplicates60NoAutoHitHistory=prev.duplicates60NoAutoHitHistory||[];
+    missesC60=prev.missesC60; missesC60NoAuto=prev.missesC60NoAuto; groupCAutoHitHistory=prev.groupCAutoHitHistory||[]; groupCNoAutoHitHistory=prev.groupCNoAutoHitHistory||[]; autoResetPrivilegeC60=prev.autoResetPrivilegeC60||[];
     missesThree60=prev.missesThree60; threeOnlyHitHistory=prev.threeOnlyHitHistory||[];
     missesTwoOnlyA60=prev.missesTwoOnlyA60; missesTwoOnlyB60=prev.missesTwoOnlyB60; twoOnlyAHitHistory=prev.twoOnlyAHitHistory||[]; twoOnlyBHitHistory=prev.twoOnlyBHitHistory||[];
     combinedTwoOnlyMisses=prev.combinedTwoOnlyMisses; combinedTwoOnlyHitHistory=prev.combinedTwoOnlyHitHistory||[];
@@ -559,14 +749,12 @@
     persistAll(); return true;
   }
   
-  // updateDisplay implementation (kept compact, only remaining sections)
   function updateDisplay() {
     const container = document.getElementById("recentSpins"); container.innerHTML = "";
     for(let i=0;i<60;i++) { const idx = history.length-1-i; const div = document.createElement("div"); if(idx>=0) { div.className = `spin-box ${getColor(history[idx])}`; div.textContent = history[idx]; } else { div.className = "spin-box empty"; div.textContent = ""; } container.appendChild(div); }
     document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
     const last60 = history.slice(-60);
     const counts = getGroupCounts(last60).groupCCounts;
-    
     function renderList(containerId, numberSet, label, autoList) {
       const div = document.getElementById(containerId); div.innerHTML = numberSet.size ? "" : '<div class="no-duplicates">—</div>';
       numberSet.forEach(num => { let item=document.createElement("div"); item.className="duplicate-item"; let inner=`<div class="duplicate-number ${getColor(num)}">${num}</div><div class="duplicate-count">${label}</div>`; if(autoList && autoList.includes(num)) inner+=`<div class="auto-badge">auto</div>`; item.innerHTML=inner; div.appendChild(item); });
@@ -576,25 +764,31 @@
       historyArray.forEach(v=>{ let span=document.createElement("span"); span.className="hitseq-mini-item"; span.textContent=v; div.appendChild(span); });
       if(countId) document.getElementById(countId).textContent = historyArray.length;
     }
-    // Combined Big
+    const dup60Set = new Set(getDuplicatesFromLastN(history,60));
+    renderList("duplicates60List", dup60Set, "dup60", autoResetDuplicates60);
+    document.getElementById("duplicates60AutoMissesText").textContent = duplicates60AutoMisses;
+    document.getElementById("duplicates60NoAutoMissesText").textContent = duplicates60NoAutoMisses;
+    renderHitSeq("duplicates60HitSeqList", duplicates60HitHistory, "duplicates60HitCount");
+    renderHitSeq("duplicates60NoAutoHitSeqList", duplicates60NoAutoHitHistory, "duplicates60NoAutoHitCount");
+    
     const bigSet = getCombinedBigSet(history);
     const bigContainer = document.getElementById("combinedBigList"); bigContainer.innerHTML = bigSet.size ? "" : '<div class="no-duplicates">—</div>';
     if(bigSet.size) { Array.from(bigSet).sort((a,b)=>{ let av=a==="00"?100:parseInt(a), bv=b==="00"?100:parseInt(b); return av-bv; }).forEach(num => { let badges=[]; if(getDuplicatesFromLastN(history,30).includes(num)) badges.push("D30"); if(getTriplesOrMoreFromLastN(history,40).includes(num)) badges.push("T40"); if((counts[num]||0)>=3) badges.push("GpD"); if(groupA.includes(num) && counts[num]===2) badges.push("2A"); if(groupB.includes(num) && counts[num]===2) badges.push("2B"); let item=document.createElement("div"); item.className="duplicate-item"; item.innerHTML=`<div class="duplicate-number ${getColor(num)}">${num}</div><div class="badge-combined">${badges.join(",")}</div>`; bigContainer.appendChild(item); }); }
     document.getElementById("combinedBigMissesText").textContent = combinedBigMisses; renderHitSeq("combinedBigHitSeqList", combinedBigHitHistory, "combinedBigHitCount");
-    // Duplicates20,30, Triples60, A, B, TwoOnly, CombinedTwoOnly, ThreeOnly, Quad
+    
     const dup20 = new Set(getDuplicatesFromLastN(history,20)); renderList("duplicates20List", dup20, "dup20", autoResetDuplicates20);
     document.getElementById("duplicates20AutoMissesText").textContent = duplicates20AutoMisses; document.getElementById("duplicates20NoAutoMissesText").textContent = duplicates20NoAutoMisses;
     renderHitSeq("duplicates20HitSeqList", duplicates20HitHistory, "duplicates20HitCount"); renderHitSeq("duplicates20NoAutoHitSeqList", duplicates20NoAutoHitHistory, "duplicates20NoAutoHitCount");
     const dup30 = new Set(getDuplicatesFromLastN(history,30)); renderList("duplicates30List", dup30, "dup30", autoResetDuplicates30);
     document.getElementById("duplicates30AutoMissesText").textContent = duplicates30AutoMisses; document.getElementById("duplicates30NoAutoMissesText").textContent = duplicates30NoAutoMisses;
     renderHitSeq("duplicates30HitSeqList", duplicates30HitHistory, "duplicates30HitCount"); renderHitSeq("duplicates30NoAutoHitSeqList", duplicates30NoAutoHitHistory, "duplicates30NoAutoHitCount");
-    const trip60 = new Set(getTriplesOrMoreFromLastN(history,60)); renderList("triplicates60List", trip60, "≥3/60", autoResetTriplicates60);
+    const trip60 = new Set(getTriplesOrMoreFromLastN(history,60)); renderList("triplicates60List", trip60, "=3/60", autoResetTriplicates60);
     document.getElementById("triplicates60AutoMissesText").textContent = triplicates60AutoMisses; document.getElementById("triplicates60NoAutoMissesText").textContent = triplicates60NoAutoMisses;
     renderHitSeq("triplicates60HitSeqList", triplicates60HitHistory, "triplicates60HitCount"); renderHitSeq("triplicates60NoAutoHitSeqList", triplicates60NoAutoHitHistory, "triplicates60NoAutoHitCount");
-    const trip60A = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num] >= 3)); renderList("triplicates60AList", trip60A, "≥3/60A", autoResetTriplicates60A);
+    const trip60A = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num] >= 3)); renderList("triplicates60AList", trip60A, "=3/60A", autoResetTriplicates60A);
     document.getElementById("triplicates60AAutoMissesText").textContent = triplicates60AAutoMisses; document.getElementById("triplicates60ANoAutoMissesText").textContent = triplicates60ANoAutoMisses;
     renderHitSeq("triplicates60AHitSeqList", triplicates60AHitHistory, "triplicates60AHitCount"); renderHitSeq("triplicates60ANoAutoHitSeqList", triplicates60ANoAutoHitHistory, "triplicates60ANoAutoHitCount");
-    const trip60B = new Set(Object.keys(counts).filter(num => groupB.includes(num) && counts[num] >= 3)); renderList("triplicates60BList", trip60B, "≥3/60B", autoResetTriplicates60B);
+    const trip60B = new Set(Object.keys(counts).filter(num => groupB.includes(num) && counts[num] >= 3)); renderList("triplicates60BList", trip60B, "=3/60B", autoResetTriplicates60B);
     document.getElementById("triplicates60BAutoMissesText").textContent = triplicates60BAutoMisses; document.getElementById("triplicates60BNoAutoMissesText").textContent = triplicates60BNoAutoMisses;
     renderHitSeq("triplicates60BHitSeqList", triplicates60BHitHistory, "triplicates60BHitCount"); renderHitSeq("triplicates60BNoAutoHitSeqList", triplicates60BNoAutoHitHistory, "triplicates60BNoAutoHitCount");
     const twoA = new Set(Object.keys(counts).filter(num => groupA.includes(num) && counts[num]===2)); renderList("twoOnlyAList", twoA, "2", []); document.getElementById("twoOnlyAMissesText").textContent = missesTwoOnlyA60; renderHitSeq("twoOnlyAHitSeqList", twoOnlyAHitHistory, null);
@@ -613,8 +807,12 @@
     saveStateToHistory(); history.push(val); calculateMissesAndPrivileges(); document.getElementById("numberInput").value = ""; persistAll(); updateDisplay(); document.getElementById("inputStatus").textContent = `Added ${val}`;
   }
   function undo() { if(history.length===0) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; } if(restoreFromHistory()) { updateDisplay(); document.getElementById("inputStatus").textContent = "Undo done"; } else { history.pop(); resetAllInternal(); persistAll(); updateDisplay(); } }
-  function resetAllInternal() { history=[]; missesC60=missesC60NoAuto=0; groupCAutoHitHistory=[]; groupCNoAutoHitHistory=[]; autoResetPrivilegeC60=[]; missesThree60=0; threeOnlyHitHistory=[]; missesTwoOnlyA60=missesTwoOnlyB60=0; twoOnlyAHitHistory=[]; twoOnlyBHitHistory=[]; combinedTwoOnlyMisses=0; combinedTwoOnlyHitHistory=[]; duplicates20AutoMisses=duplicates20NoAutoMisses=0; autoResetDuplicates20=[]; duplicates20HitHistory=[]; duplicates20NoAutoHitHistory=[]; duplicates30AutoMisses=duplicates30NoAutoMisses=0; autoResetDuplicates30=[]; duplicates30HitHistory=[]; duplicates30NoAutoHitHistory=[]; triplicates60AutoMisses=triplicates60NoAutoMisses=0; autoResetTriplicates60=[]; triplicates60HitHistory=[]; triplicates60NoAutoHitHistory=[]; triplicates60AAutoMisses=triplicates60ANoAutoMisses=0; autoResetTriplicates60A=[]; triplicates60AHitHistory=[]; triplicates60ANoAutoHitHistory=[]; triplicates60BAutoMisses=triplicates60BNoAutoMisses=0; autoResetTriplicates60B=[]; triplicates60BHitHistory=[]; triplicates60BNoAutoHitHistory=[]; combinedBigMisses=0; combinedBigHitHistory=[]; stateHistory=[]; }
+  function resetAllInternal() { history=[]; duplicates60AutoMisses=0; duplicates60NoAutoMisses=0; autoResetDuplicates60=[]; duplicates60HitHistory=[]; duplicates60NoAutoHitHistory=[]; missesC60=missesC60NoAuto=0; groupCAutoHitHistory=[]; groupCNoAutoHitHistory=[]; autoResetPrivilegeC60=[]; missesThree60=0; threeOnlyHitHistory=[]; missesTwoOnlyA60=missesTwoOnlyB60=0; twoOnlyAHitHistory=[]; twoOnlyBHitHistory=[]; combinedTwoOnlyMisses=0; combinedTwoOnlyHitHistory=[]; duplicates20AutoMisses=duplicates20NoAutoMisses=0; autoResetDuplicates20=[]; duplicates20HitHistory=[]; duplicates20NoAutoHitHistory=[]; duplicates30AutoMisses=duplicates30NoAutoMisses=0; autoResetDuplicates30=[]; duplicates30HitHistory=[]; duplicates30NoAutoHitHistory=[]; triplicates60AutoMisses=triplicates60NoAutoMisses=0; autoResetTriplicates60=[]; triplicates60HitHistory=[]; triplicates60NoAutoHitHistory=[]; triplicates60AAutoMisses=triplicates60ANoAutoMisses=0; autoResetTriplicates60A=[]; triplicates60AHitHistory=[]; triplicates60ANoAutoHitHistory=[]; triplicates60BAutoMisses=triplicates60BNoAutoMisses=0; autoResetTriplicates60B=[]; triplicates60BHitHistory=[]; triplicates60BNoAutoHitHistory=[]; combinedBigMisses=0; combinedBigHitHistory=[]; stateHistory=[]; }
   function resetAll() { if(confirm("Reset everything?")) { resetAllInternal(); persistAll(); updateDisplay(); } }
+  
+  window.resetDuplicates60Misses = () => { if(confirm("Reset Duplicates60 misses?")){ saveStateToHistory(); duplicates60AutoMisses=0; duplicates60NoAutoMisses=0; persistAll(); updateDisplay(); } };
+  window.resetDuplicates60HitHistory = () => { if(confirm("Reset auto hit seq?")){ saveStateToHistory(); duplicates60HitHistory=[]; persistAll(); updateDisplay(); } };
+  window.resetDuplicates60NoAutoHitHistory = () => { if(confirm("Reset no-auto hit seq?")){ saveStateToHistory(); duplicates60NoAutoHitHistory=[]; persistAll(); updateDisplay(); } };
   window.resetCombinedBigMisses = () => { if(confirm("Reset Combined misses?")){ saveStateToHistory(); combinedBigMisses=0; persistAll(); updateDisplay(); } };
   window.resetCombinedBigHitHistory = () => { if(confirm("Reset Combined hit seq?")){ saveStateToHistory(); combinedBigHitHistory=[]; persistAll(); updateDisplay(); } };
   window.resetDuplicates20Misses = () => { if(confirm("Reset Duplicates20 misses?")){ saveStateToHistory(); duplicates20AutoMisses=0; duplicates20NoAutoMisses=0; persistAll(); updateDisplay(); } };

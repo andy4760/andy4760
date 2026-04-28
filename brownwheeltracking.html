@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
-  <title>Brown Wheel Tracker Pro | Gold Miss Alert + Wheel Adjacency</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brown Wheel Roulette Tracker Pro</title>
   <style>
     * {
       box-sizing: border-box;
@@ -16,7 +16,6 @@
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #f0f0f0;
       min-height: 100vh;
-      padding-bottom: 95px;
     }
     .container {
       max-width: 1200px;
@@ -109,30 +108,6 @@
       margin: 1rem 0;
       flex-wrap: wrap;
     }
-    .pattern-tracking {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin: 1.5rem 0 2rem 0;
-    }
-    .pattern-box {
-      border: 1px solid #444;
-      padding: 15px;
-      border-radius: 12px;
-      background: rgba(30, 30, 46, 0.7);
-      min-width: 140px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    .pattern-box h3 {
-      color: #ff8a65;
-      margin-bottom: 10px;
-      font-size: 1.1rem;
-    }
-    .pattern-stats {
-      font-size: 1rem;
-    }
     .number-sets {
       display: flex;
       flex-direction: column;
@@ -184,10 +159,8 @@
     }
     .miss-count {
       font-weight: bold;
-      font-size: 1rem;
       color: #42a5f5;
-      transition: color 0.1s ease;
-      text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+      font-size: 1rem;
     }
     .numpad {
       position: fixed;
@@ -218,7 +191,6 @@
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
       cursor: pointer;
       transition: all 0.2s ease;
-      touch-action: manipulation;
     }
     .numpad button:active {
       transform: scale(0.95);
@@ -244,33 +216,20 @@
       margin-top: 5px;
       color: #ffab91;
     }
-    /* READONLY INPUT STYLES - prevents native keyboard on iPad/tablets */
-    .input-wrapper {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .readonly-input {
+    input {
       padding: 10px;
-      font-size: 1.2rem;
-      width: 130px;
+      font-size: 1rem;
+      width: 120px;
       text-align: center;
-      border: 2px solid #ff4b2b;
-      border-radius: 12px;
-      background: rgba(20, 20, 35, 0.9);
-      color: #ffd966;
-      font-weight: bold;
-      letter-spacing: 1px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: rgba(30, 30, 46, 0.8);
+      color: white;
       outline: none;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-      cursor: default;
-      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    .readonly-input:focus {
-      border-color: #ff8a65;
-      background: rgba(30, 30, 50, 0.95);
+    input:focus {
+      border-color: #ff4b2b;
     }
     button {
       padding: 10px 15px;
@@ -282,7 +241,6 @@
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-      touch-action: manipulation;
     }
     button:hover {
       background: rgba(80, 80, 100, 0.9);
@@ -359,29 +317,14 @@
       .number-column {
         min-width: 35px;
       }
-      .pattern-box {
-        min-width: 120px;
-        padding: 10px;
-      }
-    }
-    .gold-miss {
-      color: #FFD700 !important;
-      text-shadow: 0 0 3px rgba(0,0,0,0.5);
-    }
-    /* tiny helper */
-    .note-text {
-      font-size: 0.7rem;
-      color: #aaa;
-      text-align: center;
-      margin-top: 4px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Brown Wheel Tracker Pro</h1>
-      <div class="tagline">Track spins, misses → gold at 30+ misses | Wheel adjacency alert (5+ neighbors ≥30)</div>
+      <h1>Brown Wheel Roulette Tracker Pro</h1>
+      <div class="tagline">Track spins and individual number misses</div>
     </header>
     
     <div id="recentSpins"></div>
@@ -400,35 +343,18 @@
         <div class="legend-color legend-green"></div>
         <span>Green</span>
       </div>
-      <div class="legend-item">
-        <span style="color:#FFD700; font-weight:bold;">★ Gold ≥30 misses</span>
-      </div>
     </div>
 
-    <!-- MANUAL INPUT SECTION - READONLY prevents iPad native keyboard -->
     <div class="controls">
-      <div class="input-wrapper">
-        <input 
-          type="text" 
-          id="numberInput" 
-          class="readonly-input" 
-          placeholder="0-36 or 00" 
-          maxlength="2" 
-          readonly 
-          inputmode="none"
-          value=""
-          aria-label="Number display - use numpad below"
-        />
-        <button onclick="addNumber()" class="action-add">Add Spin</button>
-        <button onclick="undo()">Undo Last</button>
-        <button onclick="resetAll()" id="resetButton">Reset All</button>
-      </div>
+      <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+      <button onclick="addNumber()">Add Spin</button>
+      <button onclick="undo()">Undo Last</button>
+      <button onclick="resetAll()" id="resetButton">Reset All</button>
       <div id="inputStatus" class="input-status"></div>
-      <div class="note-text">🔢 Use numpad below → no keyboard popup</div>
     </div>
 
     <div class="number-sets">
-      <!-- Top 19 Numbers (00 + 18 others) -->
+      <!-- Top 19 Numbers -->
       <div class="number-set">
         <div class="horizontal-layout">
           <div class="number-column">
@@ -510,7 +436,7 @@
         </div>
       </div>
       
-      <!-- Bottom 19 Numbers (0 and other 18) -->
+      <!-- Bottom 19 Numbers -->
       <div class="number-set">
         <div class="horizontal-layout">
           <div class="number-column">
@@ -592,48 +518,8 @@
         </div>
       </div>
     </div>
-
-    <!-- Pattern Tracking Section -->
-    <div class="pattern-tracking">
-      <div class="pattern-box">
-        <h3>Track 3</h3>
-        <div class="pattern-stats">
-          Misses: <span id="miss3">0</span><br>
-          Hits: <span id="hit3">0</span>
-        </div>
-      </div>
-      <div class="pattern-box">
-        <h3>Track 4</h3>
-        <div class="pattern-stats">
-          Misses: <span id="miss4">0</span><br>
-          Hits: <span id="hit4">0</span>
-        </div>
-      </div>
-      <div class="pattern-box">
-        <h3>Track 5</h3>
-        <div class="pattern-stats">
-          Misses: <span id="miss5">0</span><br>
-          Hits: <span id="hit5">0</span>
-        </div>
-      </div>
-      <div class="pattern-box">
-        <h3>Track 6</h3>
-        <div class="pattern-stats">
-          Misses: <span id="miss6">0</span><br>
-          Hits: <span id="hit6">0</span>
-        </div>
-      </div>
-      <div class="pattern-box">
-        <h3>Track 9</h3>
-        <div class="pattern-stats">
-          Misses: <span id="miss9">0</span><br>
-          Hits: <span id="hit9">0</span>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <!-- CUSTOM NUMPAD - no hardware keyboard interference -->
   <div class="numpad">
     <button onclick="numpadClick('1')">1</button>
     <button onclick="numpadClick('2')">2</button>
@@ -646,11 +532,10 @@
     <button onclick="numpadClick('9')">9</button>
     <button onclick="numpadClick('0')">0</button>
     <button class="enter" onclick="addNumber()">Enter</button>
-    <button class="backspace" onclick="backspace()">⌫</button>
+    <button class="backspace" onclick="backspace()">?</button>
   </div>
 
   <script>
-    // ----- CORE DATA -----
     const colors = {
       red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
       black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
@@ -659,16 +544,13 @@
 
     let history = JSON.parse(localStorage.getItem("history") || "[]");
     let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({
-      3: { m: 0, h: 0 },
-      4: { m: 0, h: 0 },
-      5: { m: 0, h: 0 },
-      6: { m: 0, h: 0 },
-      9: { m: 0, h: 0 },
+      // Top 19 numbers
       top: { 
         '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, 
         '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, 
         '35':0, '14':0, '2':0 
       },
+      // Bottom 19 numbers
       bottom: { 
         '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, 
         '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, 
@@ -676,63 +558,29 @@
       }
     }));
 
-    if (typeof stats === 'string') stats = JSON.parse(stats);
-    if (!stats.top) stats.top = { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 };
-    if (!stats.bottom) stats.bottom = { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 };
-    if (!stats[3]) stats[3] = { m: 0, h: 0 };
-    if (!stats[4]) stats[4] = { m: 0, h: 0 };
-    if (!stats[5]) stats[5] = { m: 0, h: 0 };
-    if (!stats[6]) stats[6] = { m: 0, h: 0 };
-    if (!stats[9]) stats[9] = { m: 0, h: 0 };
+    // Track if the alert has been shown
+    let alertShown = localStorage.getItem("alertShown") === "true" || false;
 
-    // AMERICAN WHEEL ORDER (circular)
-    const WHEEL_ORDER = [
-      '0','28','9','26','30','11','7','20','32','17','5','22','34','15','3','24','36','13','1',
-      '00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'
-    ];  // 38 numbers
-
-    function getMissCount(numStr) {
-      if (numStr === '00') return stats.top['00'] ?? 0;
-      if (numStr === '0') return stats.bottom['0'] ?? 0;
-      if (stats.top.hasOwnProperty(numStr)) return stats.top[numStr];
-      if (stats.bottom.hasOwnProperty(numStr)) return stats.bottom[numStr];
-      return 0;
+    if (typeof stats === 'string') {
+      stats = JSON.parse(stats);
     }
 
-    function findFirstAdjacentBlock(minLen = 5) {
-      const n = WHEEL_ORDER.length;
-      for (let start = 0; start < n; start++) {
-        let block = [];
-        for (let offset = 0; offset < n; offset++) {
-          const idx = (start + offset) % n;
-          const num = WHEEL_ORDER[idx];
-          if (getMissCount(num) >= 30) {
-            block.push(num);
-          } else {
-            break;
-          }
-        }
-        if (block.length >= minLen) return block;
-      }
-      return null;
+    // Initialize stats if they don't exist
+    if (!stats.top) {
+      stats.top = { 
+        '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, 
+        '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, 
+        '35':0, '14':0, '2':0 
+      };
+    }
+    if (!stats.bottom) {
+      stats.bottom = { 
+        '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, 
+        '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, 
+        '9':0, '28':0, '0':0 
+      };
     }
 
-    let prevAdjacentAlertActive = false;
-
-    function checkWheelAdjacentAlert() {
-      const block = findFirstAdjacentBlock(5);
-      const currentlyActive = (block !== null);
-      if (currentlyActive && !prevAdjacentAlertActive) {
-        const displayList = block.slice(0, 8).join(', ') + (block.length > 8 ? '...' : '');
-        alert(`⚠️ WHEEL ALERT ⚠️\n${block.length} adjacent numbers on the roulette wheel ALL have 30+ misses!\nNumbers (example block): ${displayList}\nCheck gold-marked numbers in tracker.`);
-      }
-      prevAdjacentAlertActive = currentlyActive;
-    }
-    
-    function syncAlertFlagNoAlert() {
-      prevAdjacentAlertActive = (findFirstAdjacentBlock(5) !== null);
-    }
-    
     function getColor(n) {
       if (colors.green.includes(n)) return "green";
       if (colors.red.includes(Number(n))) return "red";
@@ -740,16 +588,19 @@
       return "";
     }
 
-    function applyGoldOnHighMisses() {
-      document.querySelectorAll('.miss-count').forEach(div => {
-        const rawText = div.innerText || div.textContent;
-        const missVal = parseInt(rawText, 10);
-        if (!isNaN(missVal) && missVal >= 30) {
-          div.classList.add('gold-miss');
-        } else {
-          div.classList.remove('gold-miss');
-        }
-      });
+    function checkForAlert() {
+      // Check if all four numbers (7, 9, 16, 20) have 50+ misses
+      const sevenMiss = stats.bottom['7'] >= 50;
+      const nineMiss = stats.bottom['9'] >= 50;
+      const sixteenMiss = stats.top['16'] >= 50;
+      const twentyMiss = stats.bottom['20'] >= 50;
+      
+      // If all conditions are met and alert hasn't been shown yet
+      if (sevenMiss && nineMiss && sixteenMiss && twentyMiss && !alertShown) {
+        alert("ALERT: Numbers 7, 9, 16, and 20 have all reached 50+ misses!");
+        alertShown = true;
+        localStorage.setItem("alertShown", "true");
+      }
     }
 
     function updateDisplay() {
@@ -763,148 +614,193 @@
       });
       document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
       
-      document.getElementById("miss3").textContent = stats[3].m;
-      document.getElementById("hit3").textContent = stats[3].h;
-      document.getElementById("miss4").textContent = stats[4].m;
-      document.getElementById("hit4").textContent = stats[4].h;
-      document.getElementById("miss5").textContent = stats[5].m;
-      document.getElementById("hit5").textContent = stats[5].h;
-      document.getElementById("miss6").textContent = stats[6].m;
-      document.getElementById("hit6").textContent = stats[6].h;
-      document.getElementById("miss9").textContent = stats[9].m;
-      document.getElementById("hit9").textContent = stats[9].h;
+      // Update top numbers
+      document.getElementById("top-00").textContent = stats.top['00'];
+      document.getElementById("top-27").textContent = stats.top['27'];
+      document.getElementById("top-10").textContent = stats.top['10'];
+      document.getElementById("top-25").textContent = stats.top['25'];
+      document.getElementById("top-29").textContent = stats.top['29'];
+      document.getElementById("top-12").textContent = stats.top['12'];
+      document.getElementById("top-8").textContent = stats.top['8'];
+      document.getElementById("top-19").textContent = stats.top['19'];
+      document.getElementById("top-31").textContent = stats.top['31'];
+      document.getElementById("top-18").textContent = stats.top['18'];
+      document.getElementById("top-6").textContent = stats.top['6'];
+      document.getElementById("top-21").textContent = stats.top['21'];
+      document.getElementById("top-33").textContent = stats.top['33'];
+      document.getElementById("top-16").textContent = stats.top['16'];
+      document.getElementById("top-4").textContent = stats.top['4'];
+      document.getElementById("top-23").textContent = stats.top['23'];
+      document.getElementById("top-35").textContent = stats.top['35'];
+      document.getElementById("top-14").textContent = stats.top['14'];
+      document.getElementById("top-2").textContent = stats.top['2'];
       
-      for (let [key, val] of Object.entries(stats.top)) document.getElementById(`top-${key}`).textContent = val;
-      for (let [key, val] of Object.entries(stats.bottom)) document.getElementById(`bottom-${key}`).textContent = val;
+      // Update bottom numbers
+      document.getElementById("bottom-1").textContent = stats.bottom['1'];
+      document.getElementById("bottom-13").textContent = stats.bottom['13'];
+      document.getElementById("bottom-36").textContent = stats.bottom['36'];
+      document.getElementById("bottom-24").textContent = stats.bottom['24'];
+      document.getElementById("bottom-3").textContent = stats.bottom['3'];
+      document.getElementById("bottom-15").textContent = stats.bottom['15'];
+      document.getElementById("bottom-34").textContent = stats.bottom['34'];
+      document.getElementById("bottom-22").textContent = stats.bottom['22'];
+      document.getElementById("bottom-5").textContent = stats.bottom['5'];
+      document.getElementById("bottom-17").textContent = stats.bottom['17'];
+      document.getElementById("bottom-32").textContent = stats.bottom['32'];
+      document.getElementById("bottom-20").textContent = stats.bottom['20'];
+      document.getElementById("bottom-7").textContent = stats.bottom['7'];
+      document.getElementById("bottom-11").textContent = stats.bottom['11'];
+      document.getElementById("bottom-30").textContent = stats.bottom['30'];
+      document.getElementById("bottom-26").textContent = stats.bottom['26'];
+      document.getElementById("bottom-9").textContent = stats.bottom['9'];
+      document.getElementById("bottom-28").textContent = stats.bottom['28'];
+      document.getElementById("bottom-0").textContent = stats.bottom['0'];
       
-      applyGoldOnHighMisses();
+      // Check if we need to show the alert
+      checkForAlert();
     }
 
     function save() {
       localStorage.setItem("history", JSON.stringify(history));
       localStorage.setItem("stats", JSON.stringify(stats));
-    }
-
-    function updatePatternTracking(val) {
-      [3, 4, 5, 6, 9].forEach(k => {
-        const uniqueNumbers = [];
-        const seen = new Set();
-        for (let i = history.length - 2; i >= 0; i--) {
-          const num = history[i];
-          if (!seen.has(num)) {
-            seen.add(num);
-            uniqueNumbers.unshift(num);
-            if (uniqueNumbers.length >= k) break;
-          }
-        }
-        if (uniqueNumbers.includes(val)) {
-          stats[k].h++;
-          stats[k].m = 0;
-        } else {
-          stats[k].m++;
-          const alertThresholds = {3: 60, 4: 50, 5: 40, 6: 30, 9: 20};
-          if (stats[k].m === alertThresholds[k]) {
-            alert(`Track ${k} missed ${stats[k].m} times! Current number: ${val}`);
-          }
-        }
-      });
+      localStorage.setItem("alertShown", alertShown.toString());
     }
 
     function addNumber() {
-      const inputEl = document.getElementById("numberInput");
-      const statusDiv = document.getElementById("inputStatus");
-      let val = inputEl.value.trim();
-      statusDiv.textContent = "";
+      const input = document.getElementById("numberInput");
+      const status = document.getElementById("inputStatus");
+      let val = input.value.trim();
+      
+      // Clear previous status
+      status.textContent = "";
+      
+      // Validate input
       if (!val) {
-        statusDiv.textContent = "Use numpad to select a number";
+        status.textContent = "Please enter a number";
         return;
       }
+      
+      // Handle "00" specially
       if (val === "00") {
-        // valid
+        // Valid, continue
       } else {
         const num = parseInt(val, 10);
         if (isNaN(num) || num < 0 || num > 36) {
-          statusDiv.textContent = "Invalid number (0-36 or 00)";
+          status.textContent = "Invalid number (0-36 or 00)";
           return;
         }
-        val = num.toString();
+        val = num.toString(); // Normalize to string
       }
-      history.push(val);
-      updatePatternTracking(val);
       
+      // Add to history
+      history.push(val);
+      
+      // Update top numbers
       const topNumbers = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
       topNumbers.forEach(num => {
-        if (val === num) stats.top[num] = 0;
-        else stats.top[num]++;
+        if (val === num) {
+          stats.top[num] = 0;
+        } else {
+          stats.top[num]++;
+        }
       });
       
+      // Update bottom numbers
       const bottomNumbers = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
       bottomNumbers.forEach(num => {
-        if (val === num) stats.bottom[num] = 0;
-        else stats.bottom[num]++;
+        if (val === num) {
+          stats.bottom[num] = 0;
+        } else {
+          stats.bottom[num]++;
+        }
       });
       
-      inputEl.value = "";
+      // Reset input and save
+      input.value = "";
       save();
       updateDisplay();
-      checkWheelAdjacentAlert();
-      statusDiv.textContent = `✓ Added spin: ${val}`;
-      setTimeout(() => { if(statusDiv.textContent === `✓ Added spin: ${val}`) statusDiv.textContent = ""; }, 1800);
+      status.textContent = `Added spin: ${val}`;
     }
 
     function undo() {
-      const statusDiv = document.getElementById("inputStatus");
+      const status = document.getElementById("inputStatus");
       if (history.length === 0) {
-        statusDiv.textContent = "Nothing to undo";
+        status.textContent = "Nothing to undo";
         return;
       }
-      history.pop();
+      
+      const lastVal = history.pop();
+      
+      // Reset stats to recalculate
       stats = {
-        3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
-        top: { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 },
-        bottom: { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 }
+        top: { 
+          '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, 
+          '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, 
+          '35':0, '14':0, '2':0 
+        },
+        bottom: { 
+          '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, 
+          '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, 
+          '9':0, '28':0, '0':0 
+        }
       };
-      history.forEach((spinVal, idx) => {
-        [3,4,5,6,9].forEach(k => {
-          const uniq = [];
-          const seenSet = new Set();
-          for (let j = idx - 1; j >= 0; j--) {
-            const prevNum = history[j];
-            if (!seenSet.has(prevNum)) {
-              seenSet.add(prevNum);
-              uniq.unshift(prevNum);
-              if (uniq.length >= k) break;
-            }
+      
+      // Reset alert status since we're recalculating everything
+      alertShown = false;
+      localStorage.setItem("alertShown", "false");
+      
+      // Recalculate all stats based on remaining history
+      history.forEach((val, i) => {
+        // Update top numbers
+        const topNumbers = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
+        topNumbers.forEach(num => {
+          if (val === num) {
+            stats.top[num] = 0;
+          } else {
+            stats.top[num]++;
           }
-          if (uniq.includes(spinVal)) { stats[k].h++; stats[k].m = 0; }
-          else stats[k].m++;
         });
-        const topNums = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-        topNums.forEach(num => { if (spinVal === num) stats.top[num] = 0; else stats.top[num]++; });
-        const bottomNums = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-        bottomNums.forEach(num => { if (spinVal === num) stats.bottom[num] = 0; else stats.bottom[num]++; });
+        
+        // Update bottom numbers
+        const bottomNumbers = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
+        bottomNumbers.forEach(num => {
+          if (val === num) {
+            stats.bottom[num] = 0;
+          } else {
+            stats.bottom[num]++;
+          }
+        });
       });
+      
       save();
       updateDisplay();
-      checkWheelAdjacentAlert();
-      statusDiv.textContent = "↩️ Last spin undone";
-      setTimeout(() => { if(statusDiv.textContent === "↩️ Last spin undone") statusDiv.textContent = ""; }, 1500);
+      status.textContent = `Undo: ${lastVal} removed`;
     }
 
     function resetAll() {
-      if (confirm("⚠️ RESET ALL DATA? This action cannot be undone.")) {
+      if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
         history = [];
         stats = {
-          3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
-          top: { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 },
-          bottom: { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 }
+          top: { 
+            '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, 
+            '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, 
+            '35':0, '14':0, '2':0 
+          },
+          bottom: { 
+            '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, 
+            '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, 
+            '9':0, '28':0, '0':0 
+          }
         };
+        
+        // Reset alert status
+        alertShown = false;
+        
         localStorage.removeItem("history");
         localStorage.removeItem("stats");
+        localStorage.removeItem("alertShown");
         updateDisplay();
-        checkWheelAdjacentAlert();
-        document.getElementById("inputStatus").textContent = "All data reset.";
-        document.getElementById("numberInput").value = "";
+        document.getElementById("inputStatus").textContent = "All data reset";
       }
     }
 
@@ -912,16 +808,12 @@
       const input = document.getElementById("numberInput");
       const status = document.getElementById("inputStatus");
       status.textContent = "";
+      
       if (n === '00') {
         input.value = '00';
       } else {
-        let current = input.value;
-        if (current === '00') current = '';
-        if (current.length < 2) {
-          input.value = current + n;
-        } else {
-          status.textContent = "Max 2 digits";
-          setTimeout(() => { if(status.textContent === "Max 2 digits") status.textContent = ""; }, 800);
+        if (input.value.length < 2) {
+          input.value += n;
         }
       }
     }
@@ -929,22 +821,15 @@
     function backspace() {
       const input = document.getElementById("numberInput");
       input.value = input.value.slice(0, -1);
-      document.getElementById("inputStatus").textContent = "";
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // Initialize on load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("numberInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") addNumber();
+      });
+      
       updateDisplay();
-      syncAlertFlagNoAlert();
-      // Additional guard: disable any potential manual keyboard triggers
-      const inputEl = document.getElementById("numberInput");
-      inputEl.addEventListener("keydown", (e) => {
-        e.preventDefault();
-        return false;
-      });
-      inputEl.addEventListener("beforeinput", (e) => {
-        e.preventDefault();
-        return false;
-      });
     });
   </script>
 </body>

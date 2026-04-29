@@ -123,6 +123,7 @@
       gap: 14px;
       margin: 1rem 0;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .pattern-tracking {
@@ -213,7 +214,7 @@
       color: white;
     }
 
-    /* Miss count styling: no bubble, clean text, slightly smaller */
+    /* Miss count styling: clean text, gold for 30+ */
     .miss-count {
       font-size: 0.85rem;
       font-weight: 700;
@@ -223,7 +224,6 @@
       margin-top: 2px;
     }
 
-    /* Gold highlight for 30+ misses (text only, no background) */
     .miss-count.gold,
     .miss-count span.gold-text {
       color: #FFD700 !important;
@@ -267,6 +267,7 @@
       transition: all 0.1s ease;
       letter-spacing: 1px;
       font-family: inherit;
+      touch-action: manipulation;
     }
 
     .numpad button:active {
@@ -326,23 +327,28 @@
       }
     }
 
-    input {
+    /* READONLY input field style - iPad friendly, no native keyboard */
+    .readonly-input {
       padding: 12px 16px;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       width: 140px;
       text-align: center;
-      border: 2px solid #ff4b2b;
+      border: 2px solid #ff9800;
       border-radius: 40px;
       background: rgba(0, 0, 0, 0.7);
-      color: white;
+      color: #ffd966;
       outline: none;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      cursor: default;
+      letter-spacing: 1px;
     }
 
-    input:focus {
-      border-color: #ff9800;
-      background: #000000aa;
+    .input-hint {
+      font-size: 0.7rem;
+      color: #ffb74d;
+      margin-top: 4px;
+      text-align: center;
     }
 
     button {
@@ -356,21 +362,22 @@
       cursor: pointer;
       transition: 0.15s;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      touch-action: manipulation;
     }
 
     button:active {
       transform: scale(0.96);
     }
 
-    .controls button:nth-child(2) {
+    .controls button:nth-child(3) {
       background: linear-gradient(145deg, #1976d2, #0b5fb0);
     }
 
-    .controls button:nth-child(3) {
+    .controls button:nth-child(4) {
       background: linear-gradient(145deg, #ff9800, #f57c00);
     }
 
-    .controls button:nth-child(4) {
+    .controls button:nth-child(5) {
       background: linear-gradient(145deg, #f44336, #d32f2f);
     }
 
@@ -390,6 +397,12 @@
       font-weight: 500;
     }
 
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+
     .input-status {
       text-align: center;
       margin-top: 8px;
@@ -406,6 +419,14 @@
       border-radius: 40px;
       margin-top: 6px;
     }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
@@ -417,7 +438,6 @@
 
   <div id="recentSpins"></div>
 
-
   <div class="legend">
     <div class="legend-item"><div class="legend-color" style="background:#e53935;"></div><span>Red</span></div>
     <div class="legend-item"><div class="legend-color" style="background:#212121;"></div><span>Black</span></div>
@@ -426,11 +446,15 @@
   </div>
 
   <div class="controls">
-  <div id="entryCount" style="text-align:center;">Total spins: 0</div>
-    <input id="numberInput" placeholder="0-36 or 00" maxlength="2" autocomplete="off" />
-    <button onclick="addNumber()">➕ ADD SPIN</button>
-    <button onclick="undo()">↩️ UNDO</button>
-    <button onclick="resetAll()">🗑️ RESET</button>
+    <div id="entryCount" style="text-align:center;">Total spins: 0</div>
+    <div class="flex-row">
+      <!-- READONLY input field: iPad won't show virtual keyboard, only custom numpad works -->
+      <input id="numberInput" class="readonly-input" placeholder="0-36/00" maxlength="2" readonly value="" autocomplete="off" />
+      <button onclick="addNumber()">➕ ADD SPIN</button>
+      <button onclick="undo()">↩️ UNDO</button>
+      <button onclick="resetAll()">🗑️ RESET</button>
+    </div>
+    <div class="input-hint">✨ Tap numpad buttons below → then ENTER</div>
     <div id="inputStatus" class="input-status"></div>
   </div>
 
@@ -454,7 +478,7 @@
   </div>
 </div>
 
-<!-- BOLD NUMPAD (standard single digit entry, no double-tap) -->
+<!-- BOLD NUMPAD (iPad optimized, works flawlessly with readonly input) -->
 <div class="numpad">
   <button class="backspace" onclick="backspace()">⌫</button>
   <button onclick="numpadClick('1')">1</button>
@@ -531,13 +555,14 @@
   }
 
   function getColor(n) {
-    if (colors.green.includes(n)) return "green";
+    const str = n.toString();
+    if (colors.green.includes(str)) return "green";
     if (colors.red.includes(Number(n))) return "red";
     if (colors.black.includes(Number(n))) return "black";
     return "";
   }
 
-  // Apply gold color to miss counts without any background bubble
+  // Apply gold highlight on miss counts (30+)
   function applyGoldOnHighMisses() {
     document.querySelectorAll('.miss-count').forEach(div => {
       const span = div.querySelector('span');
@@ -602,7 +627,7 @@
     document.getElementById("miss9").textContent = stats[9].m;
     document.getElementById("hit9").textContent = stats[9].h;
     
-    // recent spins (show up to 20 most recent, reversed for chronological left-to-right)
+    // recent spins (show up to 20 most recent, reversed for left-to-right chronological)
     const spinsContainer = document.getElementById("recentSpins");
     spinsContainer.innerHTML = "";
     history.slice(-20).reverse().forEach(n => {
@@ -645,19 +670,25 @@
     });
   }
   
-  // simple numpad: append digit, max 2 chars
+  // SIMPLE NUMPAD LOGIC: works perfectly on iPad Mini (touch events)
   function numpadClick(val) {
     const inputField = document.getElementById("numberInput");
     const statusDiv = document.getElementById("inputStatus");
     statusDiv.textContent = "";
+    // maxlength 2: allow "00" or "36"
     if (inputField.value.length < 2) {
       inputField.value += val;
     }
+    // Optional: tiny haptic-like style (just UI response)
+    inputField.style.transform = "scale(0.98)";
+    setTimeout(() => { if (inputField) inputField.style.transform = ""; }, 80);
   }
   
   function backspace() {
     const input = document.getElementById("numberInput");
     input.value = input.value.slice(0, -1);
+    const statusDiv = document.getElementById("inputStatus");
+    if (statusDiv) statusDiv.textContent = "";
   }
   
   function addNumber() {
@@ -666,7 +697,8 @@
     let val = input.value.trim();
     
     if (!val) { 
-      statusDiv.textContent = "Enter a number (0-36 or 00)"; 
+      statusDiv.textContent = "Tap numpad then ENTER (0-36 or 00)"; 
+      setTimeout(() => { if(statusDiv.textContent === "Tap numpad then ENTER (0-36 or 00)") statusDiv.textContent = ""; }, 1800);
       return; 
     }
     if (val === "00") {
@@ -675,6 +707,7 @@
       const num = parseInt(val, 10);
       if (isNaN(num) || num < 0 || num > 36) {
         statusDiv.textContent = "Invalid number (0-36 or 00)";
+        setTimeout(() => { if(statusDiv.textContent === "Invalid number (0-36 or 00)") statusDiv.textContent = ""; }, 1500);
         return;
       }
       val = num.toString();
@@ -706,6 +739,7 @@
   function undo() {
     if (history.length === 0) { 
       document.getElementById("inputStatus").textContent = "Nothing to undo"; 
+      setTimeout(() => { let st = document.getElementById("inputStatus"); if(st.textContent === "Nothing to undo") st.textContent = ""; }, 1200);
       return; 
     }
     history.pop();
@@ -764,9 +798,15 @@
   document.addEventListener("DOMContentLoaded", () => {
     rebuildUI();
     syncAlertFlag();
-    document.getElementById("numberInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") addNumber();
-    });
+    // no keyboard interference: input is readonly, so iPad won't pop native keyboard
+    // additional safeguard: prevent any accidental focus from triggering keyboard (readonly already does it)
+    const inputField = document.getElementById("numberInput");
+    if (inputField) {
+      inputField.addEventListener("touchstart", (e) => {
+        // Just to keep cursor but no keyboard - readonly handles it natively
+        e.stopPropagation();
+      });
+    }
   });
 </script>
 </body>

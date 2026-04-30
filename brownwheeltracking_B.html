@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
-  <title>Brown Roulette Tracker Pro | Gold Miss Alert + Wheel Adjacency</title>
+  <title>Brown Roulette Tracker Pro | Gold Alert + Wheel Adjacency</title>
   <style>
     * {
       box-sizing: border-box;
@@ -50,7 +50,6 @@
       font-size: 0.8rem;
       opacity: 0.9;
     }
-    /* recent spins container - centered and larger */
     .recent-wrapper {
       display: flex;
       justify-content: center;
@@ -67,7 +66,6 @@
       background: rgba(0, 0, 0, 0.25);
       border-radius: 40px;
       scrollbar-width: thin;
-      scrollbar-color: #ff4b2b #1a1a2e;
       -webkit-overflow-scrolling: touch;
       max-width: 100%;
       width: auto;
@@ -83,7 +81,6 @@
       background: #ff4b2b;
       border-radius: 10px;
     }
-    /* larger spin boxes */
     .spin-box {
       width: 52px;
       height: 52px;
@@ -101,21 +98,9 @@
     .spin-box:active {
       transform: scale(0.96);
     }
-    .red { 
-      background: linear-gradient(145deg, #e53935, #c62828); 
-      color: white; 
-      border-color: #b71c1c;
-    }
-    .black { 
-      background: linear-gradient(145deg, #212121, #000000); 
-      color: white; 
-      border-color: #111;
-    }
-    .green { 
-      background: linear-gradient(145deg, #43a047, #2e7d32); 
-      color: white; 
-      border-color: #1b5e20;
-    }
+    .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; border-color: #b71c1c; }
+    .black { background: linear-gradient(145deg, #212121, #000000); color: white; border-color: #111; }
+    .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; border-color: #1b5e20; }
     .controls {
       display: flex;
       justify-content: center;
@@ -162,8 +147,6 @@
       background: rgba(30, 30, 46, 0.7);
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
     }
-    
-    /* 19 numbers in a single row - grid, no wrap, tightly packed for iPad mini */
     .horizontal-layout {
       display: grid;
       grid-template-columns: repeat(19, minmax(42px, 1fr));
@@ -173,7 +156,6 @@
       align-items: center;
       width: 100%;
     }
-    
     .number-column {
       display: flex;
       flex-direction: column;
@@ -185,7 +167,6 @@
       transition: background 0.1s ease;
       width: 100%;
     }
-    
     .number-display {
       font-weight: bold;
       font-size: 1rem;
@@ -198,18 +179,9 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       margin-bottom: 5px;
     }
-    .number-display.red {
-      background: linear-gradient(145deg, #e53935, #c62828);
-      color: white;
-    }
-    .number-display.black {
-      background: linear-gradient(145deg, #212121, #000000);
-      color: white;
-    }
-    .number-display.green {
-      background: linear-gradient(145deg, #43a047, #2e7d32);
-      color: white;
-    }
+    .number-display.red { background: linear-gradient(145deg, #e53935, #c62828); color: white; }
+    .number-display.black { background: linear-gradient(145deg, #212121, #000000); color: white; }
+    .number-display.green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
     .miss-count {
       font-weight: bold;
       font-size: 0.8rem;
@@ -265,22 +237,11 @@
       transition: all 0.12s linear;
       touch-action: manipulation;
     }
-    .numpad button:active {
-      transform: scale(0.95);
-      background: rgba(80, 80, 110, 0.9);
-    }
-    .numpad .enter { 
-      background: linear-gradient(145deg, #4caf50, #2e7d32); 
-    }
-    .numpad .enter:active { 
-      background: linear-gradient(145deg, #388e3c, #1b5e20); 
-    }
-    .numpad .backspace { 
-      background: linear-gradient(145deg, #f44336, #d32f2f); 
-    }
-    .numpad .backspace:active { 
-      background: linear-gradient(145deg, #e53935, #b71c1c); 
-    }
+    .numpad button:active { transform: scale(0.95); background: rgba(80, 80, 110, 0.9); }
+    .numpad .enter { background: linear-gradient(145deg, #4caf50, #2e7d32); }
+    .numpad .enter:active { background: linear-gradient(145deg, #388e3c, #1b5e20); }
+    .numpad .backspace { background: linear-gradient(145deg, #f44336, #d32f2f); }
+    .numpad .backspace:active { background: linear-gradient(145deg, #e53935, #b71c1c); }
     #entryCount {
       text-align: center;
       font-size: 0.9rem;
@@ -317,18 +278,10 @@
       font-weight: 600;
       touch-action: manipulation;
     }
-    button:active {
-      transform: scale(0.96);
-    }
-    .controls button:nth-child(2) { 
-      background: linear-gradient(145deg, #2196f3, #1976d2); 
-    }
-    .controls button:nth-child(3) { 
-      background: linear-gradient(145deg, #ff9800, #f57c00); 
-    }
-    .controls button:nth-child(4) { 
-      background: linear-gradient(145deg, #f44336, #d32f2f); 
-    }
+    button:active { transform: scale(0.96); }
+    .controls button:nth-child(2) { background: linear-gradient(145deg, #2196f3, #1976d2); }
+    .controls button:nth-child(3) { background: linear-gradient(145deg, #ff9800, #f57c00); }
+    .controls button:nth-child(4) { background: linear-gradient(145deg, #f44336, #d32f2f); }
     .legend {
       display: flex;
       justify-content: center;
@@ -346,11 +299,7 @@
       padding: 4px 12px;
       border-radius: 40px;
     }
-    .legend-color {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-    }
+    .legend-color { width: 18px; height: 18px; border-radius: 50%; }
     .legend-red { background: linear-gradient(145deg, #e53935, #c62828); }
     .legend-black { background: linear-gradient(145deg, #212121, #000); }
     .legend-green { background: linear-gradient(145deg, #43a047, #2e7d32); }
@@ -362,106 +311,35 @@
       color: #ffccbc;
       font-weight: 500;
     }
-    
-    /* iPad mini (768px width) and smaller adjustments - ensure 19 numbers visible without horizontal scroll */
     @media (max-width: 860px) {
-      .horizontal-layout {
-        grid-template-columns: repeat(19, minmax(36px, 1fr));
-        gap: 3px;
-      }
-      .number-display {
-        width: 32px;
-        height: 32px;
-        font-size: 0.85rem;
-      }
-      .miss-count {
-        font-size: 0.7rem;
-        padding: 1px 4px;
-        min-width: 28px;
-      }
-      .number-column {
-        padding: 4px 1px;
-      }
-      .spin-box {
-        width: 46px;
-        height: 46px;
-        font-size: 1.1rem;
-      }
+      .horizontal-layout { grid-template-columns: repeat(19, minmax(36px, 1fr)); gap: 3px; }
+      .number-display { width: 32px; height: 32px; font-size: 0.85rem; }
+      .miss-count { font-size: 0.7rem; padding: 1px 4px; min-width: 28px; }
+      .number-column { padding: 4px 1px; }
+      .spin-box { width: 46px; height: 46px; font-size: 1.1rem; }
     }
-    
     @media (max-width: 780px) {
-      .horizontal-layout {
-        grid-template-columns: repeat(19, minmax(32px, 1fr));
-        gap: 2px;
-      }
-      .number-display {
-        width: 28px;
-        height: 28px;
-        font-size: 0.75rem;
-      }
-      .miss-count {
-        font-size: 0.6rem;
-        min-width: 24px;
-      }
-      .spin-box {
-        width: 42px;
-        height: 42px;
-        font-size: 1rem;
-      }
-      .pattern-box {
-        min-width: 95px;
-        padding: 8px 6px;
-      }
+      .horizontal-layout { grid-template-columns: repeat(19, minmax(32px, 1fr)); gap: 2px; }
+      .number-display { width: 28px; height: 28px; font-size: 0.75rem; }
+      .miss-count { font-size: 0.6rem; min-width: 24px; }
+      .spin-box { width: 42px; height: 42px; font-size: 1rem; }
+      .pattern-box { min-width: 95px; padding: 8px 6px; }
     }
-    
     @media (max-width: 680px) {
-      .number-display {
-        width: 26px;
-        height: 26px;
-        font-size: 0.7rem;
-      }
-      .miss-count {
-        font-size: 0.55rem;
-        min-width: 22px;
-        padding: 1px 2px;
-      }
-      .spin-box {
-        width: 38px;
-        height: 38px;
-        font-size: 0.9rem;
-      }
+      .number-display { width: 26px; height: 26px; font-size: 0.7rem; }
+      .miss-count { font-size: 0.55rem; min-width: 22px; padding: 1px 2px; }
+      .spin-box { width: 38px; height: 38px; font-size: 0.9rem; }
     }
-    
-    /* iPad mini portrait specific (768px) - extra tweak */
     @media (width: 768px) and (orientation: portrait) {
-      .horizontal-layout {
-        grid-template-columns: repeat(19, minmax(34px, 1fr));
-        gap: 2px;
-      }
-      .number-display {
-        width: 30px;
-        height: 30px;
-        font-size: 0.8rem;
-      }
-      .miss-count {
-        font-size: 0.65rem;
-        min-width: 26px;
-      }
+      .horizontal-layout { grid-template-columns: repeat(19, minmax(34px, 1fr)); gap: 2px; }
+      .number-display { width: 30px; height: 30px; font-size: 0.8rem; }
+      .miss-count { font-size: 0.65rem; min-width: 26px; }
     }
-    
     @media (hover: hover) {
-      button:hover, .numpad button:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.05);
-      }
-      .spin-box:hover {
-        transform: scale(1.05);
-      }
+      button:hover, .numpad button:hover { transform: translateY(-2px); filter: brightness(1.05); }
+      .spin-box:hover { transform: scale(1.05); }
     }
-    .pattern-stats span {
-      font-weight: bold;
-      color: #ffb74d;
-    }
+    .pattern-stats span { font-weight: bold; color: #ffb74d; }
   </style>
 </head>
 <body>
@@ -471,10 +349,7 @@
     <div class="tagline">Gold Miss (≥30) | Wheel Adjacency Alert (5+ neighbors ≥30)</div>
   </header>
 
-  <!-- Recent spins centered with wrapper -->
-  <div class="recent-wrapper">
-    <div id="recentSpins"></div>
-  </div>
+  <div class="recent-wrapper"><div id="recentSpins"></div></div>
   <div id="entryCount">Total spins: 0</div>
 
   <div class="legend">
@@ -487,12 +362,12 @@
   <div class="controls">
     <input id="numberInput" placeholder="0–36 or 00" maxlength="2" inputmode="numeric" />
     <button onclick="addNumber()">➕ Add Spin</button>
-    <button onclick="undo()">↩️ Undo Last</button>
-    <button onclick="resetAll()" id="resetButton">🔄 Reset All</button>
+    <button onclick="undoLastSpin()">↩️ Undo Last</button>
+    <button onclick="resetAllData()" id="resetButton">🔄 Reset All</button>
     <div id="inputStatus" class="input-status"></div>
   </div>
 
-  <!-- TOP ROW: exactly 19 numbers – one row, no horizontal scroll -->
+  <!-- TOP ROW: 19 numbers -->
   <div class="number-sets">
     <div class="number-set">
       <div class="horizontal-layout" id="topRowContainer">
@@ -517,7 +392,7 @@
         <div class="number-column"><div class="number-display black">2</div><div class="miss-count"><span id="top-2">0</span></div></div>
       </div>
     </div>
-    <!-- BOTTOM ROW: exactly 19 numbers – one row, no horizontal scroll -->
+    <!-- BOTTOM ROW: 19 numbers -->
     <div class="number-set">
       <div class="horizontal-layout" id="bottomRowContainer">
         <div class="number-column"><div class="number-display red">1</div><div class="miss-count"><span id="bottom-1">0</span></div></div>
@@ -543,7 +418,6 @@
     </div>
   </div>
 
-  <!-- Pattern tracking -->
   <div class="pattern-tracking">
     <div class="pattern-box"><h3>🎯 Track 3</h3><div class="pattern-stats">Misses: <span id="miss3">0</span><br>Hits: <span id="hit3">0</span></div></div>
     <div class="pattern-box"><h3>🎯 Track 4</h3><div class="pattern-stats">Misses: <span id="miss4">0</span><br>Hits: <span id="hit4">0</span></div></div>
@@ -554,50 +428,93 @@
 </div>
 
 <div class="numpad">
-  <button class="backspace" onclick="backspace()">⌫</button>
-  <button onclick="numpadClick('1')">1</button>
-  <button onclick="numpadClick('2')">2</button>
-  <button onclick="numpadClick('3')">3</button>
-  <button onclick="numpadClick('4')">4</button>
-  <button onclick="numpadClick('5')">5</button>
-  <button onclick="numpadClick('6')">6</button>
-  <button onclick="numpadClick('7')">7</button>
-  <button onclick="numpadClick('8')">8</button>
-  <button onclick="numpadClick('9')">9</button>
+  <button class="backspace" onclick="backspaceInput()">⌫</button>
+  <button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button>
+  <button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button>
+  <button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button>
   <button onclick="numpadClick('0')">0</button>
   <button class="enter" onclick="addNumber()">↵ Enter</button>
 </div>
 
 <script>
-  // ----- CORE -----
-  const colors = {
-    red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
-    black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
-    green: ["0", "00"]
-  };
-  let history = JSON.parse(localStorage.getItem("history") || "[]");
-  let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({
-    3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
-    top: { '00':0,'27':0,'10':0,'25':0,'29':0,'12':0,'8':0,'19':0,'31':0,'18':0,'6':0,'21':0,'33':0,'16':0,'4':0,'23':0,'35':0,'14':0,'2':0 },
-    bottom: { '1':0,'13':0,'36':0,'24':0,'3':0,'15':0,'34':0,'22':0,'5':0,'17':0,'32':0,'20':0,'7':0,'11':0,'30':0,'26':0,'9':0,'28':0,'0':0 }
-  }));
-  if (typeof stats === 'string') stats = JSON.parse(stats);
-  Object.keys(stats.top || {}).length || (stats.top = { '00':0,'27':0,'10':0,'25':0,'29':0,'12':0,'8':0,'19':0,'31':0,'18':0,'6':0,'21':0,'33':0,'16':0,'4':0,'23':0,'35':0,'14':0,'2':0 });
-  Object.keys(stats.bottom || {}).length || (stats.bottom = { '1':0,'13':0,'36':0,'24':0,'3':0,'15':0,'34':0,'22':0,'5':0,'17':0,'32':0,'20':0,'7':0,'11':0,'30':0,'26':0,'9':0,'28':0,'0':0 });
-  for (let k of [3,4,5,6,9]) if (!stats[k]) stats[k] = { m: 0, h: 0 };
-
-  // American wheel order (circular) - 38 numbers
+  // ---------- CONSTANTS & GLOBALS ----------
+  const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+  const greenNumbers = ["0", "00"];
+  
+  // American wheel order (circular)
   const WHEEL_ORDER = ['0','28','9','26','30','11','7','20','32','17','5','22','34','15','3','24','36','13','1','00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-
+  
+  // Top row keys (19 numbers)
+  const TOP_KEYS = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
+  // Bottom row keys (19 numbers)
+  const BOTTOM_KEYS = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
+  const TRACK_VALUES = [3,4,5,6,9];
+  
+  // ---------- DATA ----------
+  let history = [];
+  let stats = {
+    3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
+    top: {}, bottom: {}
+  };
+  
+  // helper: fresh stats object
+  function getFreshStats() {
+    const freshTop = {};
+    TOP_KEYS.forEach(k => freshTop[k] = 0);
+    const freshBottom = {};
+    BOTTOM_KEYS.forEach(k => freshBottom[k] = 0);
+    return {
+      3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
+      top: freshTop, bottom: freshBottom
+    };
+  }
+  
+  // load from localStorage with full validation
+  function loadData() {
+    const storedHistory = localStorage.getItem("history");
+    if (storedHistory) history = JSON.parse(storedHistory);
+    else history = [];
+    const storedStats = localStorage.getItem("stats");
+    if (storedStats) {
+      try {
+        const parsed = JSON.parse(storedStats);
+        // ensure structure
+        const fresh = getFreshStats();
+        stats = fresh;
+        if (parsed) {
+          TRACK_VALUES.forEach(t => { if (parsed[t] && typeof parsed[t].m === 'number') stats[t] = parsed[t]; });
+          if (parsed.top && typeof parsed.top === 'object') TOP_KEYS.forEach(k => { if (typeof parsed.top[k] === 'number') stats.top[k] = parsed.top[k]; });
+          if (parsed.bottom && typeof parsed.bottom === 'object') BOTTOM_KEYS.forEach(k => { if (typeof parsed.bottom[k] === 'number') stats.bottom[k] = parsed.bottom[k]; });
+        }
+      } catch(e) { stats = getFreshStats(); }
+    } else {
+      stats = getFreshStats();
+    }
+  }
+  
+  function saveData() {
+    localStorage.setItem("history", JSON.stringify(history));
+    localStorage.setItem("stats", JSON.stringify(stats));
+  }
+  
+  function getColorClass(num) {
+    if (greenNumbers.includes(String(num))) return "green";
+    if (redNumbers.includes(Number(num))) return "red";
+    if (blackNumbers.includes(Number(num))) return "black";
+    return "";
+  }
+  
   function getMissCount(numStr) {
     if (numStr === '00') return stats.top['00'] ?? 0;
     if (numStr === '0') return stats.bottom['0'] ?? 0;
-    if (stats.top.hasOwnProperty(numStr)) return stats.top[numStr];
-    if (stats.bottom.hasOwnProperty(numStr)) return stats.bottom[numStr];
+    if (TOP_KEYS.includes(numStr)) return stats.top[numStr] ?? 0;
+    if (BOTTOM_KEYS.includes(numStr)) return stats.bottom[numStr] ?? 0;
     return 0;
   }
-
-  function findFirstAdjacentBlock(minLen = 5) {
+  
+  // wheel adjacency: find first block of consecutive numbers with miss >=30
+  function findAdjacentBlock(minLen = 5) {
     const n = WHEEL_ORDER.length;
     for (let start = 0; start < n; start++) {
       let block = [];
@@ -611,34 +528,78 @@
     }
     return null;
   }
-
-  let prevAdjacentAlertActive = false;
-  function checkWheelAdjacentAlert() {
-    const block = findFirstAdjacentBlock(5);
-    const currentlyActive = (block !== null);
-    if (currentlyActive && !prevAdjacentAlertActive) {
-      const displayList = block.slice(0, 9).join(', ') + (block.length > 9 ? '...' : '');
-      alert(`⚠️ WHEEL ADJACENCY ALERT ⚠️\n${block.length} adjacent numbers on the wheel have 30+ misses!\nBlock: ${displayList}\nConsider gold-marked numbers.`);
+  
+  let previousAlertActive = false;
+  function checkAdjacencyAndAlert() {
+    const block = findAdjacentBlock(5);
+    const active = (block !== null);
+    if (active && !previousAlertActive) {
+      const preview = block.slice(0, 9).join(', ') + (block.length > 9 ? '...' : '');
+      alert(`⚠️ WHEEL ADJACENCY ALERT ⚠️\n${block.length} adjacent numbers on the wheel have 30+ misses!\nBlock: ${preview}\nConsider gold-marked numbers.`);
     }
-    prevAdjacentAlertActive = currentlyActive;
+    previousAlertActive = active;
   }
-  function syncAlertFlagNoAlert() { prevAdjacentAlertActive = (findFirstAdjacentBlock(5) !== null); }
-
-  function getColorClass(n) {
-    if (colors.green.includes(String(n))) return "green";
-    if (colors.red.includes(Number(n))) return "red";
-    if (colors.black.includes(Number(n))) return "black";
-    return "";
+  
+  function syncAlertFlag() { previousAlertActive = (findAdjacentBlock(5) !== null); }
+  
+  // update pattern tracking for a new spin
+  function updatePatternTracking(spinVal) {
+    for (let k of TRACK_VALUES) {
+      const unique = [];
+      const seen = new Set();
+      for (let i = history.length - 2; i >= 0; i--) {
+        const num = history[i];
+        if (!seen.has(num)) {
+          seen.add(num);
+          unique.unshift(num);
+          if (unique.length >= k) break;
+        }
+      }
+      if (unique.includes(spinVal)) {
+        stats[k].h++;
+        stats[k].m = 0;
+      } else {
+        stats[k].m++;
+        const thresholds = {3:60,4:50,5:40,6:30,9:20};
+        if (stats[k].m === thresholds[k]) alert(`🔔 Track ${k} missed ${stats[k].m} times! Last spin: ${spinVal}`);
+      }
+    }
   }
-
-  function applyGoldOnHighMisses() {
-    document.querySelectorAll('.miss-count').forEach(div => {
-      const missVal = parseInt(div.innerText, 10);
-      if (!isNaN(missVal) && missVal >= 30) div.classList.add('gold-miss');
-      else div.classList.remove('gold-miss');
-    });
+  
+  // recompute stats entirely from history (used by undo/reset)
+  function rebuildStatsFromHistory() {
+    const newStats = getFreshStats();
+    const topMap = newStats.top;
+    const bottomMap = newStats.bottom;
+    for (let idx = 0; idx < history.length; idx++) {
+      const spin = history[idx];
+      // increment misses for all numbers first, then set current spin miss=0
+      TOP_KEYS.forEach(k => { if (spin === k) topMap[k] = 0; else topMap[k]++; });
+      BOTTOM_KEYS.forEach(k => { if (spin === k) bottomMap[k] = 0; else bottomMap[k]++; });
+      // pattern tracking
+      for (let k of TRACK_VALUES) {
+        const unique = [];
+        const seenSet = new Set();
+        for (let j = idx - 1; j >= 0; j--) {
+          const prevNum = history[j];
+          if (!seenSet.has(prevNum)) {
+            seenSet.add(prevNum);
+            unique.unshift(prevNum);
+            if (unique.length >= k) break;
+          }
+        }
+        if (unique.includes(spin)) {
+          newStats[k].h++;
+          newStats[k].m = 0;
+        } else {
+          newStats[k].m++;
+        }
+      }
+    }
+    stats = newStats;
   }
-
+  
+  // UI Update
   function updateDisplay() {
     const container = document.getElementById("recentSpins");
     container.innerHTML = "";
@@ -659,96 +620,101 @@
     document.getElementById("hit6").textContent = stats[6].h;
     document.getElementById("miss9").textContent = stats[9].m;
     document.getElementById("hit9").textContent = stats[9].h;
-    for (let [k, v] of Object.entries(stats.top)) document.getElementById(`top-${k}`).textContent = v;
-    for (let [k, v] of Object.entries(stats.bottom)) document.getElementById(`bottom-${k}`).textContent = v;
-    applyGoldOnHighMisses();
-  }
-  function save() { localStorage.setItem("history", JSON.stringify(history)); localStorage.setItem("stats", JSON.stringify(stats)); }
-  
-  function updatePatternTracking(val) {
-    for (let k of [3,4,5,6,9]) {
-      const unique = [];
-      const seenSet = new Set();
-      for (let i = history.length - 2; i >= 0; i--) {
-        const num = history[i];
-        if (!seenSet.has(num)) { seenSet.add(num); unique.unshift(num); if (unique.length >= k) break; }
-      }
-      if (unique.includes(val)) { stats[k].h++; stats[k].m = 0; }
-      else { stats[k].m++; const thresholds = {3:60,4:50,5:40,6:30,9:20}; if (stats[k].m === thresholds[k]) alert(`🔔 Track ${k} missed ${stats[k].m} times! Last spin: ${val}`); }
+    for (let k of TOP_KEYS) {
+      const el = document.getElementById(`top-${k}`);
+      if (el) el.textContent = stats.top[k] ?? 0;
     }
+    for (let k of BOTTOM_KEYS) {
+      const el = document.getElementById(`bottom-${k}`);
+      if (el) el.textContent = stats.bottom[k] ?? 0;
+    }
+    // gold highlight
+    document.querySelectorAll('.miss-count').forEach(div => {
+      const val = parseInt(div.innerText, 10);
+      if (!isNaN(val) && val >= 30) div.classList.add('gold-miss');
+      else div.classList.remove('gold-miss');
+    });
   }
-
-  function addNumber() {
-    const input = document.getElementById("numberInput");
+  
+  // ---------- ACTIONS ----------
+  window.addNumber = function() {
+    const inputElem = document.getElementById("numberInput");
     const statusDiv = document.getElementById("inputStatus");
-    let val = input.value.trim();
-    if (!val) { statusDiv.textContent = "Enter a number (0-36 or 00)"; return; }
-    if (val !== "00") { let num = parseInt(val,10); if (isNaN(num) || num < 0 || num > 36) { statusDiv.textContent = "Invalid number (0-36 or 00)"; return; } val = num.toString(); }
-    history.push(val);
-    updatePatternTracking(val);
-    const topNums = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    topNums.forEach(n => { if (val === n) stats.top[n] = 0; else stats.top[n]++; });
-    const bottomNums = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-    bottomNums.forEach(n => { if (val === n) stats.bottom[n] = 0; else stats.bottom[n]++; });
-    input.value = "";
-    save();
+    let raw = inputElem.value.trim();
+    if (!raw) { statusDiv.textContent = "Enter a number (0-36 or 00)"; return; }
+    let validated = null;
+    if (raw === "00") validated = "00";
+    else {
+      const num = parseInt(raw, 10);
+      if (isNaN(num) || num < 0 || num > 36) { statusDiv.textContent = "Invalid (0-36 or 00)"; return; }
+      validated = num.toString();
+    }
+    history.push(validated);
+    updatePatternTracking(validated);
+    // update miss counters (increment all, reset current)
+    TOP_KEYS.forEach(k => { if (validated === k) stats.top[k] = 0; else stats.top[k]++; });
+    BOTTOM_KEYS.forEach(k => { if (validated === k) stats.bottom[k] = 0; else stats.bottom[k]++; });
+    saveData();
     updateDisplay();
-    checkWheelAdjacentAlert();
-    statusDiv.textContent = `✓ Spin ${val} recorded`;
-  }
-
-  function undo() {
+    checkAdjacencyAndAlert();
+    inputElem.value = "";
+    statusDiv.textContent = `✓ Spin ${validated} added`;
+    setTimeout(() => { if (statusDiv.textContent.includes("added")) statusDiv.textContent = ""; }, 1800);
+  };
+  
+  window.undoLastSpin = function() {
     if (!history.length) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; }
     history.pop();
-    stats = { 3:{m:0,h:0},4:{m:0,h:0},5:{m:0,h:0},6:{m:0,h:0},9:{m:0,h:0},
-      top: { '00':0,'27':0,'10':0,'25':0,'29':0,'12':0,'8':0,'19':0,'31':0,'18':0,'6':0,'21':0,'33':0,'16':0,'4':0,'23':0,'35':0,'14':0,'2':0 },
-      bottom: { '1':0,'13':0,'36':0,'24':0,'3':0,'15':0,'34':0,'22':0,'5':0,'17':0,'32':0,'20':0,'7':0,'11':0,'30':0,'26':0,'9':0,'28':0,'0':0 }
-    };
-    const topList = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    const bottomList = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-    history.forEach((spin, idx) => {
-      for (let k of [3,4,5,6,9]) {
-        let uniq = [], seen = new Set();
-        for (let j = idx-1; j >= 0; j--) { let p = history[j]; if (!seen.has(p)) { seen.add(p); uniq.unshift(p); if (uniq.length >= k) break; } }
-        if (uniq.includes(spin)) { stats[k].h++; stats[k].m = 0; } else stats[k].m++;
-      }
-      topList.forEach(n => { if (spin === n) stats.top[n] = 0; else stats.top[n]++; });
-      bottomList.forEach(n => { if (spin === n) stats.bottom[n] = 0; else stats.bottom[n]++; });
-    });
-    save();
+    rebuildStatsFromHistory();   // fully recalc stats from fresh history (clean)
+    saveData();
     updateDisplay();
-    checkWheelAdjacentAlert();
+    syncAlertFlag();
     document.getElementById("inputStatus").textContent = "↩️ Last spin undone";
-  }
-
-  function resetAll() {
-    if (confirm("⚠️ RESET all spins & stats? This cannot be undone.")) {
+    setTimeout(() => { const st = document.getElementById("inputStatus"); if (st.textContent.includes("undone")) st.textContent = ""; }, 1500);
+  };
+  
+  window.resetAllData = function() {
+    if (confirm("⚠️ RESET all spins & stats? This action is permanent and cannot be undone.")) {
       history = [];
-      stats = { 3:{m:0,h:0},4:{m:0,h:0},5:{m:0,h:0},6:{m:0,h:0},9:{m:0,h:0},
-        top: { '00':0,'27':0,'10':0,'25':0,'29':0,'12':0,'8':0,'19':0,'31':0,'18':0,'6':0,'21':0,'33':0,'16':0,'4':0,'23':0,'35':0,'14':0,'2':0 },
-        bottom: { '1':0,'13':0,'36':0,'24':0,'3':0,'15':0,'34':0,'22':0,'5':0,'17':0,'32':0,'20':0,'7':0,'11':0,'30':0,'26':0,'9':0,'28':0,'0':0 }
-      };
-      localStorage.removeItem("history");
-      localStorage.removeItem("stats");
+      stats = getFreshStats();
+      saveData();
       updateDisplay();
-      syncAlertFlagNoAlert();
-      document.getElementById("inputStatus").textContent = "All data reset";
+      syncAlertFlag();
+      document.getElementById("inputStatus").textContent = "✅ All data has been reset";
+      setTimeout(() => { const st = document.getElementById("inputStatus"); if (st.textContent.includes("reset")) st.textContent = ""; }, 2000);
+    } else {
+      document.getElementById("inputStatus").textContent = "Reset cancelled";
+      setTimeout(() => { const st = document.getElementById("inputStatus"); if (st.textContent.includes("cancelled")) st.textContent = ""; }, 1200);
     }
-  }
-
-  function numpadClick(n) {
+  };
+  
+  window.numpadClick = function(digit) {
     const input = document.getElementById("numberInput");
     const statusDiv = document.getElementById("inputStatus");
     statusDiv.textContent = "";
-    if (n === '00') input.value = '00';
-    else if (input.value.length < 2) input.value += n;
-  }
-  function backspace() { let inp = document.getElementById("numberInput"); inp.value = inp.value.slice(0, -1); }
-
+    if (digit === '00') input.value = '00';
+    else if (input.value.length < 2) input.value += digit;
+  };
+  
+  window.backspaceInput = function() {
+    const inp = document.getElementById("numberInput");
+    inp.value = inp.value.slice(0, -1);
+  };
+  
+  // enter key on input field
   document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("numberInput").addEventListener("keydown", (e) => { if (e.key === "Enter") addNumber(); });
+    loadData();
+    // ensure stats top/bottom fully synced after load (legacy protection)
+    if (!stats.top || Object.keys(stats.top).length === 0) {
+      const fresh = getFreshStats();
+      stats.top = fresh.top;
+      stats.bottom = fresh.bottom;
+    }
+    if (!stats.bottom || Object.keys(stats.bottom).length === 0) stats.bottom = getFreshStats().bottom;
+    TRACK_VALUES.forEach(t => { if (!stats[t]) stats[t] = { m: 0, h: 0 }; });
     updateDisplay();
-    syncAlertFlagNoAlert();
+    syncAlertFlag();
+    document.getElementById("numberInput").addEventListener("keydown", (e) => { if (e.key === "Enter") addNumber(); });
   });
 </script>
 </body>

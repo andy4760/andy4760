@@ -177,6 +177,7 @@
       color: white;
       font-weight: 600;
       cursor: pointer;
+      -webkit-appearance: none;
     }
     .numpad .enter { background: linear-gradient(145deg, #4caf50, #2e7d32); }
     .numpad .backspace { background: linear-gradient(145deg, #f44336, #d32f2f); }
@@ -244,9 +245,10 @@
   </header>
 
   <div class="recent-wrapper"><div id="recentSpins"></div></div>
-  <div id="entryCount">Total spins: 0</div>
+
 
   <div class="legend">
+    <div id="entryCount">Total spins: 0</div>
     <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
     <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
@@ -287,49 +289,75 @@
 
 <script>
   (function() {
-    // ---------- CONFIGURATION ----------
-    const RED_NUMS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-    const BLACK_NUMS = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
-    const GREEN_NUMS = ["0","00"];
-    const WHEEL_ORDER = ['0','28','9','26','30','11','7','20','32','17','5','22','34','15','3','24','36','13','1','00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    const TOP_KEYS = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    const BOTTOM_KEYS = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-    const TRACKS = [3,4,5,6,9];
+    // ---------- COMPATIBILITY HELPERS (no .includes for old WebKit) ----------
+    function arrayContains(arr, val) {
+      return arr.indexOf(val) !== -1;
+    }
+    
+    function inArray(value, arr) {
+      return arr.indexOf(value) !== -1;
+    }
+
+    // ---------- CONSTANTS ----------
+    var RED_NUMS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    var BLACK_NUMS = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+    var GREEN_NUMS = ["0","00"];
+    var WHEEL_ORDER = ['0','28','9','26','30','11','7','20','32','17','5','22','34','15','3','24','36','13','1','00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
+    var TOP_KEYS = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
+    var BOTTOM_KEYS = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
+    var TRACKS = [3,4,5,6,9];
+    var THRESHOLD_ALERTS = {3:60,4:50,5:40,6:30,9:20};
 
     // ---------- DATA ----------
-    let history = [];
-    let stats = {
-      3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
-      top: {}, bottom: {}
-    };
+    var history = [];
+    var stats = null;
 
-    // Helper: fresh stats object
     function getFreshStats() {
-      const topObj = {};
-      TOP_KEYS.forEach(k => topObj[k] = 0);
-      const bottomObj = {};
-      BOTTOM_KEYS.forEach(k => bottomObj[k] = 0);
+      var topObj = {};
+      var bottomObj = {};
+      for (var i = 0; i < TOP_KEYS.length; i++) topObj[TOP_KEYS[i]] = 0;
+      for (var i = 0; i < BOTTOM_KEYS.length; i++) bottomObj[BOTTOM_KEYS[i]] = 0;
       return {
-        3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
-        top: topObj, bottom: bottomObj
+        3: { m: 0, h: 0 },
+        4: { m: 0, h: 0 },
+        5: { m: 0, h: 0 },
+        6: { m: 0, h: 0 },
+        9: { m: 0, h: 0 },
+        top: topObj,
+        bottom: bottomObj
       };
     }
 
-    // Load / Save
+    // persistence
     function loadData() {
       try {
-        const storedHistory = localStorage.getItem("roulette_history");
+        var storedHistory = localStorage.getItem("roulette_history");
         if (storedHistory) history = JSON.parse(storedHistory);
         else history = [];
-
-        const storedStats = localStorage.getItem("roulette_stats");
+        var storedStats = localStorage.getItem("roulette_stats");
         if (storedStats) {
-          const parsed = JSON.parse(storedStats);
-          const fresh = getFreshStats();
+          var parsed = JSON.parse(storedStats);
+          var fresh = getFreshStats();
           stats = fresh;
-          TRACKS.forEach(t => { if (parsed[t] && typeof parsed[t].m === 'number') stats[t] = parsed[t]; });
-          if (parsed.top) TOP_KEYS.forEach(k => { if (typeof parsed.top[k] === 'number') stats.top[k] = parsed.top[k]; });
-          if (parsed.bottom) BOTTOM_KEYS.forEach(k => { if (typeof parsed.bottom[k] === 'number') stats.bottom[k] = parsed.bottom[k]; });
+          for (var tIdx = 0; tIdx < TRACKS.length; tIdx++) {
+            var t = TRACKS[tIdx];
+            if (parsed[t] && typeof parsed[t].m === 'number') {
+              stats[t].m = parsed[t].m;
+              stats[t].h = parsed[t].h;
+            }
+          }
+          if (parsed.top) {
+            for (var kIdx = 0; kIdx < TOP_KEYS.length; kIdx++) {
+              var key = TOP_KEYS[kIdx];
+              if (typeof parsed.top[key] === 'number') stats.top[key] = parsed.top[key];
+            }
+          }
+          if (parsed.bottom) {
+            for (var bIdx = 0; bIdx < BOTTOM_KEYS.length; bIdx++) {
+              var bKey = BOTTOM_KEYS[bIdx];
+              if (typeof parsed.bottom[bKey] === 'number') stats.bottom[bKey] = parsed.bottom[bKey];
+            }
+          }
         } else {
           stats = getFreshStats();
         }
@@ -344,30 +372,33 @@
       localStorage.setItem("roulette_stats", JSON.stringify(stats));
     }
 
-    // ---------- CORE LOGIC ----------
-    function getColorClass(num) {
-      if (GREEN_NUMS.includes(String(num))) return "green";
-      if (RED_NUMS.includes(Number(num))) return "red";
-      if (BLACK_NUMS.includes(Number(num))) return "black";
+    // ---------- COLOR HELPERS ----------
+    function getColorClass(numStr) {
+      var numAsString = String(numStr);
+      if (arrayContains(GREEN_NUMS, numAsString)) return "green";
+      var numeric = parseInt(numAsString, 10);
+      if (!isNaN(numeric) && arrayContains(RED_NUMS, numeric)) return "red";
+      if (!isNaN(numeric) && arrayContains(BLACK_NUMS, numeric)) return "black";
       return "";
     }
 
     function getMissCount(numStr) {
-      if (numStr === '00') return stats.top['00'] ?? 0;
-      if (numStr === '0') return stats.bottom['0'] ?? 0;
-      if (TOP_KEYS.includes(numStr)) return stats.top[numStr] ?? 0;
-      if (BOTTOM_KEYS.includes(numStr)) return stats.bottom[numStr] ?? 0;
+      if (numStr === '00') return stats.top['00'] || 0;
+      if (numStr === '0') return stats.bottom['0'] || 0;
+      if (arrayContains(TOP_KEYS, numStr)) return stats.top[numStr] || 0;
+      if (arrayContains(BOTTOM_KEYS, numStr)) return stats.bottom[numStr] || 0;
       return 0;
     }
 
-    // Wheel adjacency alert
-    function findAdjacentBlock(minLen = 5) {
-      const n = WHEEL_ORDER.length;
-      for (let start = 0; start < n; start++) {
-        let block = [];
-        for (let offset = 0; offset < n; offset++) {
-          const idx = (start + offset) % n;
-          const num = WHEEL_ORDER[idx];
+    // Wheel adjacency (5+ consecutive with miss >=30)
+    function findAdjacentBlock(minLen) {
+      minLen = minLen || 5;
+      var n = WHEEL_ORDER.length;
+      for (var start = 0; start < n; start++) {
+        var block = [];
+        for (var offset = 0; offset < n; offset++) {
+          var idx = (start + offset) % n;
+          var num = WHEEL_ORDER[idx];
           if (getMissCount(num) >= 30) block.push(num);
           else break;
         }
@@ -376,40 +407,55 @@
       return null;
     }
 
-    let alertActive = false;
+    var alertActive = false;
     function checkAdjacencyAndAlert() {
-      const block = findAdjacentBlock(5);
-      const active = block !== null;
+      var block = findAdjacentBlock(5);
+      var active = (block !== null);
       if (active && !alertActive) {
-        const preview = block.slice(0, 9).join(', ') + (block.length > 9 ? '...' : '');
-        alert(`⚠️ WHEEL ADJACENCY ALERT ⚠️\n${block.length} adjacent numbers on the wheel have 30+ misses!\nBlock: ${preview}`);
+        var preview = block.slice(0, 9).join(', ');
+        if (block.length > 9) preview = preview + '...';
+        alert("⚠️ WHEEL ADJACENCY ALERT ⚠️\n" + block.length + " adjacent numbers on the wheel have 30+ misses!\nBlock: " + preview);
       }
       alertActive = active;
     }
-    function syncAlertFlag() { alertActive = (findAdjacentBlock(5) !== null); }
+    function syncAlertFlag() {
+      alertActive = (findAdjacentBlock(5) !== null);
+    }
 
-    // Rebuild pattern stats from history (used after undo/reset)
-    function rebuildStats() {
-      const newStats = getFreshStats();
-      for (let idx = 0; idx < history.length; idx++) {
-        const spin = history[idx];
-        // Update misses (increment all, reset current)
-        TOP_KEYS.forEach(k => { if (spin === k) newStats.top[k] = 0; else newStats.top[k]++; });
-        BOTTOM_KEYS.forEach(k => { if (spin === k) newStats.bottom[k] = 0; else newStats.bottom[k]++; });
-
-        // Pattern tracking
-        for (let k of TRACKS) {
-          const unique = [];
-          const seen = new Set();
-          for (let j = idx - 1; j >= 0; j--) {
-            const prev = history[j];
-            if (!seen.has(prev)) {
-              seen.add(prev);
+    // ------ PATTERN (no includes) ------
+    function rebuildStatsFull() {
+      var newStats = getFreshStats();
+      for (var idx = 0; idx < history.length; idx++) {
+        var spin = history[idx];
+        // update miss counters
+        for (var t = 0; t < TOP_KEYS.length; t++) {
+          var key = TOP_KEYS[t];
+          if (spin === key) newStats.top[key] = 0;
+          else newStats.top[key]++;
+        }
+        for (var b = 0; b < BOTTOM_KEYS.length; b++) {
+          var bKey = BOTTOM_KEYS[b];
+          if (spin === bKey) newStats.bottom[bKey] = 0;
+          else newStats.bottom[bKey]++;
+        }
+        // pattern tracking (distinct history)
+        for (var patIdx = 0; patIdx < TRACKS.length; patIdx++) {
+          var k = TRACKS[patIdx];
+          var unique = [];
+          var seen = {};
+          for (var j = idx - 1; j >= 0; j--) {
+            var prev = history[j];
+            if (!seen[prev]) {
+              seen[prev] = true;
               unique.unshift(prev);
               if (unique.length >= k) break;
             }
           }
-          if (unique.includes(spin)) {
+          var found = false;
+          for (var u = 0; u < unique.length; u++) {
+            if (unique[u] === spin) { found = true; break; }
+          }
+          if (found) {
             newStats[k].h++;
             newStats[k].m = 0;
           } else {
@@ -420,44 +466,49 @@
       stats = newStats;
     }
 
-    // Update pattern after a new spin (incremental)
     function updatePatternForNewSpin(spin) {
-      for (let k of TRACKS) {
-        const unique = [];
-        const seen = new Set();
-        for (let i = history.length - 2; i >= 0; i--) {
-          const num = history[i];
-          if (!seen.has(num)) {
-            seen.add(num);
+      for (var p = 0; p < TRACKS.length; p++) {
+        var k = TRACKS[p];
+        var unique = [];
+        var seen = {};
+        for (var i = history.length - 2; i >= 0; i--) {
+          var num = history[i];
+          if (!seen[num]) {
+            seen[num] = true;
             unique.unshift(num);
             if (unique.length >= k) break;
           }
         }
-        if (unique.includes(spin)) {
+        var contained = false;
+        for (var tst = 0; tst < unique.length; tst++) {
+          if (unique[tst] === spin) { contained = true; break; }
+        }
+        if (contained) {
           stats[k].h++;
           stats[k].m = 0;
         } else {
           stats[k].m++;
-          const thresholds = {3:60,4:50,5:40,6:30,9:20};
-          if (stats[k].m === thresholds[k]) alert(`🔔 Track ${k} missed ${stats[k].m} times! Last spin: ${spin}`);
+          if (stats[k].m === THRESHOLD_ALERTS[k]) {
+            alert("🔔 Track " + k + " missed " + stats[k].m + " times! Last spin: " + spin);
+          }
         }
       }
     }
 
-    // ---------- UI UPDATE ----------
+    // ---------- UI UPDATES ----------
     function updateUI() {
-      // Recent spins
-      const container = document.getElementById("recentSpins");
-      container.innerHTML = "";
-      history.slice(-20).reverse().forEach(n => {
-        const div = document.createElement("div");
-        div.className = `spin-box ${getColorClass(n)}`;
+      var recentContainer = document.getElementById("recentSpins");
+      recentContainer.innerHTML = "";
+      var displayList = history.slice(-20).reverse();
+      for (var i = 0; i < displayList.length; i++) {
+        var n = displayList[i];
+        var div = document.createElement("div");
+        div.className = "spin-box " + getColorClass(n);
         div.textContent = n;
-        container.appendChild(div);
-      });
-      document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
+        recentContainer.appendChild(div);
+      }
+      document.getElementById("entryCount").textContent = "Total spins: " + history.length;
 
-      // Pattern stats
       document.getElementById("miss3").textContent = stats[3].m;
       document.getElementById("hit3").textContent = stats[3].h;
       document.getElementById("miss4").textContent = stats[4].m;
@@ -469,37 +520,40 @@
       document.getElementById("miss9").textContent = stats[9].m;
       document.getElementById("hit9").textContent = stats[9].h;
 
-      // Update all miss counters on the grid
-      TOP_KEYS.forEach(k => {
-        const el = document.getElementById(`top-${k}`);
-        if (el) el.textContent = stats.top[k] ?? 0;
-      });
-      BOTTOM_KEYS.forEach(k => {
-        const el = document.getElementById(`bottom-${k}`);
-        if (el) el.textContent = stats.bottom[k] ?? 0;
-      });
+      for (var tIdx = 0; tIdx < TOP_KEYS.length; tIdx++) {
+        var key = TOP_KEYS[tIdx];
+        var el = document.getElementById("top-" + key);
+        if (el) el.textContent = stats.top[key] || 0;
+      }
+      for (var bIdx = 0; bIdx < BOTTOM_KEYS.length; bIdx++) {
+        var bKey = BOTTOM_KEYS[bIdx];
+        var bel = document.getElementById("bottom-" + bKey);
+        if (bel) bel.textContent = stats.bottom[bKey] || 0;
+      }
 
-      // Gold highlight
-      document.querySelectorAll('.miss-count').forEach(el => {
-        const val = parseInt(el.innerText, 10);
-        if (!isNaN(val) && val >= 30) el.classList.add('gold-miss');
-        else el.classList.remove('gold-miss');
-      });
+      var allMissCounts = document.querySelectorAll('.miss-count');
+      for (var m = 0; m < allMissCounts.length; m++) {
+        var elSpan = allMissCounts[m];
+        var val = parseInt(elSpan.innerText, 10);
+        if (!isNaN(val) && val >= 30) elSpan.classList.add('gold-miss');
+        else elSpan.classList.remove('gold-miss');
+      }
     }
 
     // ---------- ACTIONS ----------
     function addSpin() {
-      const inputEl = document.getElementById("numberInput");
-      const statusDiv = document.getElementById("inputStatus");
-      let raw = inputEl.value.trim();
-      if (!raw) {
+      var inputEl = document.getElementById("numberInput");
+      var statusDiv = document.getElementById("inputStatus");
+      var raw = inputEl.value.trim();
+      if (raw === "") {
         statusDiv.textContent = "Enter a number (0-36 or 00)";
         return;
       }
-      let validated = null;
-      if (raw === "00") validated = "00";
-      else {
-        const num = parseInt(raw, 10);
+      var validated = null;
+      if (raw === "00") {
+        validated = "00";
+      } else {
+        var num = parseInt(raw, 10);
         if (isNaN(num) || num < 0 || num > 36) {
           statusDiv.textContent = "Invalid number (0-36 or 00)";
           return;
@@ -507,21 +561,29 @@
         validated = num.toString();
       }
 
-      // Add to history
       history.push(validated);
-      // Incremental pattern update
+      // update miss counters incrementally
+      for (var i = 0; i < TOP_KEYS.length; i++) {
+        var tk = TOP_KEYS[i];
+        if (validated === tk) stats.top[tk] = 0;
+        else stats.top[tk]++;
+      }
+      for (var j = 0; j < BOTTOM_KEYS.length; j++) {
+        var bk = BOTTOM_KEYS[j];
+        if (validated === bk) stats.bottom[bk] = 0;
+        else stats.bottom[bk]++;
+      }
       updatePatternForNewSpin(validated);
-      // Update miss counters (increment all, reset current)
-      TOP_KEYS.forEach(k => { if (validated === k) stats.top[k] = 0; else stats.top[k]++; });
-      BOTTOM_KEYS.forEach(k => { if (validated === k) stats.bottom[k] = 0; else stats.bottom[k]++; });
-
       saveData();
       updateUI();
       checkAdjacencyAndAlert();
 
       inputEl.value = "";
-      statusDiv.textContent = `✓ Spin ${validated} recorded`;
-      setTimeout(() => { if (statusDiv.textContent.includes("recorded")) statusDiv.textContent = ""; }, 1800);
+      statusDiv.textContent = "✓ Spin " + validated + " recorded";
+      setTimeout(function() { 
+        var st = document.getElementById("inputStatus");
+        if (st.textContent.indexOf("recorded") !== -1) st.textContent = "";
+      }, 1800);
     }
 
     function undoLast() {
@@ -530,12 +592,15 @@
         return;
       }
       history.pop();
-      rebuildStats();   // full recompute from clean history
+      rebuildStatsFull();
       saveData();
       updateUI();
       syncAlertFlag();
       document.getElementById("inputStatus").textContent = "↩️ Last spin undone";
-      setTimeout(() => { const st = document.getElementById("inputStatus"); if (st.textContent.includes("undone")) st.textContent = ""; }, 1500);
+      setTimeout(function() {
+        var st = document.getElementById("inputStatus");
+        if (st.textContent.indexOf("undone") !== -1) st.textContent = "";
+      }, 1500);
     }
 
     function resetAll() {
@@ -546,33 +611,70 @@
         updateUI();
         syncAlertFlag();
         document.getElementById("inputStatus").textContent = "✅ All data reset";
-        setTimeout(() => { const st = document.getElementById("inputStatus"); if (st.textContent.includes("reset")) st.textContent = ""; }, 2000);
+        setTimeout(function() {
+          var stDiv = document.getElementById("inputStatus");
+          if (stDiv.textContent.indexOf("reset") !== -1) stDiv.textContent = "";
+        }, 2000);
       } else {
         document.getElementById("inputStatus").textContent = "Reset cancelled";
       }
     }
 
-    // ---------- BUILD STATIC GRID DYNAMICALLY (to guarantee IDs exist) ----------
+    // numpad digit handling (iPad Mini 2 compatible + 00 support)
+    function handleDigit(digit) {
+      var input = document.getElementById("numberInput");
+      var current = input.value;
+      if (digit === '0') {
+        if (current === '0') {
+          input.value = '00';
+        } else if (current === '') {
+          input.value = '0';
+        } else if (current.length === 1 && current !== '0') {
+          input.value = current + '0';
+        } else if (current === '00') {
+          // already '00', do nothing
+          return;
+        } else if (current.length < 2 && !isNaN(parseInt(current,10))) {
+          input.value = current + '0';
+        }
+      } else {
+        if (current === '00') return;
+        if (current.length < 2) {
+          input.value = current + digit;
+        }
+      }
+      document.getElementById("inputStatus").textContent = "";
+    }
+
+    function handleBackspace() {
+      var input = document.getElementById("numberInput");
+      var cur = input.value;
+      if (cur === '00') input.value = '0';
+      else input.value = cur.slice(0, -1);
+    }
+
+    // ---------- BUILD GRID (ensure elements exist) ----------
     function buildGrid() {
-      const topRowDiv = document.getElementById("topRow");
-      const bottomRowDiv = document.getElementById("bottomRow");
+      var topRowDiv = document.getElementById("topRow");
+      var bottomRowDiv = document.getElementById("bottomRow");
       topRowDiv.innerHTML = "";
       bottomRowDiv.innerHTML = "";
-
-      TOP_KEYS.forEach(num => {
-        const color = getColorClass(num);
-        const col = document.createElement("div");
+      for (var i = 0; i < TOP_KEYS.length; i++) {
+        var num = TOP_KEYS[i];
+        var color = getColorClass(num);
+        var col = document.createElement("div");
         col.className = "number-column";
-        col.innerHTML = `<div class="number-display ${color}">${num}</div><div class="miss-count"><span id="top-${num}">0</span></div>`;
+        col.innerHTML = '<div class="number-display ' + color + '">' + num + '</div><div class="miss-count"><span id="top-' + num + '">0</span></div>';
         topRowDiv.appendChild(col);
-      });
-      BOTTOM_KEYS.forEach(num => {
-        const color = getColorClass(num);
-        const col = document.createElement("div");
-        col.className = "number-column";
-        col.innerHTML = `<div class="number-display ${color}">${num}</div><div class="miss-count"><span id="bottom-${num}">0</span></div>`;
-        bottomRowDiv.appendChild(col);
-      });
+      }
+      for (var j = 0; j < BOTTOM_KEYS.length; j++) {
+        var bnum = BOTTOM_KEYS[j];
+        var bcolor = getColorClass(bnum);
+        var bcol = document.createElement("div");
+        bcol.className = "number-column";
+        bcol.innerHTML = '<div class="number-display ' + bcolor + '">' + bnum + '</div><div class="miss-count"><span id="bottom-' + bnum + '">0</span></div>';
+        bottomRowDiv.appendChild(bcol);
+      }
     }
 
     // ---------- INIT & EVENT BINDINGS ----------
@@ -582,30 +684,31 @@
       updateUI();
       syncAlertFlag();
 
-      // Button binding (no inline onclick, robust)
       document.getElementById("addSpinBtn").addEventListener("click", addSpin);
       document.getElementById("undoBtn").addEventListener("click", undoLast);
       document.getElementById("resetBtn").addEventListener("click", resetAll);
       document.getElementById("enterNumBtn").addEventListener("click", addSpin);
-      document.getElementById("backspaceBtn").addEventListener("click", () => {
-        const inp = document.getElementById("numberInput");
-        inp.value = inp.value.slice(0, -1);
-      });
+      document.getElementById("backspaceBtn").addEventListener("click", handleBackspace);
 
-      // Numpad digits
-      document.querySelectorAll(".numpad button[data-digit]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const digit = btn.getAttribute("data-digit");
-          const input = document.getElementById("numberInput");
-          if (digit === '0' && input.value === '0') return;
-          if (input.value.length < 2) input.value += digit;
-          document.getElementById("inputStatus").textContent = "";
+      var digitBtns = document.querySelectorAll(".numpad button[data-digit]");
+      for (var d = 0; d < digitBtns.length; d++) {
+        digitBtns[d].addEventListener("click", function(e) {
+          var digit = this.getAttribute("data-digit");
+          handleDigit(digit);
+          e.preventDefault();
         });
-      });
+      }
 
-      // Enter key on input field
-      document.getElementById("numberInput").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") addSpin();
+      var numberInputField = document.getElementById("numberInput");
+      numberInputField.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addSpin();
+        }
+      });
+      // optional: avoid default keyboard on touch but keep input focus friendly
+      numberInputField.addEventListener("touchstart", function() {
+        // just ensures focus
       });
     }
 

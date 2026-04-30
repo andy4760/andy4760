@@ -48,36 +48,31 @@
       margin: 1rem 0;
       width: 100%;
     }
-    /* Single horizontal row with horizontal scrolling (touch + mouse) */
+    /* Single row that fits exactly 20 numbers on iPad Mini 2 (768px) without scroll */
     #recentSpins {
       display: flex;
       flex-wrap: nowrap;
-      overflow-x: auto;
+      overflow-x: visible;    /* no horizontal scrollbar */
       overflow-y: hidden;
-      gap: 10px;
-      padding: 12px;
+      gap: 3px;               /* minimal gap to save space */
+      padding: 8px 4px;
       background: rgba(0, 0, 0, 0.25);
       border-radius: 40px;
-      scrollbar-width: thin;
-      -webkit-overflow-scrolling: touch;  /* smooth scrolling on iPad */
       width: 100%;
-      cursor: grab;
-    }
-    #recentSpins:active {
-      cursor: grabbing;
+      justify-content: center;
     }
     .spin-box {
-      width: 60px;
-      height: 60px;
+      width: 34px;            /* reduced to fit 20 items */
+      height: 34px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 16px;
+      border-radius: 10px;
       font-weight: bold;
-      font-size: 1.2rem;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      font-size: 0.85rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       flex-shrink: 0;
-      border: 2px solid #333;
+      border: 1px solid #555;
     }
     /* color classes */
     .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; }
@@ -245,16 +240,34 @@
       font-size: 0.8rem;
       color: #ffccbc;
     }
-    /* Responsive: adjust spin box size for iPad Mini 2 */
+    /* iPad Mini 2 specific adjustments - ensures 20 boxes fit perfectly */
     @media (max-width: 860px) {
       .horizontal-layout { grid-template-columns: repeat(19, minmax(36px,1fr)); gap: 3px; }
       .number-display { width: 32px; height: 32px; font-size: 0.85rem; }
       .miss-count { font-size: 0.7rem; min-width: 28px; }
-      .spin-box { width: 54px; height: 54px; font-size: 1.1rem; }
-      #recentSpins { gap: 8px; padding: 10px; }
+      /* Critical: make spin boxes small enough to fit 20 in 768px */
+      .spin-box {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+      }
+      #recentSpins {
+        gap: 2px;
+        padding: 6px 2px;
+        justify-content: center;
+      }
     }
-    @media (max-width: 640px) {
-      .spin-box { width: 48px; height: 48px; font-size: 1rem; }
+    /* For very small widths (safety) */
+    @media (max-width: 700px) {
+      .spin-box {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+      }
+      #recentSpins {
+        gap: 2px;
+      }
     }
   </style>
 </head>
@@ -265,7 +278,7 @@
     <div class="tagline">Gold Miss (≥30) | Wheel Adjacency (5+ neighbors ≥30)</div>
   </header>
 
-  <!-- Single horizontal row with horizontal scrolling -->
+  <!-- Single horizontal row that fits exactly 20 numbers without scroll -->
   <div class="recent-wrapper"><div id="recentSpins"></div></div>
   <div id="entryCount">Total spins: 0</div>
 
@@ -714,12 +727,6 @@
           e.preventDefault();
         });
       }
-
-      // Input is readonly to prevent iOS keyboard, but we make it focusable for style
-      var numberInput = document.getElementById("numberInput");
-      numberInput.addEventListener("focus", function() {
-        // keep readonly - no keyboard
-      });
     }
 
     init();

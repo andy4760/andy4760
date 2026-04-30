@@ -2,633 +2,804 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Brown Wheel Roulette Tracker Pro | Smart Alerts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+  <title>Brown Roulette Pro | Gold Miss + Multi Alert</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 1rem;
+      font-family: 'Segoe UI', -apple-system, 'Roboto', sans-serif;
+      padding: 1rem 1rem 100px 1rem;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #f0f0f0;
       min-height: 100vh;
-      padding-bottom: 100px;
+      padding-bottom: max(95px, env(safe-area-inset-bottom));
     }
     .container {
-      max-width: 1200px;
+      max-width: 1600px;
       margin: 0 auto;
+      width: 100%;
     }
     header {
       text-align: center;
-      padding: 1rem 0;
+      padding: 1rem 0.5rem;
       margin-bottom: 1rem;
       background: rgba(0, 0, 0, 0.3);
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border-radius: 20px;
     }
     h1 {
-      margin: 0;
-      font-size: 2rem;
+      font-size: 1.8rem;
       background: linear-gradient(to right, #ff416c, #ff4b2b);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .tagline {
       color: #ccc;
-      font-style: italic;
-      margin-top: 5px;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
     }
+    .recent-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
+      width: 100%;
+    }
+    /* Single row that fits exactly 20 numbers on iPad Mini 2 (768px) without scroll */
     #recentSpins {
       display: flex;
-      flex-direction: row;
       flex-wrap: nowrap;
-      overflow-x: auto;
-      gap: 8px;
-      margin: 1rem 0;
+      overflow-x: visible;
+      overflow-y: hidden;
+      gap: 3px;
+      padding: 8px 4px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 40px;
+      width: 100%;
       justify-content: center;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
-      scrollbar-width: thin;
-    }
-    #recentSpins::-webkit-scrollbar {
-      height: 8px;
     }
     .spin-box {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 2px solid #333;
       border-radius: 8px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 22px;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
       transition: transform 0.2s ease;
+      flex-shrink: 0;
     }
-    .spin-box:hover { transform: scale(1.1); }
-    .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; border-color: #b71c1c; }
-    .black { background: linear-gradient(145deg, #212121, #000000); color: white; border-color: #111; }
-    .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; border-color: #1b5e20; }
-    
+    .red { background: linear-gradient(145deg, #e53935, #c62828); color: white; }
+    .black { background: linear-gradient(145deg, #212121, #000); color: white; }
+    .green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
     .controls {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin: 1rem 0;
+      gap: 12px;
+      margin: 1.2rem 0;
       flex-wrap: wrap;
     }
-    .number-sets {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin: 1rem 0 1.5rem 0;
-    }
-    .number-set {
-      border: 1px solid #444;
-      padding: 15px;
-      border-radius: 12px;
-      background: rgba(30, 30, 46, 0.7);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    .horizontal-layout {
+    .pattern-tracking {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 14px;
+      margin: 1.5rem 0;
+    }
+    .pattern-box {
+      border: 1px solid #444;
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(30, 30, 46, 0.8);
+      min-width: 110px;
+      text-align: center;
+    }
+    .pattern-box h3 { color: #ff8a65; margin-bottom: 8px; font-size: 1rem; }
+    .pattern-stats { font-size: 0.9rem; }
+    .number-sets {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 1rem 0;
+    }
+    .number-set {
+      border: 1px solid #444;
+      padding: 14px 6px;
+      border-radius: 28px;
+      background: rgba(30, 30, 46, 0.7);
+    }
+    .horizontal-layout {
+      display: grid;
+      grid-template-columns: repeat(19, minmax(42px, 1fr));
+      gap: 4px;
+      justify-items: center;
+      align-items: center;
     }
     .number-column {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 40px;
+      background: rgba(0,0,0,0.2);
+      padding: 6px 2px;
+      border-radius: 16px;
+      width: 100%;
     }
     .number-display {
       font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 3px;
-      width: 35px;
-      height: 35px;
+      font-size: 1rem;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      margin-bottom: 5px;
     }
-    .number-display.red { background: linear-gradient(145deg, #e53935, #c62828); color: white; }
-    .number-display.black { background: linear-gradient(145deg, #212121, #000000); color: white; }
-    .number-display.green { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
-    
-    .miss-count span {
+    .miss-count {
       font-weight: bold;
-      font-size: 1rem;
-      transition: color 0.2s ease;
-      color: #42a5f5; /* default blue */
-    }
-    .miss-count span.gold-miss {
-      color: #FFD700;
-      text-shadow: 0 0 2px rgba(0,0,0,0.5);
-    }
-    
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 10px 0;
-      flex-wrap: wrap;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
       font-size: 0.8rem;
-      color: #ccc;
+      background: rgba(0,0,0,0.4);
+      padding: 2px 6px;
+      border-radius: 40px;
+      min-width: 34px;
+      text-align: center;
+      color: #82b1ff;
     }
-    .legend-color { width: 15px; height: 15px; border-radius: 50%; }
-    .legend-red { background: linear-gradient(145deg, #e53935, #c62828); }
-    .legend-black { background: linear-gradient(145deg, #212121, #000); }
-    .legend-green { background: linear-gradient(145deg, #43a047, #2e7d32); }
-    
+    .gold-miss {
+      color: #FFD700 !important;
+      background: rgba(0,0,0,0.65);
+      border: 1px solid rgba(255,215,0,0.3);
+    }
     .numpad {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(26, 26, 46, 0.96);
-      padding: 10px;
+      background: rgba(20, 20, 38, 0.96);
+      backdrop-filter: blur(12px);
+      padding: 10px 12px;
       display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      flex-wrap: nowrap;
+      gap: 8px;
       overflow-x: auto;
-      z-index: 100;
+      z-index: 1000;
       border-top: 2px solid #ff4b2b;
-      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
     }
     .numpad button {
-      flex: 1;
-      min-width: 50px;
-      padding: 12px 0;
-      font-size: 1rem;
+      flex: 1 0 auto;
+      min-width: 58px;
+      padding: 14px 0;
+      font-size: 1.2rem;
       border: none;
-      border-radius: 10px;
-      background: rgba(50, 50, 70, 0.9);
+      border-radius: 40px;
+      background: rgba(55, 55, 80, 0.95);
       color: white;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      -webkit-appearance: none;
     }
-    .numpad button:active { transform: scale(0.95); }
     .numpad .enter { background: linear-gradient(145deg, #4caf50, #2e7d32); }
     .numpad .backspace { background: linear-gradient(145deg, #f44336, #d32f2f); }
-    
-    input, button {
-      padding: 10px 15px;
-      font-size: 0.9rem;
-      border-radius: 8px;
+    input {
+      padding: 12px 15px;
+      font-size: 1.1rem;
+      width: 150px;
+      text-align: center;
+      border: 2px solid #555;
+      border-radius: 44px;
+      background: rgba(25, 25, 40, 0.9);
+      color: white;
+      outline: none;
+    }
+    input[readonly] {
+      cursor: default;
+      background: rgba(35, 35, 55, 0.9);
+      border-color: #ff8a65;
+    }
+    button {
+      padding: 12px 20px;
+      border-radius: 44px;
       border: none;
       background: rgba(60, 60, 80, 0.9);
       color: white;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
-    input {
-      width: 130px;
-      text-align: center;
-      background: rgba(30, 30, 46, 0.9);
-      border: 2px solid #444;
-    }
-    input:focus { border-color: #ff4b2b; outline: none; }
     .controls button:nth-child(2) { background: linear-gradient(145deg, #2196f3, #1976d2); }
     .controls button:nth-child(3) { background: linear-gradient(145deg, #ff9800, #f57c00); }
     .controls button:nth-child(4) { background: linear-gradient(145deg, #f44336, #d32f2f); }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.2);
+      padding: 4px 12px;
+      border-radius: 40px;
+    }
+    .legend-color { width: 18px; height: 18px; border-radius: 50%; }
+    .legend-red { background: #e53935; }
+    .legend-black { background: #212121; }
+    .legend-green { background: #2e7d32; }
     .input-status {
       text-align: center;
-      font-size: 0.8rem;
+      height: 26px;
       margin-top: 5px;
-      color: #ffab91;
+      font-size: 0.8rem;
+      color: #ffccbc;
     }
-    @media (max-width: 768px) {
-      .number-column { min-width: 35px; }
-      .numpad button { padding: 10px 0; font-size: 0.9rem; }
+    /* iPad Mini 2 specific adjustments */
+    @media (max-width: 860px) {
+      .horizontal-layout { grid-template-columns: repeat(19, minmax(36px,1fr)); gap: 3px; }
+      .number-display { width: 32px; height: 32px; font-size: 0.85rem; }
+      .miss-count { font-size: 0.7rem; min-width: 28px; }
+      .spin-box {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+      }
+      #recentSpins {
+        gap: 2px;
+        padding: 6px 2px;
+        justify-content: center;
+      }
+    }
+    @media (max-width: 700px) {
+      .spin-box {
+        width: 35px;
+        height: 35px;
+        font-size: 0.75rem;
+      }
+      #recentSpins {
+        gap: 2px;
+      }
     }
   </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>Brown Wheel Roulette Tracker Pro</h1>
-    <div class="tagline">Advanced miss analysis · Adjacency alerts · Gold indicator ≥30</div>
+    <h1>?? Brown Wheel Roulette Pro</h1>
+    <div class="tagline">Gold Miss (=30) | Multi-Threshold Wheel Adjacency Alerts | Full Keyboard Support</div>
   </header>
-  
-  <div id="recentSpins"></div>
-  <div id="entryCount">Total spins: 0</div>
-  
+
+  <div class="recent-wrapper"><div id="recentSpins"></div></div>
+
+
   <div class="legend">
     <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
     <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
-    <div class="legend-item"><span style="color:#FFD700;">★ Gold miss = ≥30 misses</span></div>
+    <div class="legend-item"><span style="color:#FFD700;">? Gold =30 misses</span></div>
   </div>
 
   <div class="controls">
-    <input id="numberInput" placeholder="0-36 or 00" maxlength="2" autocomplete="off" />
-    <button onclick="addNumber()">Add Spin</button>
-    <button onclick="undo()">Undo Last</button>
-    <button onclick="resetAll()" id="resetButton">Reset All</button>
+    <div id="entryCount">Total spins: 0</div>
+    <input id="numberInput" placeholder="0–36 or 00" maxlength="2" inputmode="none" readonly value="" />
+    <button id="addSpinBtn">? Add Spin</button>
+    <button id="undoBtn">?? Undo Last</button>
+    <button id="resetBtn">?? Reset All</button>
     <div id="inputStatus" class="input-status"></div>
   </div>
 
   <div class="number-sets">
-    <!-- Top 19 Numbers -->
-    <div class="number-set">
-      <div class="horizontal-layout" id="topRowContainer">
-        <div class="number-column"><div class="number-display green">00</div><div class="miss-count"><span id="top-00">0</span></div></div>
-        <div class="number-column"><div class="number-display red">27</div><div class="miss-count"><span id="top-27">0</span></div></div>
-        <div class="number-column"><div class="number-display black">10</div><div class="miss-count"><span id="top-10">0</span></div></div>
-        <div class="number-column"><div class="number-display red">25</div><div class="miss-count"><span id="top-25">0</span></div></div>
-        <div class="number-column"><div class="number-display black">29</div><div class="miss-count"><span id="top-29">0</span></div></div>
-        <div class="number-column"><div class="number-display red">12</div><div class="miss-count"><span id="top-12">0</span></div></div>
-        <div class="number-column"><div class="number-display black">8</div><div class="miss-count"><span id="top-8">0</span></div></div>
-        <div class="number-column"><div class="number-display red">19</div><div class="miss-count"><span id="top-19">0</span></div></div>
-        <div class="number-column"><div class="number-display black">31</div><div class="miss-count"><span id="top-31">0</span></div></div>
-        <div class="number-column"><div class="number-display red">18</div><div class="miss-count"><span id="top-18">0</span></div></div>
-        <div class="number-column"><div class="number-display black">6</div><div class="miss-count"><span id="top-6">0</span></div></div>
-        <div class="number-column"><div class="number-display red">21</div><div class="miss-count"><span id="top-21">0</span></div></div>
-        <div class="number-column"><div class="number-display black">33</div><div class="miss-count"><span id="top-33">0</span></div></div>
-        <div class="number-column"><div class="number-display red">16</div><div class="miss-count"><span id="top-16">0</span></div></div>
-        <div class="number-column"><div class="number-display black">4</div><div class="miss-count"><span id="top-4">0</span></div></div>
-        <div class="number-column"><div class="number-display red">23</div><div class="miss-count"><span id="top-23">0</span></div></div>
-        <div class="number-column"><div class="number-display black">35</div><div class="miss-count"><span id="top-35">0</span></div></div>
-        <div class="number-column"><div class="number-display red">14</div><div class="miss-count"><span id="top-14">0</span></div></div>
-        <div class="number-column"><div class="number-display black">2</div><div class="miss-count"><span id="top-2">0</span></div></div>
-      </div>
-    </div>
-    
-    <!-- Bottom 19 Numbers -->
-    <div class="number-set">
-      <div class="horizontal-layout" id="bottomRowContainer">
-        <div class="number-column"><div class="number-display red">1</div><div class="miss-count"><span id="bottom-1">0</span></div></div>
-        <div class="number-column"><div class="number-display black">13</div><div class="miss-count"><span id="bottom-13">0</span></div></div>
-        <div class="number-column"><div class="number-display red">36</div><div class="miss-count"><span id="bottom-36">0</span></div></div>
-        <div class="number-column"><div class="number-display black">24</div><div class="miss-count"><span id="bottom-24">0</span></div></div>
-        <div class="number-column"><div class="number-display red">3</div><div class="miss-count"><span id="bottom-3">0</span></div></div>
-        <div class="number-column"><div class="number-display black">15</div><div class="miss-count"><span id="bottom-15">0</span></div></div>
-        <div class="number-column"><div class="number-display red">34</div><div class="miss-count"><span id="bottom-34">0</span></div></div>
-        <div class="number-column"><div class="number-display black">22</div><div class="miss-count"><span id="bottom-22">0</span></div></div>
-        <div class="number-column"><div class="number-display red">5</div><div class="miss-count"><span id="bottom-5">0</span></div></div>
-        <div class="number-column"><div class="number-display black">17</div><div class="miss-count"><span id="bottom-17">0</span></div></div>
-        <div class="number-column"><div class="number-display red">32</div><div class="miss-count"><span id="bottom-32">0</span></div></div>
-        <div class="number-column"><div class="number-display black">20</div><div class="miss-count"><span id="bottom-20">0</span></div></div>
-        <div class="number-column"><div class="number-display red">7</div><div class="miss-count"><span id="bottom-7">0</span></div></div>
-        <div class="number-column"><div class="number-display black">11</div><div class="miss-count"><span id="bottom-11">0</span></div></div>
-        <div class="number-column"><div class="number-display red">30</div><div class="miss-count"><span id="bottom-30">0</span></div></div>
-        <div class="number-column"><div class="number-display black">26</div><div class="miss-count"><span id="bottom-26">0</span></div></div>
-        <div class="number-column"><div class="number-display red">9</div><div class="miss-count"><span id="bottom-9">0</span></div></div>
-        <div class="number-column"><div class="number-display black">28</div><div class="miss-count"><span id="bottom-28">0</span></div></div>
-        <div class="number-column"><div class="number-display green">0</div><div class="miss-count"><span id="bottom-0">0</span></div></div>
-      </div>
-    </div>
+    <div class="number-set"><div class="horizontal-layout" id="topRow"></div></div>
+    <div class="number-set"><div class="horizontal-layout" id="bottomRow"></div></div>
+  </div>
+
+  <div class="pattern-tracking">
+    <div class="pattern-box"><h3>?? Track 3</h3><div class="pattern-stats">Misses: <span id="miss3">0</span><br>Hits: <span id="hit3">0</span></div></div>
+    <div class="pattern-box"><h3>?? Track 4</h3><div class="pattern-stats">Misses: <span id="miss4">0</span><br>Hits: <span id="hit4">0</span></div></div>
+    <div class="pattern-box"><h3>?? Track 5</h3><div class="pattern-stats">Misses: <span id="miss5">0</span><br>Hits: <span id="hit5">0</span></div></div>
+    <div class="pattern-box"><h3>?? Track 6</h3><div class="pattern-stats">Misses: <span id="miss6">0</span><br>Hits: <span id="hit6">0</span></div></div>
+    <div class="pattern-box"><h3>?? Track 9</h3><div class="pattern-stats">Misses: <span id="miss9">0</span><br>Hits: <span id="hit9">0</span></div></div>
   </div>
 </div>
 
 <div class="numpad">
-  <button class="backspace" onclick="backspace()">⌫</button>
-  <button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button>
-  <button onclick="numpadClick('3')">3</button><button onclick="numpadClick('4')">4</button>
-  <button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button>
-  <button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button>
-  <button onclick="numpadClick('9')">9</button><button onclick="numpadClick('0')">0</button>
-  <button class="enter" onclick="addNumber()">Enter</button>
- 
+  <button id="backspaceBtn" class="backspace">?</button>
+  <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
+  <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
+  <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
+  <button data-digit="0">0</button>
+  <button id="enterNumBtn" class="enter">? Enter</button>
 </div>
 
 <script>
-  // -------- COLOR MAPPING ----------
-  const colors = {
-    red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36],
-    black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35],
-    green: ["0", "00"]
-  };
+  (function() {
+    // ---------- ES5 safe helpers ----------
+    function arrayContains(arr, val) {
+      return arr.indexOf(val) !== -1;
+    }
+    
+    // ---------- CONSTANTS ----------
+    var RED_NUMS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    var BLACK_NUMS = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+    var GREEN_NUMS = ["0","00"];
+    // Standard European/American wheel order (single zero + double zero layout)
+    var WHEEL_ORDER = ['0','28','9','26','30','11','7','20','32','17','5','22','34','15','3','24','36','13','1','00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
+    var TOP_KEYS = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
+    var BOTTOM_KEYS = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
+    var TRACKS = [3,4,5,6,9];
+    var THRESHOLD_ALERTS = {3:60,4:50,5:40,6:30,9:20};
+    
+    // ----- Wheel adjacency conditions (length, minMiss)
+    var ADJ_CONDITIONS = [
+      { length: 5, minMiss: 50, message: "?? WHEEL ALERT: 5+ adjacent numbers with 50+ misses!" },
+      { length: 6, minMiss: 40, message: "?? WHEEL ALERT: 6+ adjacent numbers with 40+ misses!" },
+      { length: 8, minMiss: 25, message: "?? WHEEL ALERT: 8+ adjacent numbers with 25+ misses!" },
+      { length: 12, minMiss: 20, message: "?? WHEEL ALERT: 12+ adjacent numbers with 20+ misses!" },
+      { length: 18, minMiss: 15, message: "?? WHEEL ALERT: 18+ adjacent numbers with 15+ misses!" }
+    ];
+    var alertFlags = [false, false, false, false, false]; // one per condition
+    // ---------- DATA ----------
+    var history = [];
+    var stats = null;
 
-  // Data structures
-  let history = JSON.parse(localStorage.getItem("history") || "[]");
-  let stats = JSON.parse(localStorage.getItem("stats") || JSON.stringify({
-    top: { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 },
-    bottom: { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 }
-  }));
-  
-  // Alert flags for special numbers 7,9,16,20 (original)
-  let alertShown = localStorage.getItem("alertShown") === "true" || false;
-  
-  // ADJACENCY ALERT FLAGS (to avoid repeated popups)
-  let alertedAdj30 = false;   // 5+ adjacent numbers with miss >=30
-  let alertedAdj20 = false;   // 8+ adjacent numbers with miss >=20
+    function getFreshStats() {
+      var topObj = {};
+      var bottomObj = {};
+      for (var i = 0; i < TOP_KEYS.length; i++) topObj[TOP_KEYS[i]] = 0;
+      for (var i = 0; i < BOTTOM_KEYS.length; i++) bottomObj[BOTTOM_KEYS[i]] = 0;
+      return {
+        3: { m: 0, h: 0 },
+        4: { m: 0, h: 0 },
+        5: { m: 0, h: 0 },
+        6: { m: 0, h: 0 },
+        9: { m: 0, h: 0 },
+        top: topObj,
+        bottom: bottomObj
+      };
+    }
 
-  // Helper: normalise stats if needed
-  if (!stats.top || !stats.bottom) {
-    stats = {
-      top: { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 },
-      bottom: { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 }
-    };
-  }
-
-  // -------- UTILITIES ----------
-  function getColor(n) {
-    if (colors.green.includes(n)) return "green";
-    if (colors.red.includes(Number(n))) return "red";
-    if (colors.black.includes(Number(n))) return "black";
-    return "";
-  }
-
-  // apply gold style to any miss count >= 30
-  function applyMissColors() {
-    const allMissSpans = document.querySelectorAll('.miss-count span');
-    allMissSpans.forEach(span => {
-      let missVal = parseInt(span.innerText, 10);
-      if (!isNaN(missVal) && missVal >= 30) {
-        span.style.color = '#FFD700';
-        span.style.fontWeight = 'bold';
-        span.style.textShadow = '0 0 1px rgba(0,0,0,0.5)';
-      } else {
-        span.style.color = '#42a5f5';
-        span.style.fontWeight = 'bold';
-        span.style.textShadow = 'none';
+    function loadData() {
+      try {
+        var storedHistory = localStorage.getItem("roulette_history");
+        if (storedHistory) history = JSON.parse(storedHistory);
+        else history = [];
+        var storedStats = localStorage.getItem("roulette_stats");
+        if (storedStats) {
+          var parsed = JSON.parse(storedStats);
+          var fresh = getFreshStats();
+          stats = fresh;
+          for (var tIdx = 0; tIdx < TRACKS.length; tIdx++) {
+            var t = TRACKS[tIdx];
+            if (parsed[t] && typeof parsed[t].m === 'number') {
+              stats[t].m = parsed[t].m;
+              stats[t].h = parsed[t].h;
+            }
+          }
+          if (parsed.top) {
+            for (var kIdx = 0; kIdx < TOP_KEYS.length; kIdx++) {
+              var key = TOP_KEYS[kIdx];
+              if (typeof parsed.top[key] === 'number') stats.top[key] = parsed.top[key];
+            }
+          }
+          if (parsed.bottom) {
+            for (var bIdx = 0; bIdx < BOTTOM_KEYS.length; bIdx++) {
+              var bKey = BOTTOM_KEYS[bIdx];
+              if (typeof parsed.bottom[bKey] === 'number') stats.bottom[bKey] = parsed.bottom[bKey];
+            }
+          }
+        } else {
+          stats = getFreshStats();
+        }
+      } catch(e) {
+        history = [];
+        stats = getFreshStats();
       }
-    });
-  }
+    }
 
-  // check for consecutive condition in a given ordered list (top/bottom)
-  function hasConsecutiveCondition(numberOrder, getMissFunc, condition, minLength) {
-    let currentRun = 0;
-    for (let num of numberOrder) {
-      let miss = getMissFunc(num);
-      if (condition(miss)) {
-        currentRun++;
-        if (currentRun >= minLength) return true;
-      } else {
-        currentRun = 0;
+    function saveData() {
+      localStorage.setItem("roulette_history", JSON.stringify(history));
+      localStorage.setItem("roulette_stats", JSON.stringify(stats));
+    }
+
+    // Color helpers
+    function getColorClass(numStr) {
+      var numAsString = String(numStr);
+      if (arrayContains(GREEN_NUMS, numAsString)) return "green";
+      var numeric = parseInt(numAsString, 10);
+      if (!isNaN(numeric) && arrayContains(RED_NUMS, numeric)) return "red";
+      if (!isNaN(numeric) && arrayContains(BLACK_NUMS, numeric)) return "black";
+      return "";
+    }
+
+    function getMissCount(numStr) {
+      if (numStr === '00') return stats.top['00'] || 0;
+      if (numStr === '0') return stats.bottom['0'] || 0;
+      if (arrayContains(TOP_KEYS, numStr)) return stats.top[numStr] || 0;
+      if (arrayContains(BOTTOM_KEYS, numStr)) return stats.bottom[numStr] || 0;
+      return 0;
+    }
+
+    // ---------- Wheel adjacency block detection for a given threshold (minLen, minMiss)
+    function findAdjacentBlockForThreshold(minLen, minMiss) {
+      var n = WHEEL_ORDER.length;
+      var bestBlock = null;
+      for (var start = 0; start < n; start++) {
+        var block = [];
+        for (var offset = 0; offset < n; offset++) {
+          var idx = (start + offset) % n;
+          var num = WHEEL_ORDER[idx];
+          if (getMissCount(num) >= minMiss) {
+            block.push(num);
+          } else {
+            break;
+          }
+        }
+        if (block.length >= minLen) {
+          if (!bestBlock || block.length > bestBlock.length) bestBlock = block.slice();
+        }
+      }
+      return bestBlock;
+    }
+
+    // Evaluate all conditions and return boolean array
+    function evaluateCurrentConditions() {
+      var result = [];
+      for (var i = 0; i < ADJ_CONDITIONS.length; i++) {
+        var cond = ADJ_CONDITIONS[i];
+        var block = findAdjacentBlockForThreshold(cond.length, cond.minMiss);
+        result.push(block !== null);
+      }
+      return result;
+    }
+
+    // Trigger alerts for new transitions, updates global alertFlags
+    function updateAdjacencyAlerts(triggerOnlyOnNew) {
+      var newFlags = evaluateCurrentConditions();
+      for (var i = 0; i < ADJ_CONDITIONS.length; i++) {
+        var isActiveNow = newFlags[i];
+        var wasActive = alertFlags[i];
+        if (triggerOnlyOnNew) {
+          if (isActiveNow && !wasActive) {
+            alert(ADJ_CONDITIONS[i].message);
+          }
+        }
+        alertFlags[i] = isActiveNow;
       }
     }
-    return false;
-  }
 
-  // evaluate adjacency alerts (5+ numbers miss>=30, 8+ numbers miss>=20)
-  function evaluateAdjacencyAlerts(forceResetFlags = false) {
-    // ordered sequences as displayed
-    const topOrder = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    const bottomOrder = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-    
-    const getTopMiss = (num) => stats.top[num] || 0;
-    const getBottomMiss = (num) => stats.bottom[num] || 0;
-    
-    // Condition A: >=30 misses, run of 5+
-    const cond30 = (miss) => miss >= 30;
-    const hasRun30 = hasConsecutiveCondition(topOrder, getTopMiss, cond30, 5) ||
-                     hasConsecutiveCondition(bottomOrder, getBottomMiss, cond30, 5);
-    
-    // Condition B: >=20 misses, run of 8+
-    const cond20 = (miss) => miss >= 20;
-    const hasRun20 = hasConsecutiveCondition(topOrder, getTopMiss, cond20, 8) ||
-                     hasConsecutiveCondition(bottomOrder, getBottomMiss, cond20, 8);
-    
-    // Alert logic: show only once when condition becomes true, until it resets
-    if (hasRun30 && !alertedAdj30) {
-      alert("⚠️ ADJACENCY ALERT: 5 or more adjacent numbers have 30+ misses! Check tracker.");
-      alertedAdj30 = true;
-    } else if (!hasRun30) {
-      alertedAdj30 = false;
+    // Full sync (used after undo/reset/load) without popups
+    function syncAlertFlagsSilent() {
+      var newFlags = evaluateCurrentConditions();
+      for (var i = 0; i < ADJ_CONDITIONS.length; i++) {
+        alertFlags[i] = newFlags[i];
+      }
     }
-    
-    if (hasRun20 && !alertedAdj20) {
-      alert("⚠️ ADJACENCY ALERT: 8 or more adjacent numbers have 20+ misses! Strategic window.");
-      alertedAdj20 = true;
-    } else if (!hasRun20) {
-      alertedAdj20 = false;
+
+    // Rebuild all stats from scratch (undo / reset)
+    function rebuildStatsFull() {
+      var newStats = getFreshStats();
+      for (var idx = 0; idx < history.length; idx++) {
+        var spin = history[idx];
+        for (var t = 0; t < TOP_KEYS.length; t++) {
+          var key = TOP_KEYS[t];
+          if (spin === key) newStats.top[key] = 0;
+          else newStats.top[key]++;
+        }
+        for (var b = 0; b < BOTTOM_KEYS.length; b++) {
+          var bKey = BOTTOM_KEYS[b];
+          if (spin === bKey) newStats.bottom[bKey] = 0;
+          else newStats.bottom[bKey]++;
+        }
+        for (var patIdx = 0; patIdx < TRACKS.length; patIdx++) {
+          var k = TRACKS[patIdx];
+          var unique = [];
+          var seen = {};
+          for (var j = idx - 1; j >= 0; j--) {
+            var prev = history[j];
+            if (!seen[prev]) {
+              seen[prev] = true;
+              unique.unshift(prev);
+              if (unique.length >= k) break;
+            }
+          }
+          var found = false;
+          for (var u = 0; u < unique.length; u++) {
+            if (unique[u] === spin) { found = true; break; }
+          }
+          if (found) {
+            newStats[k].h++;
+            newStats[k].m = 0;
+          } else {
+            newStats[k].m++;
+          }
+        }
+      }
+      stats = newStats;
     }
-  }
 
-  // original alert for numbers 7,9,16,20 with 50+ misses
-  function checkSpecialNumbersAlert() {
-    const sevenMiss = stats.bottom['7'] >= 50;
-    const nineMiss = stats.bottom['9'] >= 50;
-    const sixteenMiss = stats.top['16'] >= 50;
-    const twentyMiss = stats.bottom['20'] >= 50;
-    if (sevenMiss && nineMiss && sixteenMiss && twentyMiss && !alertShown) {
-      alert("🔔 ALERT: Numbers 7, 9, 16, and 20 have all reached 50+ misses!");
-      alertShown = true;
-      localStorage.setItem("alertShown", "true");
+    function updatePatternForNewSpin(spin) {
+      for (var p = 0; p < TRACKS.length; p++) {
+        var k = TRACKS[p];
+        var unique = [];
+        var seen = {};
+        for (var i = history.length - 2; i >= 0; i--) {
+          var num = history[i];
+          if (!seen[num]) {
+            seen[num] = true;
+            unique.unshift(num);
+            if (unique.length >= k) break;
+          }
+        }
+        var contained = false;
+        for (var tst = 0; tst < unique.length; tst++) {
+          if (unique[tst] === spin) { contained = true; break; }
+        }
+        if (contained) {
+          stats[k].h++;
+          stats[k].m = 0;
+        } else {
+          stats[k].m++;
+          if (stats[k].m === THRESHOLD_ALERTS[k]) {
+            alert("?? Track " + k + " missed " + stats[k].m + " times! Last spin: " + spin);
+          }
+        }
+      }
     }
-  }
 
-  // update whole UI + colors + adjacency + special alert
-  function updateDisplay() {
-    const container = document.getElementById("recentSpins");
-    container.innerHTML = "";
-    history.slice(-20).reverse().forEach(n => {
-      const div = document.createElement("div");
-      div.className = `spin-box ${getColor(n)}`;
-      div.textContent = n;
-      container.appendChild(div);
-    });
-    document.getElementById("entryCount").textContent = `Total spins: ${history.length}`;
-    
-    // sync top numbers
-    document.getElementById("top-00").textContent = stats.top['00'];
-    document.getElementById("top-27").textContent = stats.top['27'];
-    document.getElementById("top-10").textContent = stats.top['10'];
-    document.getElementById("top-25").textContent = stats.top['25'];
-    document.getElementById("top-29").textContent = stats.top['29'];
-    document.getElementById("top-12").textContent = stats.top['12'];
-    document.getElementById("top-8").textContent = stats.top['8'];
-    document.getElementById("top-19").textContent = stats.top['19'];
-    document.getElementById("top-31").textContent = stats.top['31'];
-    document.getElementById("top-18").textContent = stats.top['18'];
-    document.getElementById("top-6").textContent = stats.top['6'];
-    document.getElementById("top-21").textContent = stats.top['21'];
-    document.getElementById("top-33").textContent = stats.top['33'];
-    document.getElementById("top-16").textContent = stats.top['16'];
-    document.getElementById("top-4").textContent = stats.top['4'];
-    document.getElementById("top-23").textContent = stats.top['23'];
-    document.getElementById("top-35").textContent = stats.top['35'];
-    document.getElementById("top-14").textContent = stats.top['14'];
-    document.getElementById("top-2").textContent = stats.top['2'];
-    
-    // bottom numbers
-    document.getElementById("bottom-1").textContent = stats.bottom['1'];
-    document.getElementById("bottom-13").textContent = stats.bottom['13'];
-    document.getElementById("bottom-36").textContent = stats.bottom['36'];
-    document.getElementById("bottom-24").textContent = stats.bottom['24'];
-    document.getElementById("bottom-3").textContent = stats.bottom['3'];
-    document.getElementById("bottom-15").textContent = stats.bottom['15'];
-    document.getElementById("bottom-34").textContent = stats.bottom['34'];
-    document.getElementById("bottom-22").textContent = stats.bottom['22'];
-    document.getElementById("bottom-5").textContent = stats.bottom['5'];
-    document.getElementById("bottom-17").textContent = stats.bottom['17'];
-    document.getElementById("bottom-32").textContent = stats.bottom['32'];
-    document.getElementById("bottom-20").textContent = stats.bottom['20'];
-    document.getElementById("bottom-7").textContent = stats.bottom['7'];
-    document.getElementById("bottom-11").textContent = stats.bottom['11'];
-    document.getElementById("bottom-30").textContent = stats.bottom['30'];
-    document.getElementById("bottom-26").textContent = stats.bottom['26'];
-    document.getElementById("bottom-9").textContent = stats.bottom['9'];
-    document.getElementById("bottom-28").textContent = stats.bottom['28'];
-    document.getElementById("bottom-0").textContent = stats.bottom['0'];
+    // ---------- UI RENDERING ----------
+    function updateUI() {
+      var recentContainer = document.getElementById("recentSpins");
+      recentContainer.innerHTML = "";
+      var lastSpins = history.slice(-20).reverse();
+      for (var i = 0; i < lastSpins.length; i++) {
+        var n = lastSpins[i];
+        var div = document.createElement("div");
+        div.className = "spin-box " + getColorClass(n);
+        div.textContent = n;
+        recentContainer.appendChild(div);
+      }
+      document.getElementById("entryCount").textContent = "Total spins: " + history.length;
 
-    // apply gold color for misses >=30
-    applyMissColors();
-    
-    // run special numbers alert and adjacency alerts
-    checkSpecialNumbersAlert();
-    evaluateAdjacencyAlerts();
-  }
+      document.getElementById("miss3").textContent = stats[3].m;
+      document.getElementById("hit3").textContent = stats[3].h;
+      document.getElementById("miss4").textContent = stats[4].m;
+      document.getElementById("hit4").textContent = stats[4].h;
+      document.getElementById("miss5").textContent = stats[5].m;
+      document.getElementById("hit5").textContent = stats[5].h;
+      document.getElementById("miss6").textContent = stats[6].m;
+      document.getElementById("hit6").textContent = stats[6].h;
+      document.getElementById("miss9").textContent = stats[9].m;
+      document.getElementById("hit9").textContent = stats[9].h;
 
-  function save() {
-    localStorage.setItem("history", JSON.stringify(history));
-    localStorage.setItem("stats", JSON.stringify(stats));
-    localStorage.setItem("alertShown", alertShown.toString());
-  }
+      for (var tIdx = 0; tIdx < TOP_KEYS.length; tIdx++) {
+        var key = TOP_KEYS[tIdx];
+        var el = document.getElementById("top-" + key);
+        if (el) el.textContent = stats.top[key] || 0;
+      }
+      for (var bIdx = 0; bIdx < BOTTOM_KEYS.length; bIdx++) {
+        var bKey = BOTTOM_KEYS[bIdx];
+        var bel = document.getElementById("bottom-" + bKey);
+        if (bel) bel.textContent = stats.bottom[bKey] || 0;
+      }
 
-  // -------- CORE LOGIC: ADD SPIN ----------
-  function addNumber() {
-    const input = document.getElementById("numberInput");
-    const statusDiv = document.getElementById("inputStatus");
-    let val = input.value.trim();
-    statusDiv.textContent = "";
-    if (!val) {
-      statusDiv.textContent = "Enter a number (0-36 or 00)";
-      return;
+      var allMissCounts = document.querySelectorAll('.miss-count');
+      for (var m = 0; m < allMissCounts.length; m++) {
+        var elSpan = allMissCounts[m];
+        var val = parseInt(elSpan.innerText, 10);
+        if (!isNaN(val) && val >= 30) elSpan.classList.add('gold-miss');
+        else elSpan.classList.remove('gold-miss');
+      }
     }
-    if (val === "00") {
-      // valid
-    } else {
-      const num = parseInt(val, 10);
-      if (isNaN(num) || num < 0 || num > 36) {
-        statusDiv.textContent = "Invalid! Use 0-36 or 00";
+
+    // ---------- ACTIONS (with adjacency alert sync) ----------
+    function addSpin() {
+      var inputEl = document.getElementById("numberInput");
+      var statusDiv = document.getElementById("inputStatus");
+      var raw = inputEl.value.trim();
+      if (raw === "") {
+        statusDiv.textContent = "Enter a number using numpad or keyboard";
         return;
       }
-      val = num.toString();
-    }
-    
-    history.push(val);
-    
-    // update miss counts (all numbers except the drawn one → increment, drawn → reset to 0)
-    const topNumbers = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    topNumbers.forEach(num => {
-      if (val === num) stats.top[num] = 0;
-      else stats.top[num] = (stats.top[num] || 0) + 1;
-    });
-    
-    const bottomNumbers = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-    bottomNumbers.forEach(num => {
-      if (val === num) stats.bottom[num] = 0;
-      else stats.bottom[num] = (stats.bottom[num] || 0) + 1;
-    });
-    
-    input.value = "";
-    save();
-    updateDisplay();
-    statusDiv.textContent = `✓ Spin added: ${val}`;
-  }
+      var validated = null;
+      if (raw === "00") {
+        validated = "00";
+      } else {
+        var num = parseInt(raw, 10);
+        if (isNaN(num) || num < 0 || num > 36) {
+          statusDiv.textContent = "Invalid number (0-36 or 00)";
+          return;
+        }
+        validated = num.toString();
+      }
 
-  // -------- UNDO (rebuild stats from scratch) ----------
-  function undo() {
-    const statusDiv = document.getElementById("inputStatus");
-    if (history.length === 0) {
-      statusDiv.textContent = "Nothing to undo";
-      return;
+      history.push(validated);
+      // increment miss counters, reset current
+      for (var i = 0; i < TOP_KEYS.length; i++) {
+        var tk = TOP_KEYS[i];
+        if (validated === tk) stats.top[tk] = 0;
+        else stats.top[tk]++;
+      }
+      for (var j = 0; j < BOTTOM_KEYS.length; j++) {
+        var bk = BOTTOM_KEYS[j];
+        if (validated === bk) stats.bottom[bk] = 0;
+        else stats.bottom[bk]++;
+      }
+      updatePatternForNewSpin(validated);
+      saveData();
+      updateUI();
+      // check wheel adjacency alerts with transition based on previous flags stored
+      var oldFlags = alertFlags.slice();
+      var newFlags = evaluateCurrentConditions();
+      for (var cIdx = 0; cIdx < ADJ_CONDITIONS.length; cIdx++) {
+        if (newFlags[cIdx] && !oldFlags[cIdx]) {
+          alert(ADJ_CONDITIONS[cIdx].message);
+        }
+        alertFlags[cIdx] = newFlags[cIdx];
+      }
+      inputEl.value = "";
+      statusDiv.textContent = "? Spin " + validated + " recorded";
+      setTimeout(function() { 
+        var st = document.getElementById("inputStatus");
+        if (st.textContent.indexOf("recorded") !== -1) st.textContent = "";
+      }, 1800);
     }
-    history.pop();
-    // reset stats completely
-    const freshTop = { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 };
-    const freshBottom = { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 };
-    const topOrderArr = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
-    const bottomOrderArr = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
-    
-    // rebuild miss counts from remaining history
-    history.forEach(spin => {
-      topOrderArr.forEach(num => {
-        if (spin === num) freshTop[num] = 0;
-        else freshTop[num]++;
-      });
-      bottomOrderArr.forEach(num => {
-        if (spin === num) freshBottom[num] = 0;
-        else freshBottom[num]++;
-      });
-    });
-    stats.top = freshTop;
-    stats.bottom = freshBottom;
-    
-    // reset alert flags to avoid stale popups on adjacency
-    alertedAdj30 = false;
-    alertedAdj20 = false;
-    alertShown = false;  // special number alert flag reset (if condition no longer satisfied)
-    localStorage.setItem("alertShown", "false");
-    
-    save();
-    updateDisplay();
-    statusDiv.textContent = "↩️ Last spin undone";
-  }
 
-  // -------- RESET ALL ----------
-  function resetAll() {
-    if (confirm("⚠️ RESET ALL DATA? This will erase all spins & miss counts. Cannot be undone.")) {
-      history = [];
-      stats = {
-        top: { '00':0, '27':0, '10':0, '25':0, '29':0, '12':0, '8':0, '19':0, '31':0, '18':0, '6':0, '21':0, '33':0, '16':0, '4':0, '23':0, '35':0, '14':0, '2':0 },
-        bottom: { '1':0, '13':0, '36':0, '24':0, '3':0, '15':0, '34':0, '22':0, '5':0, '17':0, '32':0, '20':0, '7':0, '11':0, '30':0, '26':0, '9':0, '28':0, '0':0 }
-      };
-      alertedAdj30 = false;
-      alertedAdj20 = false;
-      alertShown = false;
-      localStorage.setItem("alertShown", "false");
-      localStorage.removeItem("history");
-      localStorage.removeItem("stats");
-      save();  // fresh save
-      updateDisplay();
-      document.getElementById("inputStatus").textContent = "All data reset.";
+    function undoLast() {
+      if (history.length === 0) {
+        document.getElementById("inputStatus").textContent = "Nothing to undo";
+        return;
+      }
+      var oldFlags = alertFlags.slice();
+      history.pop();
+      rebuildStatsFull();
+      saveData();
+      updateUI();
+      var newFlags = evaluateCurrentConditions();
+      for (var i = 0; i < ADJ_CONDITIONS.length; i++) {
+        if (newFlags[i] && !oldFlags[i]) {
+          alert(ADJ_CONDITIONS[i].message);
+        }
+        alertFlags[i] = newFlags[i];
+      }
+      document.getElementById("inputStatus").textContent = "?? Last spin undone";
+      setTimeout(function() {
+        var st = document.getElementById("inputStatus");
+        if (st.textContent.indexOf("undone") !== -1) st.textContent = "";
+      }, 1500);
     }
-  }
 
-  // -------- NUMPAD HELPERS ----------
-  function numpadClick(n) {
-    const input = document.getElementById("numberInput");
-    const status = document.getElementById("inputStatus");
-    status.textContent = "";
-    if (n === '00') {
-      input.value = '00';
-    } else {
-      if (input.value.length < 2 && !(input.value === '0' && n === '0')) {
-        input.value += n;
-      } else if (input.value === '00') {
-        input.value = n;
+    function resetAll() {
+      if (confirm("?? RESET all spins & stats? This cannot be undone.")) {
+        history = [];
+        stats = getFreshStats();
+        saveData();
+        updateUI();
+        syncAlertFlagsSilent();
+        document.getElementById("inputStatus").textContent = "? All data reset";
+        setTimeout(function() {
+          var stDiv = document.getElementById("inputStatus");
+          if (stDiv.textContent.indexOf("reset") !== -1) stDiv.textContent = "";
+        }, 2000);
+      } else {
+        document.getElementById("inputStatus").textContent = "Reset cancelled";
       }
     }
-  }
-  
-  function backspace() {
-    const input = document.getElementById("numberInput");
-    input.value = input.value.slice(0, -1);
-  }
 
-  // -------- INITIALISE & EVENT ----------
-  document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("numberInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") addNumber();
-    });
-    updateDisplay();
-    // also after loading sync adjacency flags & color
-    evaluateAdjacencyAlerts();
-    applyMissColors();
-  });
+    // ---------- Custom numpad logic (unchanged) ----------
+    function handleDigit(digit) {
+      var input = document.getElementById("numberInput");
+      var current = input.value;
+      if (digit === '0') {
+        if (current === '0') {
+          input.value = '00';
+        } else if (current === '') {
+          input.value = '0';
+        } else if (current.length === 1 && current !== '0') {
+          input.value = current + '0';
+        } else if (current === '00') {
+          return;
+        } else if (current.length < 2 && !isNaN(parseInt(current,10))) {
+          input.value = current + '0';
+        }
+      } else {
+        if (current === '00') return;
+        if (current.length < 2) {
+          input.value = current + digit;
+        }
+      }
+      document.getElementById("inputStatus").textContent = "";
+    }
+
+    function handleBackspace() {
+      var input = document.getElementById("numberInput");
+      var cur = input.value;
+      if (cur === '00') input.value = '0';
+      else input.value = cur.slice(0, -1);
+    }
+
+    // ---------- LAPTOP KEYBOARD SUPPORT (keeping input readonly, capture keys when focused) ----------
+    function setupKeyboardSupport() {
+      var numberInput = document.getElementById("numberInput");
+      window.addEventListener("keydown", function(e) {
+        if (document.activeElement !== numberInput) return;
+        var key = e.key;
+        // digits 0-9
+        if (/^[0-9]$/.test(key)) {
+          e.preventDefault();
+          handleDigit(key);
+        }
+        else if (key === 'Enter') {
+          e.preventDefault();
+          addSpin();
+        }
+        else if (key === 'Backspace') {
+          e.preventDefault();
+          handleBackspace();
+        }
+        else if (key === 'Delete') {
+          e.preventDefault();
+          handleBackspace();
+        }
+      });
+    }
+
+    // ---------- BUILD GRID ----------
+    function buildGrid() {
+      var topRowDiv = document.getElementById("topRow");
+      var bottomRowDiv = document.getElementById("bottomRow");
+      topRowDiv.innerHTML = "";
+      bottomRowDiv.innerHTML = "";
+      for (var i = 0; i < TOP_KEYS.length; i++) {
+        var num = TOP_KEYS[i];
+        var color = getColorClass(num);
+        var col = document.createElement("div");
+        col.className = "number-column";
+        col.innerHTML = '<div class="number-display ' + color + '">' + num + '</div><div class="miss-count"><span id="top-' + num + '">0</span></div>';
+        topRowDiv.appendChild(col);
+      }
+      for (var j = 0; j < BOTTOM_KEYS.length; j++) {
+        var bnum = BOTTOM_KEYS[j];
+        var bcolor = getColorClass(bnum);
+        var bcol = document.createElement("div");
+        bcol.className = "number-column";
+        bcol.innerHTML = '<div class="number-display ' + bcolor + '">' + bnum + '</div><div class="miss-count"><span id="bottom-' + bnum + '">0</span></div>';
+        bottomRowDiv.appendChild(bcol);
+      }
+    }
+
+    // ---------- INIT ----------
+    function init() {
+      buildGrid();
+      loadData();
+      updateUI();
+      syncAlertFlagsSilent();   // set initial flags without popup
+      setupKeyboardSupport();
+
+      document.getElementById("addSpinBtn").addEventListener("click", addSpin);
+      document.getElementById("undoBtn").addEventListener("click", undoLast);
+      document.getElementById("resetBtn").addEventListener("click", resetAll);
+      document.getElementById("enterNumBtn").addEventListener("click", addSpin);
+      document.getElementById("backspaceBtn").addEventListener("click", handleBackspace);
+
+      var digitBtns = document.querySelectorAll(".numpad button[data-digit]");
+      for (var d = 0; d < digitBtns.length; d++) {
+        digitBtns[d].addEventListener("click", function(e) {
+          var digit = this.getAttribute("data-digit");
+          handleDigit(digit);
+          e.preventDefault();
+        });
+      }
+    }
+
+    init();
+  })();
 </script>
 </body>
 </html>

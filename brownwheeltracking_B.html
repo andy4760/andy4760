@@ -43,20 +43,23 @@
       font-size: 0.8rem;
     }
     
-    /* ===== STICKY BAR (recent spins + input controls always on top) ===== */
+    /* ===== STICKY BAR - iOS 12.5.8 COMPATIBLE ===== */
+    /* Removed backdrop-filter (unsupported on iOS 12) and added -webkit-sticky */
     .sticky-top-panel {
+      position: -webkit-sticky;
       position: sticky;
       top: 0;
       z-index: 99;
-      background: rgba(22, 33, 62, 0.92);
-      backdrop-filter: blur(14px);
+      background: rgba(18, 25, 45, 0.97);  /* strong opaque fallback for older devices */
       border-radius: 28px;
       margin: 0.2rem 0 1.2rem 0;
       padding: 0.8rem 1rem 0.9rem 1rem;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.05);
       transition: all 0.2s ease;
-      border: 1px solid rgba(255, 107, 53, 0.25);
+      border: 1px solid rgba(255, 107, 53, 0.35);
+      /* no backdrop-filter to avoid rendering issues on legacy WebKit */
     }
+    /* ensure background remains readable on all devices */
     .sticky-top-panel .legend {
       margin-top: 0;
       margin-bottom: 12px;
@@ -447,7 +450,8 @@
     <div class="tagline">Gold Miss (≥30) | Adjacency Alerts | Cold 65+ | Extreme 70+ (tracking only when ≥8 numbers)</div>
   </header>
 
-  <!-- ========== STICKY BAR: recent spins + input controls always on top ========= -->
+  <!-- ========== STICKY BAR (recent spins + input controls always on top) ========= -->
+  <!-- fixed compatibility: no backdrop-filter, -webkit-sticky, robust background -->
   <div class="sticky-top-panel">
     <div class="legend">
       <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
@@ -635,8 +639,6 @@
             extremeHitSeq.push(extremeMisses);
             extremeMisses = 0;
           }
-        } else {
-          // When condition not met, extreme cumulative stays frozen (no addition, no reset). 
         }
         
         // Update miss counters for all numbers (always)
@@ -730,7 +732,7 @@
     function syncAlertFlagsSilent() { var f = evaluateConditions(); for(var i=0;i<ADJ_CONDITIONS.length;i++) alertFlags[i]=f[i]; }
     
     function updateColdUI() {
-      // Regular cold (>=65) - THRESHOLD UPDATED
+      // Regular cold (>=65)
       document.getElementById("coldMissesDisplay").innerText = stats.cold.misses;
       var hitContainer = document.getElementById("hitSequenceList");
       if (!stats.cold.hitSeq || stats.cold.hitSeq.length === 0) {
@@ -773,7 +775,7 @@
         }
       }
       
-      // Extreme cold (>=70) - unchanged
+      // Extreme cold (>=70)
       document.getElementById("extremeColdMissesDisplay").innerText = stats.extremeCold.misses;
       var extremeHitContainer = document.getElementById("extremeHitSequenceList");
       if (!stats.extremeCold.hitSeq || stats.extremeCold.hitSeq.length === 0) {
@@ -881,7 +883,7 @@
       for (var ti=0;ti<TOP_KEYS.length;ti++) { var tk=TOP_KEYS[ti]; if (validated === tk) stats.top[tk]=0; else stats.top[tk]++; }
       for (var bj=0;bj<BOTTOM_KEYS.length;bj++) { var bk=BOTTOM_KEYS[bj]; if (validated === bk) stats.bottom[bk]=0; else stats.bottom[bk]++; }
       
-      // Update pattern tracking (unchanged)
+      // Update pattern tracking
       for (var p=0;p<TRACKS.length;p++) { var k=TRACKS[p]; var unique=[], seen={};
         for (var j=history.length-1;j>=0;j--) { var prev=history[j]; if(!seen[prev]){ seen[prev]=true; unique.unshift(prev); if(unique.length>=k) break; } }
         var contained=false; for(var u=0;u<unique.length;u++){ if(unique[u]===validated){ contained=true; break; } }

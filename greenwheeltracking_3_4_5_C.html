@@ -498,15 +498,12 @@
 <div class="container">
   <header>
     <h1>🎰 Green Wheel Roulette Pro</h1>
-    <div class="tagline">Gold Miss (≥30) | Adjacency Alerts | Cold 65+ | Extreme 70+ | Cold 100+ | Continuous + 7 One‑Shot Trackers + Tri/Quad/Quintuplicates (5+)</div>
+    <div class="tagline">Gold Miss (≥30) | Adjacency Alerts | Cold 65+ | Extreme 70+ | Cold 100+ | Continuous + 7 One‑Shot Trackers + Tri/Quad/Quintuplicates (5+) + Track 12 + Hit Sequences</div>
   </header>
 
   <!-- STICKY PANEL -->
   <div class="sticky-top-panel">
-    <div class="legend">
-
-    </div>
-
+    <div class="legend"></div>
     <div class="recent-wrapper"><div id="recentSpins"></div></div>
 
     <div class="controls">
@@ -531,13 +528,42 @@
       <div class="pattern-box"><h3>🎯 Track 5</h3><div class="pattern-stats">Misses: <span id="miss5">0</span><br>Hits: <span id="hit5">0</span></div></div>
       <div class="pattern-box"><h3>🎯 Track 6</h3><div class="pattern-stats">Misses: <span id="miss6">0</span><br>Hits: <span id="hit6">0</span></div></div>
       <div class="pattern-box"><h3>🎯 Track 9</h3><div class="pattern-stats">Misses: <span id="miss9">0</span><br>Hits: <span id="hit9">0</span></div></div>
+      <div class="pattern-box"><h3>🎯 Track 12</h3><div class="pattern-stats">Misses: <span id="miss12">0</span><br>Hits: <span id="hit12">0</span></div></div>
     </div>
 
-    <!-- ===== NEW DUPLICATES TRACKER (2 hits in last 21 spins) ===== -->
+    <!-- ===== TRACK 9 HIT SEQUENCE & MISSES ===== -->
+    <div class="cold-section" style="border-left: 4px solid #f9a825; background: rgba(30,30,55,0.85);">
+      <div class="tracker-header-row">
+        <div class="cold-header" style="border-left-color: #f9a825; margin-bottom: 0;">
+          🎯 TRACK 9 – HIT SEQUENCE & MISSES
+        </div>
+      </div>
+      <div class="cold-stats-row" style="margin-top: 8px;">
+        <div class="cold-misses-badge"><span>📊 CURRENT MISSES STREAK (since last hit)</span><span id="track9MissesDisplay">0</span></div>
+        <div class="hit-sequence-box"><span>⚡ HIT SEQUENCE (misses value on hit)</span><div id="track9HitSequenceList" class="hit-list">—</div></div>
+      </div>
+      <div style="font-size:0.7rem; margin-top:6px; text-align:center; color:#ffcd7e;">✔️ Each time Track 9 hits, the current misses count is recorded and resets.</div>
+    </div>
+
+    <!-- ===== TRACK 12 HIT SEQUENCE & MISSES (NEW) ===== -->
+    <div class="cold-section" style="border-left: 4px solid #d4af37; background: rgba(30,30,55,0.85);">
+      <div class="tracker-header-row">
+        <div class="cold-header" style="border-left-color: #d4af37; margin-bottom: 0;">
+          🎯 TRACK 12 – HIT SEQUENCE & MISSES
+        </div>
+      </div>
+      <div class="cold-stats-row" style="margin-top: 8px;">
+        <div class="cold-misses-badge"><span>📊 CURRENT MISSES STREAK (since last hit)</span><span id="track12MissesDisplay">0</span></div>
+        <div class="hit-sequence-box"><span>⚡ HIT SEQUENCE (misses value on hit)</span><div id="track12HitSequenceList" class="hit-list">—</div></div>
+      </div>
+      <div style="font-size:0.7rem; margin-top:6px; text-align:center; color:#ffcd7e;">✔️ Each time Track 12 hits, the current misses count is recorded and resets.</div>
+    </div>
+
+    <!-- ===== DUPLICATES TRACKER - WINDOW 30 SPINS ===== -->
     <div class="cold-section" style="border-left: 4px solid #4db6ac; background: rgba(30,30,55,0.85);">
       <div class="tracker-header-row">
         <div class="cold-header" style="border-left-color: #4db6ac; margin-bottom: 0;">
-          🔁 DUPLICATES ( 2 hits ) 21 spins
+          🔁 DUPLICATES ( 2 hits ) 30 spins
         </div>
         <button id="resetDuplicateBtn" class="reset-tracker-btn">⟳ Reset this tracker</button>
       </div>
@@ -548,7 +574,7 @@
       </div>
     </div>
 
-    <!-- ===== TRIPLICATES TRACKER - sorted by longest remaining ===== -->
+    <!-- ===== TRIPLICATES TRACKER ===== -->
     <div class="cold-section" style="border-left: 4px solid #ffaa66; background: rgba(30,30,55,0.85);">
       <div class="tracker-header-row">
         <div class="cold-header" style="border-left-color: #ffaa66; margin-bottom: 0;">
@@ -578,7 +604,7 @@
       </div>
     </div>
 
-    <!-- ===== QUINTUPLICATES TRACKER - 5+ hits ===== -->
+    <!-- ===== QUINTUPLICATES TRACKER ===== -->
     <div class="cold-section" style="border-left: 4px solid #d4af37; background: rgba(30,30,55,0.85);">
       <div class="tracker-header-row">
         <div class="cold-header" style="border-left-color: #d4af37; margin-bottom: 0;">
@@ -633,7 +659,7 @@
       </div>
     </div>
 
-    <!-- COLD 100+ (≥100 misses) -->
+    <!-- COLD 100+ -->
     <div class="cold-section" style="border-left: 4px solid #e0a0ff; background: rgba(30,30,55,0.9);">
       <div class="cold-header" style="border-left-color: #e0a0ff;">
         💀 COLD NUMBERS (≥100 misses)
@@ -678,8 +704,8 @@
   var TOP_KEYS = ['00','27','10','25','29','12','8','19','31','18','6','21','33','16','4','23','35','14','2'];
   var BOTTOM_KEYS = ['1','13','36','24','3','15','34','22','5','17','32','20','7','11','30','26','9','28','0'];
   var ALL_ROULETTE_NUMBERS = ['0','00','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36'];
-  var TRACKS = [3,4,5,6,9];
-  var THRESHOLD_ALERTS = {3:60,4:50,5:40,6:30,9:20};
+  var TRACKS = [3,4,5,6,9,12];
+  var THRESHOLD_ALERTS = {3:60,4:50,5:40,6:30,9:20,12:15};
   var ADJ_CONDITIONS = [
     { length: 5, minMiss: 50, message: "⚠️ WHEEL ALERT: 5+ adjacent numbers with 50+ misses!" },
     { length: 6, minMiss: 40, message: "⚠️ WHEEL ALERT: 6+ adjacent numbers with 40+ misses!" },
@@ -700,7 +726,6 @@
   var cold100AlertFlag = false, specialContinuousAlertFlag = false, oneShotFullAlertFlag = false, setAAlertFlag = false, setBAlertFlag = false, setCAlertFlag = false;
   function resetAlertFlags() { cold100AlertFlag = false; specialContinuousAlertFlag = false; oneShotFullAlertFlag = false; setAAlertFlag = false; setBAlertFlag = false; setCAlertFlag = false; }
   
-  // NEW: get numbers with exact count within specific window size (last N spins before index)
   function getExactCountSetWindow(historyArr, beforeIdx, windowSize, targetCount) {
     if (beforeIdx <= 0) return [];
     var start = Math.max(0, beforeIdx - windowSize);
@@ -753,8 +778,10 @@
     var topObj = {}, bottomObj = {};
     for (var i = 0; i < TOP_KEYS.length; i++) topObj[TOP_KEYS[i]] = 0;
     for (var i = 0; i < BOTTOM_KEYS.length; i++) bottomObj[BOTTOM_KEYS[i]] = 0;
+    var trackObj = {};
+    for (var ti=0; ti<TRACKS.length; ti++) { trackObj[TRACKS[ti]] = { m: 0, h: 0, hitSeq: [] }; }
     return {
-      3: { m: 0, h: 0 }, 4: { m: 0, h: 0 }, 5: { m: 0, h: 0 }, 6: { m: 0, h: 0 }, 9: { m: 0, h: 0 },
+      ...trackObj,
       top: topObj, bottom: bottomObj,
       cold: { misses: 0, hitSeq: [] },
       extremeCold: { misses: 0, hitSeq: [] },
@@ -776,12 +803,36 @@
     };
   }
   
+  function duplicateLongevitySort(a, b) {
+    var getIndicesWindow = function(num) {
+      var idxs = [];
+      var startIdx = Math.max(0, history.length - 30);
+      for (var i = startIdx; i < history.length; i++) if (history[i] === num) idxs.push(i);
+      return idxs;
+    };
+    var idxsA = getIndicesWindow(a);
+    var idxsB = getIndicesWindow(b);
+    var minA = idxsA.length ? Math.min.apply(null, idxsA) : -1;
+    var minB = idxsB.length ? Math.min.apply(null, idxsB) : -1;
+    return minB - minA;
+  }
+  
+  function triplicateLongevitySort(a, b) {
+    var idxsA = [], idxsB = [];
+    var startIdx = Math.max(0, history.length - 50);
+    for (var i = startIdx; i < history.length; i++) { if (history[i] === a) idxsA.push(i); if (history[i] === b) idxsB.push(i); }
+    var minA = idxsA.length ? Math.min.apply(null, idxsA) : -1;
+    var minB = idxsB.length ? Math.min.apply(null, idxsB) : -1;
+    return minB - minA;
+  }
+  
   function rebuildFullFromHistory() {
     var fresh = getFreshStats();
     var topTemp = {}, bottomTemp = {};
     for (var i=0;i<TOP_KEYS.length;i++) topTemp[TOP_KEYS[i]] = 0;
     for (var i=0;i<BOTTOM_KEYS.length;i++) bottomTemp[BOTTOM_KEYS[i]] = 0;
-    var pattern = { 3: { m:0,h:0 }, 4: { m:0,h:0 }, 5: {m:0,h:0}, 6:{m:0,h:0}, 9:{m:0,h:0} };
+    var pattern = {};
+    for (var ti=0; ti<TRACKS.length; ti++) pattern[TRACKS[ti]] = { m:0, h:0, hitSeq: [] };
     var coldMisses = 0, coldHitSeq = [];
     var extremeMisses = 0, extremeHitSeq = [];
     var cold55Misses = 0, cold55HitSeq = [];
@@ -803,8 +854,7 @@
     for (var idx = 0; idx < history.length; idx++) {
       var spin = history[idx];
       
-      // DUPLICATE (exactly 2 within last 21 spins)
-      var dupSet = getExactCountSetWindow(history, idx, 21, 2);
+      var dupSet = getExactCountSetWindow(history, idx, 30, 2);
       var dupSize = dupSet.length;
       if (dupSize > 0) {
         if (arrayContains(dupSet, spin)) {
@@ -852,10 +902,15 @@
       
       for(var t=0;t<TOP_KEYS.length;t++){ var tk=TOP_KEYS[t]; if(spin===tk) topTemp[tk]=0; else topTemp[tk]++; }
       for(var b=0;b<BOTTOM_KEYS.length;b++){ var bk=BOTTOM_KEYS[b]; if(spin===bk) bottomTemp[bk]=0; else bottomTemp[bk]++; }
-      for(var p=0;p<TRACKS.length;p++){ var k=TRACKS[p]; var unique=[], seen={}; for(var j=idx-1;j>=0;j--){ var prev=history[j]; if(!seen[prev]){ seen[prev]=true; unique.unshift(prev); if(unique.length>=k) break; } } var contained=false; for(var u=0;u<unique.length;u++){ if(unique[u]===spin){ contained=true; break; } } if(contained){ pattern[k].h++; pattern[k].m=0; } else pattern[k].m++; }
+      
+      for(var p=0;p<TRACKS.length;p++){ var k=TRACKS[p]; var unique=[], seen={}; for(var j=idx-1;j>=0;j--){ var prev=history[j]; if(!seen[prev]){ seen[prev]=true; unique.unshift(prev); if(unique.length>=k) break; } } var contained=false; for(var u=0;u<unique.length;u++){ if(unique[u]===spin){ contained=true; break; } } if(contained){ 
+        pattern[k].h++; 
+        pattern[k].hitSeq.push(pattern[k].m); 
+        pattern[k].m=0; 
+      } else pattern[k].m++; }
     }
     fresh.top=topTemp; fresh.bottom=bottomTemp;
-    for(var ti=0;ti<TRACKS.length;ti++){ var tk=TRACKS[ti]; fresh[tk].m=pattern[tk].m; fresh[tk].h=pattern[tk].h; }
+    for(var ti=0;ti<TRACKS.length;ti++){ var tk=TRACKS[ti]; fresh[tk].m=pattern[tk].m; fresh[tk].h=pattern[tk].h; fresh[tk].hitSeq=pattern[tk].hitSeq; }
     fresh.cold={ misses:coldMisses, hitSeq:coldHitSeq }; fresh.extremeCold={ misses:extremeMisses, hitSeq:extremeHitSeq }; fresh.cold55={ misses:cold55Misses, hitSeq:cold55HitSeq };
     fresh.cold100={ misses:cold100Misses, hitSeq:cold100HitSeq };
     fresh.specialSet={ misses:specialMisses, hitSeq:specialHitSeq, active:specialActive };
@@ -890,54 +945,40 @@
     setTimeout(function(){ var st=document.getElementById("inputStatus"); if(st.textContent.indexOf("reset")!==-1) st.textContent=""; }, 2000);
   }
   
-  function getIndicesWithinLast50(num) {
-    var idxs = [];
-    var startIdx = Math.max(0, history.length - 50);
-    for (var i = startIdx; i < history.length; i++) {
-      if (history[i] === num) idxs.push(i);
-    }
-    return idxs;
-  }
-  function triplicateLongevitySort(a, b) {
-    var idxsA = getIndicesWithinLast50(a);
-    var idxsB = getIndicesWithinLast50(b);
-    var minA = Math.min.apply(null, idxsA);
-    var minB = Math.min.apply(null, idxsB);
-    return minB - minA;
-  }
-  function duplicateLongevitySort(a, b) {
-    var getIndicesWindow = function(num) {
-      var idxs = [];
-      var startIdx = Math.max(0, history.length - 21);
-      for (var i = startIdx; i < history.length; i++) if (history[i] === num) idxs.push(i);
-      return idxs;
-    };
-    var idxsA = getIndicesWindow(a);
-    var idxsB = getIndicesWindow(b);
-    var minA = idxsA.length ? Math.min.apply(null, idxsA) : -1;
-    var minB = idxsB.length ? Math.min.apply(null, idxsB) : -1;
-    return minB - minA;
-  }
-  
   function updateUI() {
     var rec=document.getElementById("recentSpins"); rec.innerHTML=""; var last=history.slice(-21).reverse(); for(var i=0;i<last.length;i++){ var n=last[i]; var div=document.createElement("div"); div.className="spin-box "+getColorClass(n); div.textContent=n; rec.appendChild(div); }
-    document.getElementById("entryCount").innerText="Total spins: "+history.length; document.getElementById("miss3").innerText=stats[3].m; document.getElementById("hit3").innerText=stats[3].h; document.getElementById("miss4").innerText=stats[4].m; document.getElementById("hit4").innerText=stats[4].h; document.getElementById("miss5").innerText=stats[5].m; document.getElementById("hit5").innerText=stats[5].h; document.getElementById("miss6").innerText=stats[6].m; document.getElementById("hit6").innerText=stats[6].h; document.getElementById("miss9").innerText=stats[9].m; document.getElementById("hit9").innerText=stats[9].h;
+    document.getElementById("entryCount").innerText="Total spins: "+history.length;
+    for(var ti=0;ti<TRACKS.length;ti++){ var tk=TRACKS[ti]; document.getElementById("miss"+tk).innerText=stats[tk].m; document.getElementById("hit"+tk).innerText=stats[tk].h; }
+    
+    // Track 9 hit sequence display
+    document.getElementById("track9MissesDisplay").innerText = stats[9].m;
+    var track9HitDiv = document.getElementById("track9HitSequenceList");
+    track9HitDiv.innerHTML = "";
+    if(stats[9].hitSeq.length===0) track9HitDiv.innerHTML="<span style='color:#aaa;'>—</span>";
+    else for(var i=0;i<stats[9].hitSeq.length;i++){ var chip=document.createElement("span"); chip.className="hit-chip"; chip.innerText=stats[9].hitSeq[i]; track9HitDiv.appendChild(chip); }
+    
+    // Track 12 hit sequence display (NEW)
+    document.getElementById("track12MissesDisplay").innerText = stats[12].m;
+    var track12HitDiv = document.getElementById("track12HitSequenceList");
+    track12HitDiv.innerHTML = "";
+    if(stats[12].hitSeq.length===0) track12HitDiv.innerHTML="<span style='color:#aaa;'>—</span>";
+    else for(var i=0;i<stats[12].hitSeq.length;i++){ var chip=document.createElement("span"); chip.className="hit-chip"; chip.innerText=stats[12].hitSeq[i]; track12HitDiv.appendChild(chip); }
+    
     for(var t=0;t<TOP_KEYS.length;t++){ var key=TOP_KEYS[t]; var el=document.getElementById("top-"+key); if(el) el.innerText=stats.top[key]; } for(var b=0;b<BOTTOM_KEYS.length;b++){ var bkey=BOTTOM_KEYS[b]; var bel=document.getElementById("bottom-"+bkey); if(bel) bel.innerText=stats.bottom[bkey]; }
     var allMiss=document.querySelectorAll('.miss-count'); for(var m=0;m<allMiss.length;m++){ var val=parseInt(allMiss[m].innerText,10); if(!isNaN(val) && val>=30) allMiss[m].classList.add('gold-miss'); else allMiss[m].classList.remove('gold-miss'); }
     
     // DUPLICATE
-    var currentDupSet = getExactCountSetWindow(history, history.length, 21, 2);
+    var currentDupSet = getExactCountSetWindow(history, history.length, 30, 2);
     currentDupSet.sort(duplicateLongevitySort);
     var dupContainer = document.getElementById("duplicateNumbersContainer");
     dupContainer.innerHTML = "";
-    if(currentDupSet.length === 0) dupContainer.innerHTML = '<span style="color:#aaa; font-size:0.8rem;">🔁 No duplicates (exactly 2 appearances in last 21 spins).</span>';
+    if(currentDupSet.length === 0) dupContainer.innerHTML = '<span style="color:#aaa; font-size:0.8rem;">🔁 No duplicates (exactly 2 appearances in last 30 spins).</span>';
     else { for(var i=0;i<currentDupSet.length;i++){ var numStr = currentDupSet[i]; var colorClass = getColorClass(numStr); var chip = document.createElement("span"); chip.className = "duplicate-chip " + colorClass; chip.textContent = numStr; dupContainer.appendChild(chip); } }
     document.getElementById("duplicateMisses").innerText = stats.duplicate.misses;
     var dupHitDiv = document.getElementById("duplicateHitSeq"); dupHitDiv.innerHTML = "";
     if(stats.duplicate.hitSeq.length===0) dupHitDiv.innerHTML="<span style='color:#aaa;'>—</span>";
     else for(var i=0;i<stats.duplicate.hitSeq.length;i++){ var chip=document.createElement("span"); chip.className="hit-chip"; chip.innerText=stats.duplicate.hitSeq[i]; dupHitDiv.appendChild(chip); }
     
-    // TRIPLICATE
     var currentTriSet = getExactCountSet(history, history.length, 3);
     currentTriSet.sort(triplicateLongevitySort);
     var triContainer = document.getElementById("triplicateNumbersContainer"); triContainer.innerHTML = "";
@@ -990,7 +1031,7 @@
     if(raw===""){ statusDiv.textContent="Enter a number using numpad"; return; }
     var validated=null; if(raw==="00") validated="00"; else{ var num=parseInt(raw,10); if(isNaN(num)||num<0||num>36){ statusDiv.textContent="Invalid number"; return; } validated=num.toString(); }
     
-    var currentDupSet = getExactCountSetWindow(history, history.length, 21, 2);
+    var currentDupSet = getExactCountSetWindow(history, history.length, 30, 2);
     var dupSize = currentDupSet.length;
     if (dupSize > 0) { if (arrayContains(currentDupSet, validated)) { stats.duplicate.misses += dupSize; stats.duplicate.hitSeq.push(stats.duplicate.misses); stats.duplicate.misses = 0; } else { stats.duplicate.misses += dupSize; } }
     
@@ -1028,7 +1069,12 @@
     if(stats.setC.pending){ if(arrayContains(SET_C,validated)){ stats.setC.hitSeq.push(stats.setC.misses); stats.setC.misses=0; } else { stats.setC.misses++; } stats.setC.pending=false; } if(arrayContains(SET_C,validated)) stats.setC.pending=true;
     for(var ti=0;ti<TOP_KEYS.length;ti++){ var tk=TOP_KEYS[ti]; if(validated===tk) stats.top[tk]=0; else stats.top[tk]++; }
     for(var bj=0;bj<BOTTOM_KEYS.length;bj++){ var bk=BOTTOM_KEYS[bj]; if(validated===bk) stats.bottom[bk]=0; else stats.bottom[bk]++; }
-    for(var p=0;p<TRACKS.length;p++){ var k=TRACKS[p]; var unique=[], seen={}; for(var j=history.length-1;j>=0;j--){ var prev=history[j]; if(!seen[prev]){ seen[prev]=true; unique.unshift(prev); if(unique.length>=k) break; } } var contained=false; for(var u=0;u<unique.length;u++){ if(unique[u]===validated){ contained=true; break; } } if(contained){ stats[k].h++; stats[k].m=0; } else{ stats[k].m++; if(stats[k].m===THRESHOLD_ALERTS[k]) alert("⚠️ Track "+k+" missed "+stats[k].m+" times! Last spin: "+validated); } }
+    
+    for(var p=0;p<TRACKS.length;p++){ var k=TRACKS[p]; var unique=[], seen={}; for(var j=history.length-1;j>=0;j--){ var prev=history[j]; if(!seen[prev]){ seen[prev]=true; unique.unshift(prev); if(unique.length>=k) break; } } var contained=false; for(var u=0;u<unique.length;u++){ if(unique[u]===validated){ contained=true; break; } } if(contained){ 
+      stats[k].h++; 
+      stats[k].hitSeq.push(stats[k].m); 
+      stats[k].m=0; 
+    } else{ stats[k].m++; if(stats[k].m===THRESHOLD_ALERTS[k]) alert("⚠️ Track "+k+" missed "+stats[k].m+" times! Last spin: "+validated); } }
     history.push(validated);
     evaluateAllCustomAlerts(); saveData(); updateUI();
     var oldFlags=alertFlags.slice(); var newFlags=evaluateConditions(); for(var cIdx=0;cIdx<ADJ_CONDITIONS.length;cIdx++){ if(newFlags[cIdx] && !oldFlags[cIdx]) alert(ADJ_CONDITIONS[cIdx].message); alertFlags[cIdx]=newFlags[cIdx]; }

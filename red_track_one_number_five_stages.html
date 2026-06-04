@@ -25,13 +25,16 @@
       margin: 0 auto;
     }
 
-    /* NEW STICKY PANEL - wraps controls + recent spins */
+    /* STICKY PANEL - FIXED for iPad Mini 2 / iOS 12.5.8 */
+    /* Removed backdrop-filter which caused sticky failure on older WebKit */
+    /* Added -webkit-sticky for maximum compatibility */
     .sticky-top-panel {
+      position: -webkit-sticky;
       position: sticky;
       top: 0;
       z-index: 200;
       background: rgba(26, 26, 46, 0.96);
-      backdrop-filter: blur(8px);
+      /* backdrop-filter removed: ensures sticky works on iPad Mini 2 / iOS 12 */
       border-radius: 20px;
       padding: 1rem 1.2rem;
       margin-bottom: 1.5rem;
@@ -64,6 +67,7 @@
       scrollbar-color: #ff4b2b #1a1a2e;
       min-height: 65px;
       max-width: 100%;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* keep original header & legend untouched */
@@ -653,7 +657,7 @@
     <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
   </div>
 
-  <!-- STICKY PANEL : wraps controls + recent spins (fully interactive) -->
+  <!-- STICKY PANEL (fully fixed for iPad Mini 2 / iOS 12.5.8) -->
   <div class="sticky-top-panel">
     <div class="controls">
       <div id="entryCount">Total spins: 0</div>
@@ -666,7 +670,7 @@
     <div id="recentSpins"></div>
   </div>
 
-  <!-- TRACKING SECTION: cold numbers, stages, misses, stats (unchanged) -->
+  <!-- TRACKING SECTION: cold numbers, stages, misses, stats -->
   <div class="tracking-section">
     <div class="tracking-header">
       <span>❄️ Cold Numbers Tracking (80+ Misses when appeared)</span>
@@ -725,7 +729,7 @@
 </div>
 
 <script>
-  // ---------- DATA & UTILITIES (FULLY PRESERVED) ----------
+  // ---------- DATA & UTILITIES (FULLY PRESERVED, NO ALTERATIONS TO CORE LOGIC) ----------
   const colors = { red: [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36], black: [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35], green: ["0","00"] };
   const allNumbers = ["0","00", ...Array.from({length:36},(_,i)=>(i+1).toString())];
   let history = JSON.parse(localStorage.getItem("history") || "[]");

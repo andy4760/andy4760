@@ -496,15 +496,6 @@
         </div>
 
         <div class="duplicate-section">
-            <!-- COMBINED (D30 + T40 + GroupD + TwoA + TwoB) - remains -->
-            <div class="combined-big-box">
-                <div style="font-weight:bold; margin-bottom:8px; font-size:1.1rem;">?? COMBINED (D30 + T40 + GroupD + TwoA + TwoB) – All active numbers</div>
-                <div id="combinedBigList" class="duplicate-list"><div class="no-duplicates">—</div></div>
-                <div class="misses-counter"><span>?? Misses: <span id="combinedBigMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedBigMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedBigHitHistory()">Reset hit seq</button></div></div>
-                <div class="hitseq-mini-list" id="combinedBigHitSeqList"><div class="no-duplicates">No hits yet</div></div>
-                <div style="font-size:10px; text-align:center;">?? hits: <span id="combinedBigHitCount">0</span></div>
-                <div style="margin-top: 8px; font-size: 10px; text-align: center; background: rgba(255,170,68,0.25); border-radius: 12px; padding: 5px;">?? D30 (dup=2/30) | T40 (=3/40) | GroupD (=3/60) | TwoA (exact 2 in last60, GroupA) | TwoB (exact 2 in last60, GroupB)</div>
-            </div>
 
             <!-- DUPLICATES20 -->
             <div class="row-single"><div class="duplicates20-box"><div style="font-weight:bold; margin-bottom:8px;">?? DUPLICATES (20 RECENT SPINS) - count = 2</div><div id="duplicates20List" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="duplicates20AutoMissesText">0</span></span><span>??? No Auto misses: <span id="duplicates20NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates20Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates20HitSeqList"></div><div>hits: <span id="duplicates20HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates20NoAutoHitSeqList"></div><div>hits: <span id="duplicates20NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates20NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
@@ -535,6 +526,17 @@
 
             <!-- Three Only (exactly 3 in last60) -->
             <div class="row-single"><div class="three-only-box"><div style="font-weight:bold">?? Three Only (exactly 3 in last60)</div><div id="threeOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="threeOnlyMissesText">0</span></span><button class="misses-reset-btn" onclick="resetThreeOnlyMisses()">Reset</button><button class="hitseq-reset-btn" onclick="resetThreeOnlyHitHistory()">Reset hits</button></div><div class="hitseq-mini-list" id="threeOnlyHitSeqList"></div></div></div>
+
+            <!-- COMBINED (D30 + T40 + GroupD + TwoA + TwoB) - remains -->
+            <div class="combined-big-box">
+                <div style="font-weight:bold; margin-bottom:8px; font-size:1.1rem;">?? COMBINED (D30 + T40 + GroupD + TwoA + TwoB) – All active numbers</div>
+                <div id="combinedBigList" class="duplicate-list"><div class="no-duplicates">—</div></div>
+                <div class="misses-counter"><span>?? Misses: <span id="combinedBigMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetCombinedBigMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetCombinedBigHitHistory()">Reset hit seq</button></div></div>
+                <div class="hitseq-mini-list" id="combinedBigHitSeqList"><div class="no-duplicates">No hits yet</div></div>
+                <div style="font-size:10px; text-align:center;">?? hits: <span id="combinedBigHitCount">0</span></div>
+                <div style="margin-top: 8px; font-size: 10px; text-align: center; background: rgba(255,170,68,0.25); border-radius: 12px; padding: 5px;">?? D30 (dup=2/30) | T40 (=3/40) | GroupD (=3/60) | TwoA (exact 2 in last60, GroupA) | TwoB (exact 2 in last60, GroupB)</div>
+            </div>
+
 
             <!-- Group C Quadruplicates (=4 in last60) -->
             <div class="row-single"><div class="group-c-box"><div style="font-weight:bold">?? Group C Quadruplicates (=4 in last60) – Auto & No-Auto tracking</div><div id="groupCDuplicates60" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="groupCMissesAutoText60">0</span></span><span>??? No Auto misses: <span id="groupCMissesNoAutoText60">0</span></span><div><button class="misses-reset-btn" onclick="resetQuadruplicateMisses()">Reset both misses</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="groupCAutoHitSeqList"></div><div>hits: <span id="groupCAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateAutoHitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="groupCNoAutoHitSeqList"></div><div>hits: <span id="groupCNoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetQuadruplicateNoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>

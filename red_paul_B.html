@@ -231,7 +231,8 @@
         .twoonly-box,
         .combined-twoonly-box,
         .three-only-box,
-        .group-c-box {
+        .group-c-box,
+        .auto-reset-numbers-box {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 14px;
             padding: 12px;
@@ -283,6 +284,10 @@
         .group-c-box {
             border: 2px solid #9C27B0;
             background: rgba(156, 39, 176, 0.12);
+        }
+        .auto-reset-numbers-box {
+            border: 2px solid #ff6ec7;
+            background: rgba(255, 110, 199, 0.12);
         }
         .combined-big-box {
             border: 3px solid #ffaa44;
@@ -474,7 +479,7 @@
     <div class="container">
         <header>
             <h1>Red Roulette Tracker</h1>
-            <div class="tagline">Duplicates20 • Duplicates30 • Duplicates50 • Triplicates50 • Triplicates60 • Triplicates A/B 60 • Quadruplicate60 • Two Only • Three Only</div>
+            <div class="tagline">Duplicates20 • Duplicates30 • Duplicates50 • Triplicates50 • Triplicates60 • Triplicates A/B 60 • Quadruplicate60 • Two Only • Three Only • ALL Auto Reset Numbers</div>
         </header>
 
         <div class="legend">
@@ -496,6 +501,9 @@
         </div>
 
         <div class="duplicate-section">
+
+            <!-- ALL AUTO RESET NUMBERS (UNION) - placed above Duplicates30 -->
+            <div class="row-single"><div class="auto-reset-numbers-box"><div style="font-weight:bold; margin-bottom:8px;">?? ALL AUTO RESET NUMBERS (union of all auto badges)</div><div id="autoResetNumbersOnlyList" class="duplicate-list"></div><div class="misses-counter"><span>Misses: <span id="autoResetNumbersOnlyMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetAutoResetNumbersOnlyMisses()">Reset misses</button><button class="hitseq-reset-btn" onclick="resetAutoResetNumbersOnlyHitHistory()">Reset hit seq</button></div></div><div class="hitseq-mini-list" id="autoResetNumbersOnlyHitSeqList"></div><div>hits: <span id="autoResetNumbersOnlyHitCount">0</span></div></div></div>
 
             <!-- DUPLICATES30 -->
             <div class="row-single"><div class="duplicates30-box"><div style="font-weight:bold; margin-bottom:8px;">?? DUPLICATES (30 RECENT SPINS) - count = 2</div><div id="duplicates30List" class="duplicate-list"></div><div class="misses-counter"><span>? Auto misses: <span id="duplicates30AutoMissesText">0</span></span><span>??? No Auto misses: <span id="duplicates30NoAutoMissesText">0</span></span><div><button class="misses-reset-btn" onclick="resetDuplicates30Misses()">Reset both</button></div></div><div style="margin-top:12px"><div style="font-weight:bold">? Auto Reset Misses hit sequence</div><div class="hitseq-mini-list" id="duplicates30HitSeqList"></div><div>hits: <span id="duplicates30HitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30HitHistory()">Reset auto seq</button></div></div><div style="margin-top:8px"><div style="font-weight:bold">??? No Auto hit sequence</div><div class="hitseq-mini-list" id="duplicates30NoAutoHitSeqList"></div><div>hits: <span id="duplicates30NoAutoHitCount">0</span> <button class="hitseq-reset-btn" onclick="resetDuplicates30NoAutoHitHistory()">Reset no-auto seq</button></div></div></div></div>
@@ -622,6 +630,16 @@
         let combinedBigHitHistory = JSON.parse(localStorage.getItem("combinedBigHitHistory") || "[]");
         let stateHistory = JSON.parse(localStorage.getItem("stateHistory") || "[]");
 
+        // NEW: Auto Reset Numbers Only (now union of all auto reset arrays)
+        let autoResetNumbersOnlyMisses = parseInt(localStorage.getItem("autoResetNumbersOnlyMisses") || "0");
+        let autoResetNumbersOnlyHitHistory = JSON.parse(localStorage.getItem("autoResetNumbersOnlyHitHistory") || "[]");
+
+        // --- Alert flags (stored in localStorage) ---
+        let duplicates30NoAutoAlertShown = localStorage.getItem("duplicates30NoAutoAlertShown") === "true";
+        let triplicates50NoAutoAlertShown = localStorage.getItem("triplicates50NoAutoAlertShown") === "true";
+        let autoReset140AlertShown = localStorage.getItem("autoReset140AlertShown") === "true";
+
+        // ---------- HELPER FUNCTIONS ----------
         function getColor(n) { if (colors.green.includes(n)) return "green"; const num = parseInt(n, 10); if (colors.red.includes(num))
                 return "red"; if (colors.black.includes(num)) return "black"; return ""; }
 
@@ -641,12 +659,65 @@
                     dup30Set, ...trip40Set, ...groupDSet, ...twoOnlyASet, ...twoOnlyBSet
                 ]); }
 
+        // NEW: get all auto reset numbers – union of all auto arrays (duplicates removed)
+        function getAutoResetNumbersOnlySet() {
+            const allAuto = [];
+            if (autoResetDuplicates20) allAuto.push(...autoResetDuplicates20);
+            if (autoResetDuplicates30) allAuto.push(...autoResetDuplicates30);
+            if (autoResetDuplicates50) allAuto.push(...autoResetDuplicates50);
+            if (autoResetTriplicates50) allAuto.push(...autoResetTriplicates50);
+            if (autoResetTriplicates60) allAuto.push(...autoResetTriplicates60);
+            if (autoResetTriplicates60A) allAuto.push(...autoResetTriplicates60A);
+            if (autoResetTriplicates60B) allAuto.push(...autoResetTriplicates60B);
+            if (autoResetPrivilegeC60) allAuto.push(...autoResetPrivilegeC60);
+            return new Set(allAuto);
+        }
+
+        // ---------- ALERT SYSTEM ----------
+        function showAlert(title, number, message) {
+            document.getElementById("alertTitle").textContent = title;
+            document.getElementById("alertNumber").textContent = number;
+            document.getElementById("alertMessage").textContent = message;
+            document.getElementById("alertModal").style.display = "flex";
+        }
+
+        function closeAlert() {
+            document.getElementById("alertModal").style.display = "none";
+        }
+
+        // ---------- CORE CALCULATION ----------
         function calculateMissesAndPrivileges() {
             if (history.length === 0) return;
             const lastSpin = history[history.length - 1];
             const prevSpins = history.slice(0, -1);
             const prevLast60 = prevSpins.slice(-60);
             const prevCounts = getGroupCounts(prevLast60);
+
+            // AUTO RESET NUMBERS ONLY (UNION) – capture previous auto set
+            const prevAutoSet = getAutoResetNumbersOnlySet();
+
+            if (prevAutoSet.size > 0) {
+                if (prevAutoSet.has(lastSpin)) {
+                    autoResetNumbersOnlyHitHistory.push(autoResetNumbersOnlyMisses + prevAutoSet.size);
+                    autoResetNumbersOnlyMisses = 0;
+                } else {
+                    autoResetNumbersOnlyMisses += prevAutoSet.size;
+                }
+            }
+
+            // --- 140 MISSES ALERT for ALL AUTO RESET NUMBERS ---
+            if (autoResetNumbersOnlyMisses >= 140) {
+                if (!autoReset140AlertShown) {
+                    showAlert("?? ALL AUTO RESET NUMBERS", 140, "Misses have reached 140! Pay attention.");
+                    autoReset140AlertShown = true;
+                    localStorage.setItem("autoReset140AlertShown", "true");
+                }
+            } else {
+                if (autoReset140AlertShown) {
+                    autoReset140AlertShown = false;
+                    localStorage.setItem("autoReset140AlertShown", "false");
+                }
+            }
 
             // Combined Big
             const prevBigSet = getCombinedBigSet(prevSpins);
@@ -697,7 +768,7 @@
                 autoResetDuplicates30 = autoResetDuplicates30.filter(n => currentDuplicates30Set.has(n));
             }
 
-            // NEW: Duplicates50
+            // Duplicates50
             const prevDuplicates50Set = new Set(getDuplicatesFromLastN(prevSpins, 50));
             if (prevDuplicates50Set.size > 0) {
                 if (prevDuplicates50Set.has(lastSpin)) {
@@ -717,7 +788,7 @@
                 autoResetDuplicates50 = autoResetDuplicates50.filter(n => currentDuplicates50Set.has(n));
             }
 
-            // NEW: Triplicates50
+            // Triplicates50
             const prevTriplicates50Set = new Set(getTriplesOrMoreFromLastN(prevSpins, 50));
             if (prevTriplicates50Set.size > 0) {
                 if (prevTriplicates50Set.has(lastSpin)) {
@@ -861,7 +932,7 @@
             }
         }
 
-        // persistAll
+        // ---------- PERSISTENCE ----------
         function persistAll() {
             localStorage.setItem("history", JSON.stringify(history));
             localStorage.setItem("missesC60", missesC60);
@@ -887,13 +958,11 @@
             localStorage.setItem("autoResetDuplicates30", JSON.stringify(autoResetDuplicates30));
             localStorage.setItem("duplicates30HitHistory", JSON.stringify(duplicates30HitHistory));
             localStorage.setItem("duplicates30NoAutoHitHistory", JSON.stringify(duplicates30NoAutoHitHistory));
-            // NEW: Duplicates50
             localStorage.setItem("duplicates50AutoMisses", duplicates50AutoMisses);
             localStorage.setItem("duplicates50NoAutoMisses", duplicates50NoAutoMisses);
             localStorage.setItem("autoResetDuplicates50", JSON.stringify(autoResetDuplicates50));
             localStorage.setItem("duplicates50HitHistory", JSON.stringify(duplicates50HitHistory));
             localStorage.setItem("duplicates50NoAutoHitHistory", JSON.stringify(duplicates50NoAutoHitHistory));
-            // NEW: Triplicates50
             localStorage.setItem("triplicates50AutoMisses", triplicates50AutoMisses);
             localStorage.setItem("triplicates50NoAutoMisses", triplicates50NoAutoMisses);
             localStorage.setItem("autoResetTriplicates50", JSON.stringify(autoResetTriplicates50));
@@ -917,6 +986,9 @@
             localStorage.setItem("combinedBigMisses", combinedBigMisses);
             localStorage.setItem("combinedBigHitHistory", JSON.stringify(combinedBigHitHistory));
             localStorage.setItem("stateHistory", JSON.stringify(stateHistory));
+            localStorage.setItem("autoResetNumbersOnlyMisses", autoResetNumbersOnlyMisses);
+            localStorage.setItem("autoResetNumbersOnlyHitHistory", JSON.stringify(autoResetNumbersOnlyHitHistory));
+            // Alert flags are saved individually as they change
         }
 
         function saveStateToHistory() {
@@ -945,13 +1017,11 @@
                 autoResetDuplicates30: [...autoResetDuplicates30],
                 duplicates30HitHistory: [...duplicates30HitHistory],
                 duplicates30NoAutoHitHistory: [...duplicates30NoAutoHitHistory],
-                // NEW: Duplicates50
                 duplicates50AutoMisses,
                 duplicates50NoAutoMisses,
                 autoResetDuplicates50: [...autoResetDuplicates50],
                 duplicates50HitHistory: [...duplicates50HitHistory],
                 duplicates50NoAutoHitHistory: [...duplicates50NoAutoHitHistory],
-                // NEW: Triplicates50
                 triplicates50AutoMisses,
                 triplicates50NoAutoMisses,
                 autoResetTriplicates50: [...autoResetTriplicates50],
@@ -973,7 +1043,9 @@
                 triplicates60BHitHistory: [...triplicates60BHitHistory],
                 triplicates60BNoAutoHitHistory: [...triplicates60BNoAutoHitHistory],
                 combinedBigMisses,
-                combinedBigHitHistory: [...combinedBigHitHistory]
+                combinedBigHitHistory: [...combinedBigHitHistory],
+                autoResetNumbersOnlyMisses,
+                autoResetNumbersOnlyHitHistory: [...autoResetNumbersOnlyHitHistory]
             };
             stateHistory.push(snap);
             if (stateHistory.length > 50) stateHistory = stateHistory.slice(-50);
@@ -1007,13 +1079,11 @@
             autoResetDuplicates30 = prev.autoResetDuplicates30 || [];
             duplicates30HitHistory = prev.duplicates30HitHistory || [];
             duplicates30NoAutoHitHistory = prev.duplicates30NoAutoHitHistory || [];
-            // NEW: Duplicates50
             duplicates50AutoMisses = prev.duplicates50AutoMisses || 0;
             duplicates50NoAutoMisses = prev.duplicates50NoAutoMisses || 0;
             autoResetDuplicates50 = prev.autoResetDuplicates50 || [];
             duplicates50HitHistory = prev.duplicates50HitHistory || [];
             duplicates50NoAutoHitHistory = prev.duplicates50NoAutoHitHistory || [];
-            // NEW: Triplicates50
             triplicates50AutoMisses = prev.triplicates50AutoMisses || 0;
             triplicates50NoAutoMisses = prev.triplicates50NoAutoMisses || 0;
             autoResetTriplicates50 = prev.autoResetTriplicates50 || [];
@@ -1036,11 +1106,13 @@
             triplicates60BNoAutoHitHistory = prev.triplicates60BNoAutoHitHistory || [];
             combinedBigMisses = prev.combinedBigMisses || 0;
             combinedBigHitHistory = prev.combinedBigHitHistory || [];
+            autoResetNumbersOnlyMisses = prev.autoResetNumbersOnlyMisses || 0;
+            autoResetNumbersOnlyHitHistory = prev.autoResetNumbersOnlyHitHistory || [];
             persistAll();
             return true;
         }
 
-        // updateDisplay
+        // ---------- DISPLAY ----------
         function updateDisplay() {
             const container = document.getElementById("recentSpins");
             container.innerHTML = "";
@@ -1107,7 +1179,21 @@
             renderHitSeq("duplicates30HitSeqList", duplicates30HitHistory, "duplicates30HitCount");
             renderHitSeq("duplicates30NoAutoHitSeqList", duplicates30NoAutoHitHistory, "duplicates30NoAutoHitCount");
 
-            // NEW: Duplicates50
+            // --- ALERT: No Auto Reset Number in DUPLICATES30 ---
+            if (autoResetDuplicates30.length === 0) {
+                if (!duplicates30NoAutoAlertShown) {
+                    showAlert("?? DUPLICATES (30)", history.length, "No Auto Reset Number in DUPLICATES (30 RECENT SPINS) — count = 2");
+                    duplicates30NoAutoAlertShown = true;
+                    localStorage.setItem("duplicates30NoAutoAlertShown", "true");
+                }
+            } else {
+                if (duplicates30NoAutoAlertShown) {
+                    duplicates30NoAutoAlertShown = false;
+                    localStorage.setItem("duplicates30NoAutoAlertShown", "false");
+                }
+            }
+
+            // Duplicates50
             const dup50 = new Set(getDuplicatesFromLastN(history, 50));
             renderList("duplicates50List", dup50, "dup50", autoResetDuplicates50);
             document.getElementById("duplicates50AutoMissesText").textContent = duplicates50AutoMisses;
@@ -1115,13 +1201,27 @@
             renderHitSeq("duplicates50HitSeqList", duplicates50HitHistory, "duplicates50HitCount");
             renderHitSeq("duplicates50NoAutoHitSeqList", duplicates50NoAutoHitHistory, "duplicates50NoAutoHitCount");
 
-            // NEW: Triplicates50
+            // Triplicates50
             const trip50 = new Set(getTriplesOrMoreFromLastN(history, 50));
             renderList("triplicates50List", trip50, "=3/50", autoResetTriplicates50);
             document.getElementById("triplicates50AutoMissesText").textContent = triplicates50AutoMisses;
             document.getElementById("triplicates50NoAutoMissesText").textContent = triplicates50NoAutoMisses;
             renderHitSeq("triplicates50HitSeqList", triplicates50HitHistory, "triplicates50HitCount");
             renderHitSeq("triplicates50NoAutoHitSeqList", triplicates50NoAutoHitHistory, "triplicates50NoAutoHitCount");
+
+            // --- ALERT: No Auto Reset Number in TRIPLICATES50 ---
+            if (autoResetTriplicates50.length === 0) {
+                if (!triplicates50NoAutoAlertShown) {
+                    showAlert("?? TRIPLICATES (50)", history.length, "No Auto Reset Number in TRIPLICATES (50 RECENT SPINS) — count = 3");
+                    triplicates50NoAutoAlertShown = true;
+                    localStorage.setItem("triplicates50NoAutoAlertShown", "true");
+                }
+            } else {
+                if (triplicates50NoAutoAlertShown) {
+                    triplicates50NoAutoAlertShown = false;
+                    localStorage.setItem("triplicates50NoAutoAlertShown", "false");
+                }
+            }
 
             // Triplicates60 all
             const trip60 = new Set(getTriplesOrMoreFromLastN(history, 60));
@@ -1178,8 +1278,23 @@
             document.getElementById("groupCMissesNoAutoText60").textContent = missesC60NoAuto;
             renderHitSeq("groupCAutoHitSeqList", groupCAutoHitHistory, "groupCAutoHitCount");
             renderHitSeq("groupCNoAutoHitSeqList", groupCNoAutoHitHistory, "groupCNoAutoHitCount");
+
+            // Auto Reset Numbers Only (union)
+            const autoResetNumbersSet = getAutoResetNumbersOnlySet();
+            const arnContainer = document.getElementById("autoResetNumbersOnlyList");
+            arnContainer.innerHTML = autoResetNumbersSet.size ? "" : '<div class="no-duplicates">—</div>';
+            autoResetNumbersSet.forEach(num => {
+                let item = document.createElement("div");
+                item.className = "duplicate-item";
+                item.innerHTML =
+                    `<div class="duplicate-number ${getColor(num)}">${num}</div><div class="auto-badge">auto</div><div class="badge-combined" style="font-size:7px;">ALL</div>`;
+                arnContainer.appendChild(item);
+            });
+            document.getElementById("autoResetNumbersOnlyMissesText").textContent = autoResetNumbersOnlyMisses;
+            renderHitSeq("autoResetNumbersOnlyHitSeqList", autoResetNumbersOnlyHitHistory, "autoResetNumbersOnlyHitCount");
         }
 
+        // ---------- USER ACTIONS ----------
         function addNumber() {
             let val = document.getElementById("numberInput").value.trim();
             if (!val) { document.getElementById("inputStatus").textContent = "Enter number"; return; }
@@ -1224,12 +1339,10 @@
             autoResetDuplicates30 = [];
             duplicates30HitHistory = [];
             duplicates30NoAutoHitHistory = [];
-            // NEW: Duplicates50
             duplicates50AutoMisses = duplicates50NoAutoMisses = 0;
             autoResetDuplicates50 = [];
             duplicates50HitHistory = [];
             duplicates50NoAutoHitHistory = [];
-            // NEW: Triplicates50
             triplicates50AutoMisses = triplicates50NoAutoMisses = 0;
             autoResetTriplicates50 = [];
             triplicates50HitHistory = [];
@@ -1249,13 +1362,22 @@
             combinedBigMisses = 0;
             combinedBigHitHistory = [];
             stateHistory = [];
+            autoResetNumbersOnlyMisses = 0;
+            autoResetNumbersOnlyHitHistory = [];
+            // Reset alert flags
+            duplicates30NoAutoAlertShown = false;
+            triplicates50NoAutoAlertShown = false;
+            autoReset140AlertShown = false;
+            localStorage.setItem("duplicates30NoAutoAlertShown", "false");
+            localStorage.setItem("triplicates50NoAutoAlertShown", "false");
+            localStorage.setItem("autoReset140AlertShown", "false");
         }
 
         function resetAll() { if (confirm("Reset everything?")) { resetAllInternal();
                 persistAll();
                 updateDisplay(); } }
 
-        // Reset functions for existing + new
+        // ---------- RESET FUNCTIONS (existing + new) ----------
         window.resetCombinedBigMisses = () => { if (confirm("Reset Combined misses?")) { saveStateToHistory();
                 combinedBigMisses = 0;
                 persistAll();
@@ -1293,7 +1415,6 @@
                 persistAll();
                 updateDisplay(); } };
 
-        // NEW: Duplicates50 resets
         window.resetDuplicates50Misses = () => { if (confirm("Reset Duplicates50 misses?")) { saveStateToHistory();
                 duplicates50AutoMisses = 0;
                 duplicates50NoAutoMisses = 0;
@@ -1308,7 +1429,6 @@
                 persistAll();
                 updateDisplay(); } };
 
-        // NEW: Triplicates50 resets
         window.resetTriplicates50Misses = () => { if (confirm("Reset Triplicates50 misses?")) { saveStateToHistory();
                 triplicates50AutoMisses = 0;
                 triplicates50NoAutoMisses = 0;
@@ -1414,16 +1534,31 @@
                 persistAll();
                 updateDisplay(); } };
 
+        window.resetAutoResetNumbersOnlyMisses = () => { if (confirm("Reset ALL Auto Reset Numbers misses?")) { saveStateToHistory
+                (); autoResetNumbersOnlyMisses = 0;
+                persistAll();
+                updateDisplay(); } };
+        window.resetAutoResetNumbersOnlyHitHistory = () => { if (confirm("Reset ALL Auto Reset Numbers hit seq?")) { saveStateToHistory
+                (); autoResetNumbersOnlyHitHistory = [];
+                persistAll();
+                updateDisplay(); } };
+
+        // ---------- NUMPAD ----------
         window.numpadClick = (v) => { let inp = document.getElementById("numberInput"); if (v === '00') inp.value = '00';
             else if (inp.value.length < 2) inp.value += v; };
         window.backspace = () => { let inp = document.getElementById("numberInput");
             inp.value = inp.value.slice(0, -1); };
-        window.closeAlert = () => { document.getElementById("alertModal").style.display = "none"; };
+        window.closeAlert = closeAlert;
 
+        // ---------- INIT ----------
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("numberInput").addEventListener("keydown", e => { if (e.key === "Enter")
                     addNumber(); });
             if (stateHistory.length === 0 && history.length > 0) saveStateToHistory();
+            // Ensure alert flags are synced with localStorage
+            duplicates30NoAutoAlertShown = localStorage.getItem("duplicates30NoAutoAlertShown") === "true";
+            triplicates50NoAutoAlertShown = localStorage.getItem("triplicates50NoAutoAlertShown") === "true";
+            autoReset140AlertShown = localStorage.getItem("autoReset140AlertShown") === "true";
             updateDisplay();
         });
     </script>

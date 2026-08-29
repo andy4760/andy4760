@@ -565,13 +565,14 @@
             border-radius: 20px;
         }
         .hit-record-badge {
-            background: rgba(255, 75, 43, 0.25);
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-family: monospace;
-            font-weight: bold;
-            color: #ffaa88;
-        }
+    background: rgba(255, 75, 43, 0.25);
+    border-radius: 20px;
+    padding: 4px 12px;       /* (Optional) Add more padding so they look balanced */
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.0rem;       /* <-- ADD THIS LINE. Use 1.2rem, 1.5rem, or 20px */
+    color: #ffaa88;
+}
         .hit-record-empty {
             font-style: italic;
             color: #777;
@@ -739,12 +740,13 @@
             border-radius: 20px;
         }
         .summary-hit-history .hit-record-badge {
-            background: rgba(255, 75, 43, 0.25);
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-family: monospace;
-            font-weight: bold;
-            color: #ffaa88;
+             background: rgba(255, 75, 43, 0.25);
+    border-radius: 20px;
+    padding: 4px 12px;       /* (Optional) Add more padding so they look balanced */
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.0rem;       /* <-- ADD THIS LINE. Use 1.2rem, 1.5rem, or 20px */
+    color: #ffaa88;
         }
         .summary-hit-history .hit-record-empty {
             font-style: italic;
@@ -1164,7 +1166,7 @@
                 if (records.length === 0) {
                     container.innerHTML = `<span class="hit-record-empty">⏳ No hit records yet</span>`;
                 } else {
-                    const badges = records.map(v => `<span class="hit-record-badge">${v} misses</span>`).join('');
+                    const badges = records.map(v => `<span class="hit-record-badge">${v} </span>`).join('');
                     container.innerHTML = `<span class="hit-record-label">🎯 Hits @:</span> ${badges}`;
                 }
             }
@@ -1176,7 +1178,7 @@
                 container.innerHTML =
                     `<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>`;
             } else {
-                const badges = stage1HitHistory.map(v => `<span class="hit-record-badge">${v} misses</span>`).join('');
+                const badges = stage1HitHistory.map(v => `<span class="hit-record-badge">${v} </span>`).join('');
                 container.innerHTML = `<span class="hit-record-label">🎯 Hits @:</span> ${badges}`;
             }
         }
@@ -1188,7 +1190,7 @@
                 container.innerHTML =
                     `<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>`;
             } else {
-                const badges = eightyPlusHitHistory.map(v => `<span class="hit-record-badge">${v} misses</span>`).join('');
+                const badges = eightyPlusHitHistory.map(v => `<span class="hit-record-badge">${v} </span>`).join('');
                 container.innerHTML = `<span class="hit-record-label">🎯 Hits @:</span> ${badges}`;
             }
         }
@@ -1335,7 +1337,7 @@
                 historyContainer.innerHTML =
                     `<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>`;
             } else {
-                const badges = summaryHitHistory.map(v => `<span class="hit-record-badge">${v} misses</span>`).join('');
+                const badges = summaryHitHistory.map(v => `<span class="hit-record-badge">${v} </span>`).join('');
                 historyContainer.innerHTML = `<span class="hit-record-label">🎯 Hits @:</span> ${badges}`;
             }
         }

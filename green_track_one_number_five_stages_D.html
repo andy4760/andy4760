@@ -1496,13 +1496,15 @@
 
             const currentHighMiss = allNumbers.filter(n => missesBefore[n] >= 80);
             const isHit80 = currentHighMiss.includes(newNumber);
-            if (isHit80) {
-                eightyPlusHitHistory.push(eightyPlusCumulativeMisses);
-                if (eightyPlusHitHistory.length > 100) eightyPlusHitHistory = eightyPlusHitHistory.slice(-100);
-                eightyPlusCumulativeMisses = 0;
-            } else {
-                eightyPlusCumulativeMisses += currentHighMiss.length;
-            }
+// New
+if (isHit80) {
+    const highMissCount = currentHighMiss.length;
+    eightyPlusCumulativeMisses += highMissCount;
+    eightyPlusHitHistory.push(eightyPlusCumulativeMisses);
+    eightyPlusCumulativeMisses = 0;
+} else {
+    eightyPlusCumulativeMisses += currentHighMiss.length;
+}
 
             const currMisses = calculateMisses();
             coldNumbers.forEach(cn => { if (cn.active || cn.waiting) cn.misses = currMisses[cn.number]; });

@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Red Roulette Tracker - Cold Numbers | Stage Misses Alert + Hits Lists</title>
+    <style>
+        /* ── reset & base ── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 1rem;
+            padding-bottom: 95px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sticky-top-panel {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(26, 26, 46, 0.96);
+            border-radius: 20px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 75, 43, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s;
+        }
+        .sticky-top-panel .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 0 0.8rem 0;
+            flex-wrap: wrap;
+        }
+        .sticky-top-panel #recentSpins {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 8px;
+            justify-content: flex-start;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 14px;
+            scrollbar-width: thin;
+            scrollbar-color: #ff4b2b #1a1a2e;
+            min-height: 65px;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        header {
+            text-align: center;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .tagline {
+            color: #ccc;
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .spin-box {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 22px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+        .spin-box:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        .red {
+            background: linear-gradient(145deg, #e53935, #c62828);
+            color: white;
+            border-color: #b71c1c;
+        }
+        .black {
+            background: linear-gradient(145deg, #212121, #000000);
+            color: white;
+            border-color: #111;
+        }
+        .green {
+            background: linear-gradient(145deg, #43a047, #2e7d32);
+            color: white;
+            border-color: #1b5e20;
+        }
+        .empty {
+            background: rgba(60, 60, 80, 0.5);
+            border-color: #444;
+            color: transparent;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1rem;
+            width: 120px;
+            text-align: center;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: rgba(30, 30, 46, 0.8);
+            color: white;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        input:focus {
+            border-color: #ff4b2b;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            border: none;
+            background: rgba(60, 60, 80, 0.9);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            background: rgba(80, 80, 100, 0.9);
+            transform: translateY(-2px);
+        }
+        .controls button:nth-child(2) {
+            background: linear-gradient(145deg, #2196f3, #1976d2);
+        }
+        .controls button:nth-child(2):hover {
+            background: linear-gradient(145deg, #42a5f5, #1e88e5);
+        }
+        .controls button:nth-child(3) {
+            background: linear-gradient(145deg, #ff9800, #f57c00);
+        }
+        .controls button:nth-child(3):hover {
+            background: linear-gradient(145deg, #ffa726, #fb8c00);
+        }
+        .controls button:nth-child(4) {
+            background: linear-gradient(145deg, #f44336, #d32f2f);
+        }
+        .controls button:nth-child(4):hover {
+            background: linear-gradient(145deg, #ef5350, #e53935);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 0px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        .legend-red {
+            background: linear-gradient(145deg, #e53935, #c62828);
+        }
+        .legend-black {
+            background: linear-gradient(145deg, #212121, #000);
+        }
+        .legend-green {
+            background: linear-gradient(145deg, #43a047, #2e7d32);
+        }
+
+        .input-status {
+            text-align: center;
+            height: 20px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: #ffab91;
+        }
+
+        .tracking-section {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        .tracking-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #ffab91;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .stages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .stage-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 75, 43, 0.3);
+        }
+        .stage-numbers-area {
+            flex: 3;
+            min-width: 200px;
+            overflow-x: auto;
+        }
+        #stage1List,
+        #stage2List,
+        #stage3List,
+        #stage4List,
+        #stage5List {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 4px 2px;
+        }
+        .cold-number {
+            flex: 0 0 auto;
+            width: 210px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        .cold-number:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+        .stage-misses-area {
+            flex: 0 0 160px;
+            background: rgba(20, 20, 35, 0.9);
+            border-radius: 16px;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-left: 4px solid #ff9800;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .stage-misses-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffab91;
+            margin-bottom: 8px;
+        }
+        .stage-misses-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            line-height: 1;
+        }
+
+        .stage-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #ffb347;
+            border-left: 3px solid #ff4b2b;
+            padding-left: 10px;
+        }
+        .stage-header small {
+            font-size: 0.75rem;
+            color: #bbb;
+            font-weight: normal;
+        }
+
+        .number-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .number-display {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+        .number-display.red {
+            background: linear-gradient(145deg, #e53935, #c62828);
+            color: white;
+            border: 1px solid #ff8a80;
+        }
+        .number-display.black {
+            background: linear-gradient(145deg, #212121, #000000);
+            color: white;
+            border: 1px solid #555;
+        }
+        .number-display.green {
+            background: linear-gradient(145deg, #43a047, #2e7d32);
+            color: white;
+            border: 1px solid #81c784;
+        }
+
+        .tracking-stats {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+        .misses-count {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .spins-left {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .waiting-status {
+            color: #ff9800;
+            font-weight: bold;
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+        .empty-column {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 20px;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .stats-summary {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .stat-item {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffab91;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: #ccc;
+        }
+
+        .misses-list {
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .misses-header {
+            color: #ffab91;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .misses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+            gap: 6px;
+        }
+        .misses-item {
+            padding: 6px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+        .misses-item.highlight {
+            background: rgba(255, 75, 43, 0.25);
+            border: 1px solid #ff4b2b;
+            font-weight: bold;
+        }
+
+        .eightyplus-hit-history {
+            margin-top: 12px;
+            font-size: 0.7rem;
+            color: #ffb347;
+            border-top: 1px dashed rgba(255, 75, 43, 0.4);
+            padding-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hits-list-container.hot {
+            border-color: #ff6b6b;
+            background: rgba(255, 50, 50, 0.08);
+        }
+        .hits-list-container.hot .hits-header {
+            color: #ff6b6b;
+            border-left-color: #ff6b6b;
+        }
+        .hits-list-container.hot .hit-item {
+            border-left-color: #ff6b6b;
+            background: rgba(255, 80, 80, 0.12);
+        }
+        .hits-list-container.hot .hit-item:hover {
+            background: rgba(255, 80, 80, 0.22);
+        }
+        .hits-list-container.hot .hits-cumulative {
+            color: #ff8888;
+        }
+
+        .hits-list-container {
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid #ffb347;
+        }
+        .hits-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            font-weight: bold;
+            color: #ffb347;
+            border-left: 3px solid #ff9800;
+            padding-left: 10px;
+        }
+        .hits-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .hit-item {
+            flex: 0 0 auto;
+            width: 210px;
+            background: rgba(255, 180, 70, 0.15);
+            border-left: 4px solid #ff9800;
+            padding: 8px 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .hit-item:hover {
+            background: rgba(255, 180, 70, 0.25);
+            transform: translateY(-2px);
+        }
+        .hit-number {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .hit-stats {
+            font-size: 0.8rem;
+            color: #aaa;
+            text-align: right;
+        }
+        .hit-stats div {
+            margin: 2px 0;
+        }
+        .hit-stats .misses-count {
+            color: #ff6b6b;
+        }
+        .hit-stats .spins-left {
+            color: #4ecdc4;
+        }
+        .hits-cumulative {
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #ffaa66;
+        }
+
+        .stage-misses-summary {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid #444;
+        }
+        .stage-miss-item {
+            text-align: center;
+            padding: 5px 10px;
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 8px;
+            min-width: 85px;
+        }
+
+        .stage-hit-history {
+            margin-top: 12px;
+            font-size: 0.7rem;
+            color: #ffb347;
+            border-top: 1px dashed rgba(255, 75, 43, 0.4);
+            padding-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .hit-record-label {
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #ffaa66;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+        .hit-record-badge {
+            background: rgba(255, 75, 43, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.0rem;
+            color: #ffaa88;
+        }
+        .hit-record-empty {
+            font-style: italic;
+            color: #777;
+        }
+
+        .alert-banner {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: alertPulse 2s infinite, glow 2s infinite;
+            max-width: 400px;
+            border: 2px solid #ffb74d;
+        }
+        .alert-number {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid white;
+        }
+        .alert-number.red {
+            background: #e53935;
+        }
+        .alert-number.black {
+            background: #1e1e1e;
+        }
+        .alert-number.green {
+            background: #2e7d32;
+        }
+        .play-alert-button {
+            background: linear-gradient(145deg, #4caf50, #2e7d32);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+            font-size: 0.8rem;
+        }
+        .close-alert {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .numpad {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.96);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            overflow-x: auto;
+            z-index: 100;
+            border-top: 2px solid #ff4b2b;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }
+        .numpad button {
+            flex: 1;
+            min-width: 60px;
+            padding: 12px 0;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            background: rgba(50, 50, 70, 0.9);
+            color: white;
+            font-weight: bold;
+        }
+        .numpad .enter {
+            background: linear-gradient(145deg, #4caf50, #2e7d32);
+        }
+        .numpad .backspace {
+            background: linear-gradient(145deg, #f44336, #d32f2f);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #ff9800; }
+            50% { box-shadow: 0 0 18px #ff9800; }
+            100% { box-shadow: 0 0 5px #ff9800; }
+        }
+        @keyframes alertPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+            100% { transform: scale(1); }
+        }
+
+        .summary-box {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 16px;
+            padding: 1.2rem 1rem;
+            border: 1px solid rgba(255, 180, 70, 0.35);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        .summary-box-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffb347;
+            margin-bottom: 0.6rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 180, 70, 0.2);
+            padding-bottom: 0.4rem;
+            letter-spacing: 0.5px;
+        }
+        .summary-stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+            padding: 0 4px;
+        }
+        .summary-total-misses {
+            font-size: 0.9rem;
+            color: #ffab91;
+        }
+        .summary-total-misses .miss-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ff6b6b;
+        }
+        .summary-hit-history {
+            font-size: 0.7rem;
+            color: #ffb347;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        .summary-hit-history .hit-record-label {
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #ffaa66;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+        .summary-hit-history .hit-record-badge {
+            background: rgba(255, 75, 43, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.0rem;
+            color: #ffaa88;
+        }
+        .summary-hit-history .hit-record-empty {
+            font-style: italic;
+            color: #777;
+        }
+
+        .summary-box-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .summary-category {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 0.8rem 0.8rem 0.6rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: background 0.2s;
+        }
+        .summary-category:hover {
+            background: rgba(0, 0, 0, 0.35);
+        }
+        .category-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .category-title .cat-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            padding: 0 10px;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        .category-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 32px;
+            align-items: center;
+        }
+        .cat-number {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            transition: transform 0.15s;
+        }
+        .cat-number:hover {
+            transform: scale(1.15);
+        }
+        .cat-number.red {
+            background: linear-gradient(145deg, #e53935, #c62828);
+            color: #fff;
+            border: 1px solid #ff8a80;
+        }
+        .cat-number.black {
+            background: linear-gradient(145deg, #212121, #000);
+            color: #fff;
+            border: 1px solid #666;
+        }
+        .cat-number.green {
+            background: linear-gradient(145deg, #43a047, #2e7d32);
+            color: #fff;
+            border: 1px solid #81c784;
+        }
+        .cat-empty {
+            color: #666;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+        .cat-count-badge {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 30px;
+            padding: 0 10px;
+            font-size: 0.7rem;
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .overview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+        .overview-category {
+            flex: 1;
+            min-width: 150px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 0.8rem;
+        }
+        .overview-category-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .overview-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .overview-stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+            padding: 0 4px;
+        }
+        .overview-total-misses {
+            font-size: 0.9rem;
+            color: #ffab91;
+        }
+        .overview-total-misses .miss-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ff6b6b;
+        }
+        .overview-hit-history {
+            font-size: 0.7rem;
+            color: #ffb347;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        .overview-hit-history .hit-record-label {
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #ffaa66;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+        .overview-hit-history .hit-record-badge {
+            background: rgba(255, 75, 43, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.0rem;
+            color: #ffaa88;
+        }
+
+        @media (max-width: 760px) {
+            .summary-box-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.6rem;
+            }
+            .summary-box {
+                padding: 0.8rem 0.6rem;
+            }
+            .cat-number {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+            .category-title {
+                font-size: 0.75rem;
+            }
+            .stage-row {
+                flex-direction: column;
+            }
+            .stage-misses-area {
+                flex: auto;
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 10px 16px;
+            }
+            .stage-misses-value {
+                font-size: 1.6rem;
+            }
+            .numpad button {
+                min-width: 50px;
+                padding: 10px 0;
+            }
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            .cold-number,
+            .hit-item {
+                width: 180px;
+            }
+            .sticky-top-panel {
+                padding: 0.8rem;
+            }
+            .misses-grid {
+                grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            }
+            .overview-category {
+                min-width: 120px;
+            }
+        }
+        @media (max-width: 480px) {
+            .summary-box-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+            .cat-number {
+                width: 26px;
+                height: 26px;
+                font-size: 0.65rem;
+            }
+            .summary-box-title {
+                font-size: 1rem;
+            }
+            .summary-stats-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .overview-category {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎰 Red Roulette Tracker - Cold Numbers</h1>
+            <div class="tagline">Track numbers with 80+ misses | Stage misses =100 alert | HIT LISTS with 40‑spin windows</div>
+        </header>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color legend-red"></div><span>Red</span></div>
+            <div class="legend-item"><div class="legend-color legend-black"></div><span>Black</span></div>
+            <div class="legend-item"><div class="legend-color legend-green"></div><span>Green</span></div>
+        </div>
+
+        <div class="sticky-top-panel">
+            <div class="controls">
+                <div id="entryCount">Total spins: 0</div>
+                <input id="numberInput" placeholder="0-36 or 00" maxlength="2" />
+                <button onclick="addNumber()">Add Spin</button>
+                <button onclick="undo()">Undo Last</button>
+                <button onclick="resetAll()" id="resetButton">Reset All</button>
+                <div id="inputStatus" class="input-status"></div>
+            </div>
+            <div id="recentSpins"></div>
+        </div>
+
+        <!-- HOT HIT LIST -->
+        <div class="hits-list-container hot" id="hotHitListContainer">
+            <div class="hits-header">
+                <span>🔥 HOT HIT LIST NUMBERS</span>
+                <span class="hits-cumulative" id="hotHitCumulativeMissesDisplay">Total Misses: 0</span>
+            </div>
+            <div id="hotHitList" class="hits-grid"></div>
+            <div class="stage-hit-history" id="hotHitHistoryDisplay">
+                <span class="hit-record-label">🎯 Hits @:</span>
+            </div>
+        </div>
+
+        <!-- Stage 1 HITS LIST -->
+        <div class="hits-list-container" id="hitsListContainer">
+            <div class="hits-header">
+                <span>🎯 Stage 1 HITS LIST (next 40 spins)</span>
+                <span class="hits-cumulative" id="hitsCumulativeMisses">Cumulative misses: 0</span>
+            </div>
+            <div id="stage1HitsList" class="hits-grid"></div>
+            <div class="stage-hit-history" id="stage1HitHistoryDisplay">
+                <span class="hit-record-label">🎯 Hits @:</span>
+            </div>
+        </div>
+
+        <!-- OVERVIEW BOX (updated: HOT HIT LIST NUMBERS + Stage 1 HITS + Active + Waiting) -->
+        <div class="tracking-section" style="margin-top:0.5rem;">
+            <div class="tracking-header">
+                <span>📋 HOT HIT LIST NUMBERS , Stage 1 HITS LIST, Active, Waiting Numbers</span>
+            </div>
+            <div class="overview-stats-row">
+                <div class="overview-total-misses">
+                    📌 Total Misses: <span class="miss-value" id="overviewTotalMissesValue">0</span>
+                </div>
+                <div class="overview-hit-history" id="overviewHitHistoryDisplay">
+                    <span class="hit-record-label">🎯 Hits @:</span>
+                </div>
+            </div>
+            <div class="overview-container">
+                <!-- HOT HIT LIST NUMBERS -->
+                <div class="overview-category">
+                    <div class="overview-category-title" style="color:#ff6b6b;">🔥 HOT HIT LIST NUMBERS</div>
+                    <div class="overview-numbers" id="overviewHotNumbers"></div>
+                </div>
+                <!-- Stage 1 HITS LIST ONLY -->
+                <div class="overview-category">
+                    <div class="overview-category-title" style="color:#ffb347;">🎯 Stage 1 HITS LIST ONLY</div>
+                    <div class="overview-numbers" id="overviewHitNumbers"></div>
+                </div>
+                <!-- Active -->
+                <div class="overview-category">
+                    <div class="overview-category-title" style="color:#4ecdc4;">✅ Active</div>
+                    <div class="overview-numbers" id="overviewActiveNumbers"></div>
+                </div>
+                <!-- Waiting -->
+                <div class="overview-category">
+                    <div class="overview-category-title" style="color:#ff9800;">⏳ Waiting</div>
+                    <div class="overview-numbers" id="overviewWaitingNumbers"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY BOX -->
+        <div class="summary-box" id="hitColdActiveWaitingBox">
+            <div class="summary-box-title">📊 Stage 1 HITS LIST, Cold, Active And Waiting Numbers</div>
+            <div class="summary-stats-row">
+                <div class="summary-total-misses">
+                    📌 Total Misses: <span class="miss-value" id="summaryTotalMissesValue">0</span>
+                </div>
+                <div class="summary-hit-history" id="summaryHitHistoryDisplay">
+                    <span class="hit-record-label">🎯 Hits @:</span>
+                </div>
+            </div>
+            <div class="summary-box-grid">
+                <div class="summary-category">
+                    <div class="category-title"><span>🎯 Stage 1 HITS LIST ONLY</span><span class="cat-count-badge" id="summaryHitCount">0</span></div>
+                    <div class="category-numbers" id="summaryHitNumbers"></div>
+                </div>
+                <div class="summary-category">
+                    <div class="category-title"><span>❄️ Cold (80+ misses)</span><span class="cat-count-badge" id="summaryColdCount">0</span></div>
+                    <div class="category-numbers" id="summaryColdNumbers"></div>
+                </div>
+                <div class="summary-category">
+                    <div class="category-title"><span>✅ Active</span><span class="cat-count-badge" id="summaryActiveCount">0</span></div>
+                    <div class="category-numbers" id="summaryActiveNumbers"></div>
+                </div>
+                <div class="summary-category">
+                    <div class="category-title"><span>⏳ Waiting</span><span class="cat-count-badge" id="summaryWaitingCount">0</span></div>
+                    <div class="category-numbers" id="summaryWaitingNumbers"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 80+ MISSES -->
+        <div class="tracking-section">
+            <div class="tracking-header">
+                <span>📊 Cold Numbers Tracking (80+ Misses when appeared)</span>
+                <span style="font-size:0.8rem;">40 spins/stage | Max 5 stages</span>
+            </div>
+            <div class="misses-list">
+                <div class="misses-header">
+                    <span>🧊 Numbers with 80+ Misses</span>
+                    <span class="hits-cumulative" id="eightyPlusCumulativeDisplay">Cumulative misses: 0</span>
+                </div>
+                <div class="misses-grid" id="missesGrid"></div>
+                <div class="eightyplus-hit-history" id="eightyPlusHitHistoryDisplay">
+                    <span class="hit-record-label">🎯 Hits @:</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 60-79 MISSES -->
+        <div class="tracking-section" style="margin-top:0.5rem;">
+            <div class="tracking-header">
+                <span>📊 Cold Numbers Tracking (60 through 79 Misses when appeared)</span>
+                <span style="font-size:0.8rem;">40 spins/stage | Max 5 stages</span>
+            </div>
+            <div class="misses-list">
+                <div class="misses-header">
+                    <span>🧊 Numbers with 60–79 Misses</span>
+                    <span class="hits-cumulative" id="sixtyPlusCumulativeDisplay">Cumulative misses: 0</span>
+                </div>
+                <div class="misses-grid" id="sixtyPlusMissesGrid"></div>
+                <div class="eightyplus-hit-history" id="sixtyPlusHitHistoryDisplay">
+                    <span class="hit-record-label">🎯 Hits @:</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 60+ MISSES -->
+        <div class="tracking-section" style="margin-top:0.5rem;">
+            <div class="tracking-header">
+                <span>📊 Cold Numbers Tracking (60+ Misses when appeared)</span>
+                <span style="font-size:0.8rem;">40 spins/stage | Max 5 stages</span>
+            </div>
+            <div class="misses-list">
+                <div class="misses-header">
+                    <span>🧊 Numbers with 60+ Misses</span>
+                    <span class="hits-cumulative" id="sixtyOrMoreCumulativeDisplay">Cumulative misses: 0</span>
+                </div>
+                <div class="misses-grid" id="sixtyOrMoreMissesGrid"></div>
+                <div class="eightyplus-hit-history" id="sixtyOrMoreHitHistoryDisplay">
+                    <span class="hit-record-label">🎯 Hits @:</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STAGES 1-5 -->
+        <div class="stages-container">
+            <div class="stage-row"><div class="stage-numbers-area"><div class="stage-header">Stage 1 <small>· First 40 Spins</small></div><div id="stage1List"></div><div class="stage-hit-history" id="stageHitHistory1"></div></div><div class="stage-misses-area"><div class="stage-misses-label">📌 Stage 1 Misses</div><div class="stage-misses-value" id="stageMissesRowValue1">0</div></div></div>
+            <div class="stage-row"><div class="stage-numbers-area"><div class="stage-header">Stage 2 <small>· Second 40 Spins</small></div><div id="stage2List"></div><div class="stage-hit-history" id="stageHitHistory2"></div></div><div class="stage-misses-area"><div class="stage-misses-label">📌 Stage 2 Misses</div><div class="stage-misses-value" id="stageMissesRowValue2">0</div></div></div>
+            <div class="stage-row"><div class="stage-numbers-area"><div class="stage-header">Stage 3 <small>· Third 40 Spins</small></div><div id="stage3List"></div><div class="stage-hit-history" id="stageHitHistory3"></div></div><div class="stage-misses-area"><div class="stage-misses-label">📌 Stage 3 Misses</div><div class="stage-misses-value" id="stageMissesRowValue3">0</div></div></div>
+            <div class="stage-row"><div class="stage-numbers-area"><div class="stage-header">Stage 4 <small>· Fourth 40 Spins</small></div><div id="stage4List"></div><div class="stage-hit-history" id="stageHitHistory4"></div></div><div class="stage-misses-area"><div class="stage-misses-label">📌 Stage 4 Misses</div><div class="stage-misses-value" id="stageMissesRowValue4">0</div></div></div>
+            <div class="stage-row"><div class="stage-numbers-area"><div class="stage-header">Stage 5 <small>· Fifth 40 Spins</small></div><div id="stage5List"></div><div class="stage-hit-history" id="stageHitHistory5"></div></div><div class="stage-misses-area"><div class="stage-misses-label">📌 Stage 5 Misses</div><div class="stage-misses-value" id="stageMissesRowValue5">0</div></div></div>
+        </div>
+
+        <div class="stage-misses-summary">
+            <div class="stage-miss-item"><div class="stage-miss-label">Stage 1 Misses</div><div class="stage-miss-value" id="stage1MissesTotal">0</div></div>
+            <div class="stage-miss-item"><div class="stage-miss-label">Stage 2 Misses</div><div class="stage-miss-value" id="stage2MissesTotal">0</div></div>
+            <div class="stage-miss-item"><div class="stage-miss-label">Stage 3 Misses</div><div class="stage-miss-value" id="stage3MissesTotal">0</div></div>
+            <div class="stage-miss-item"><div class="stage-miss-label">Stage 4 Misses</div><div class="stage-miss-value" id="stage4MissesTotal">0</div></div>
+            <div class="stage-miss-item"><div class="stage-miss-label">Stage 5 Misses</div><div class="stage-miss-value" id="stage5MissesTotal">0</div></div>
+        </div>
+
+        <div class="stats-summary">
+            <div class="stat-item"><div class="stat-value" id="totalColdNumbers">0</div><div class="stat-label">Active Numbers</div></div>
+            <div class="stat-item"><div class="stat-value" id="waitingCount">0</div><div class="stat-label">Waiting</div></div>
+            <div class="stat-item"><div class="stat-value" id="stage1Count">0</div><div class="stat-label">Stage 1</div></div>
+            <div class="stat-item"><div class="stat-value" id="stage2Count">0</div><div class="stat-label">Stage 2</div></div>
+            <div class="stat-item"><div class="stat-value" id="stage3Count">0</div><div class="stat-label">Stage 3</div></div>
+            <div class="stat-item"><div class="stat-value" id="stage4Count">0</div><div class="stat-label">Stage 4</div></div>
+            <div class="stat-item"><div class="stat-value" id="stage5Count">0</div><div class="stat-label">Stage 5</div></div>
+            <div class="stat-item"><div class="stat-value" id="totalHits">0</div><div class="stat-label">Total Hits</div></div>
+        </div>
+    </div>
+
+    <!-- alert banner -->
+    <div id="alertBanner" class="alert-banner" style="display: none;">
+        <div class="alert-number" id="alertNumberDisplay">🎯</div>
+        <div class="alert-content">
+            <div class="alert-title" id="alertTitle">Alert!</div>
+            <div class="alert-message" id="alertMessage"></div>
+            <button class="play-alert-button" onclick="acknowledgeAlert()">Acknowledge</button>
+        </div>
+        <button class="close-alert" onclick="closeAlert()">×</button>
+    </div>
+
+    <!-- numpad -->
+    <div class="numpad">
+        <button class="backspace" onclick="backspace()">⌫</button>
+        <button onclick="numpadClick('1')">1</button><button onclick="numpadClick('2')">2</button><button onclick="numpadClick('3')">3</button>
+        <button onclick="numpadClick('4')">4</button><button onclick="numpadClick('5')">5</button><button onclick="numpadClick('6')">6</button>
+        <button onclick="numpadClick('7')">7</button><button onclick="numpadClick('8')">8</button><button onclick="numpadClick('9')">9</button>
+        <button onclick="numpadClick('0')">0</button>
+        <button class="enter" onclick="addNumber()">Enter</button>
+    </div>
+
+    <script>
+        // ---------- DATA ----------
+        var colors = { red: [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
+            black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
+            green: ["0", "00"] };
+        var allNumbers = ["0", "00"].concat(Array.from({ length: 36 }, function(_, i) { return (i + 1).toString(); }));
+
+        function safeParseArray(key, defaultVal) {
+            var data = localStorage.getItem(key);
+            if (data === null) return defaultVal.slice();
+            try {
+                var parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(function(item) { return String(item); });
+                }
+                return defaultVal.slice();
+            } catch (e) {
+                return defaultVal.slice();
+            }
+        }
+
+        function safeParseObject(key, defaultVal) {
+            var data = localStorage.getItem(key);
+            if (data === null) return JSON.parse(JSON.stringify(defaultVal));
+            try {
+                var parsed = JSON.parse(data);
+                if (typeof parsed === 'object' && parsed !== null) return parsed;
+                return JSON.parse(JSON.stringify(defaultVal));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(defaultVal));
+            }
+        }
+
+        // ---- core data ----
+        var spinHistory = safeParseArray("history", []);
+        var coldNumbers = safeParseArray("coldNumbers", []);
+        var trackingStats = safeParseObject("trackingStats", { "totalHits": 0, "stageMisses": [0, 0, 0, 0, 0],
+            "stageMissesHistory": [], "stageHitRecords": [
+                [],
+                [],
+                [],
+                [],
+                []
+            ] });
+
+        // Stage 1 HITS LIST
+        var stage1Hits = safeParseArray("stage1Hits", []);
+        var stage1HitHistory = safeParseArray("stage1HitHistory", []);
+        var stage1CumulativeMisses = parseInt(localStorage.getItem("stage1CumulativeMisses")) || 0;
+
+        // HOT HIT LIST
+        var hotHitList = safeParseArray("hotHitList", []);
+        var hotHitHistory = safeParseArray("hotHitHistory", []);
+        var hotHitCumulativeMisses = parseInt(localStorage.getItem("hotHitCumulativeMisses")) || 0;
+
+        // 80+ misses
+        var eightyPlusCumulativeMisses = parseInt(localStorage.getItem("eightyPlusCumulativeMisses")) || 0;
+        var eightyPlusHitHistory = safeParseArray("eightyPlusHitHistory", []);
+        var sixtyPlusCumulativeMisses = parseInt(localStorage.getItem("sixtyPlusCumulativeMisses")) || 0;
+        var sixtyPlusHitHistory = safeParseArray("sixtyPlusHitHistory", []);
+        var sixtyOrMoreCumulativeMisses = parseInt(localStorage.getItem("sixtyOrMoreCumulativeMisses")) || 0;
+        var sixtyOrMoreHitHistory = safeParseArray("sixtyOrMoreHitHistory", []);
+
+        // Summary box
+        var summaryTotalMisses = parseInt(localStorage.getItem("summaryTotalMisses")) || 0;
+        var summaryHitHistory = safeParseArray("summaryHitHistory", []);
+        // Overview box
+        var overviewTotalMisses = parseInt(localStorage.getItem("overviewTotalMisses")) || 0;
+        var overviewHitHistory = safeParseArray("overviewHitHistory", []);
+
+        // Ensure stageHitRecords structure
+        if (!trackingStats.stageHitRecords || !Array.isArray(trackingStats.stageHitRecords) || trackingStats.stageHitRecords
+            .length !== 5) {
+            trackingStats.stageHitRecords = [
+                [],
+                [],
+                [],
+                [],
+                []
+            ];
+        }
+        if (!trackingStats.stageMissesHistory || !Array.isArray(trackingStats.stageMissesHistory)) {
+            trackingStats.stageMissesHistory = [];
+        }
+
+        // ---------- HELPERS ----------
+        function getColor(n) {
+            if (colors.green.indexOf(n) !== -1) return "green";
+            if (colors.red.indexOf(Number(n)) !== -1) return "red";
+            if (colors.black.indexOf(Number(n)) !== -1) return "black";
+            return "";
+        }
+
+        function calculateMisses(historyArray) {
+            historyArray = historyArray || spinHistory;
+            if (!Array.isArray(historyArray)) historyArray = [];
+            var misses = {};
+            allNumbers.forEach(function(n) { misses[n] = 0; });
+            if (historyArray.length === 0) return misses;
+            for (var i = historyArray.length - 1; i >= 0; i--) {
+                var num = String(historyArray[i]);
+                if (misses[num] === 0 && historyArray.lastIndexOf(num) === i) misses[num] = historyArray.length - 1 - i;
+            }
+            allNumbers.forEach(function(n) { if (historyArray.indexOf(n) === -1) misses[n] = historyArray.length; });
+            return misses;
+        }
+
+        function sortNumberStrings(arr) {
+            var order = ["0", "00"].concat(Array.from({ length: 36 }, function(_, i) { return (i + 1).toString(); }));
+            return arr.slice().sort(function(a, b) { return order.indexOf(a) - order.indexOf(b); });
+        }
+
+        function sortStage1Hits(arr) {
+            var order = ["0", "00"].concat(Array.from({ length: 36 }, function(_, i) { return (i + 1).toString(); }));
+            return arr.slice().sort(function(a, b) { return order.indexOf(a.number) - order.indexOf(b.number); });
+        }
+
+        // ---------- ALERTS ----------
+        function showGenericAlert(title, message, numberIcon) {
+            numberIcon = numberIcon || "🎯";
+            var banner = document.getElementById('alertBanner');
+            document.getElementById('alertNumberDisplay').textContent = numberIcon;
+            document.getElementById('alertNumberDisplay').className = "alert-number";
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').innerHTML = message;
+            banner.style.display = 'flex';
+            setTimeout(function() { if (banner.style.display !== 'none') banner.style.display = 'none'; }, 10000);
+        }
+
+        function showSummaryMissesAlert(total) {
+            showGenericAlert('⚠️ SUMMARY BOX MISSES 100+',
+                'The "Stage 1 HITS LIST, Cold, Active And Waiting" box has accumulated <strong>' + total +
+                '</strong> total misses.<br>Consider reviewing the numbers.',
+                '⚠️');
+        }
+
+        function showAlert(number, stage, action) {
+            var banner = document.getElementById('alertBanner');
+            var alertNumDiv = document.getElementById('alertNumberDisplay');
+            alertNumDiv.textContent = number;
+            var colorClass = getColor(number);
+            alertNumDiv.className = 'alert-number ' + colorClass;
+            var title = document.getElementById('alertTitle'),
+                msg = document.getElementById('alertMessage');
+            if (action === 'start_tracking') {
+                title.textContent = '🔥 NEW COLD NUMBER!';
+                msg.innerHTML = 'Number <strong>' + number + '</strong> appeared with 80+ misses.<br>Tracking in <strong>Stage ' +
+                    stage + '</strong>.';
+            } else if (action === 'stage_completed') {
+                title.textContent = '⏳ STAGE COMPLETED';
+                msg.innerHTML = 'Number <strong>' + number + '</strong> finished Stage ' + (stage - 1) +
+                    ' without hit.<br>Waiting for next appearance.';
+            } else if (action === 'next_stage_started') {
+                title.textContent = '🚀 NEXT STAGE STARTED!';
+                msg.innerHTML = 'Number <strong>' + number + '</strong> appears again!<br>Starting <strong>Stage ' + stage +
+                    '</strong> — CONSIDER PLAYING!';
+            } else if (action === 'hit') {
+                title.textContent = '🎯 HIT!';
+                msg.innerHTML = 'Number <strong>' + number + '</strong> HIT during Stage ' + stage +
+                    '! Removed from tracking.<br>Added to Stage 1 HITS LIST for next 40 spins.';
+            } else if (action === 'hot_hit') {
+                title.textContent = '🔥 HOT HIT!';
+                msg.innerHTML = 'Number <strong>' + number + '</strong> hit again from HOT HIT LIST!<br>40‑spin window restarted.';
+            } else if (action === 'stage1_to_hot') {
+                title.textContent = '🔥 MOVED TO HOT LIST!';
+                msg.innerHTML = 'Number <strong>' + number + '</strong> hit from Stage 1 HITS LIST!<br>Moved to <strong>HOT HIT LIST</strong> with 40 spins.';
+            }
+            banner.style.display = 'flex';
+            setTimeout(function() { if (banner.style.display !== 'none') banner.style.display = 'none'; }, 10000);
+        }
+
+        function closeAlert() { document.getElementById('alertBanner').style.display = 'none'; }
+
+        function acknowledgeAlert() { closeAlert(); }
+
+        // ---------- SAVE ----------
+        function saveAllData() {
+            localStorage.setItem("history", JSON.stringify(spinHistory));
+            localStorage.setItem("coldNumbers", JSON.stringify(coldNumbers));
+            localStorage.setItem("trackingStats", JSON.stringify(trackingStats));
+            localStorage.setItem("stage1Hits", JSON.stringify(stage1Hits));
+            localStorage.setItem("stage1HitHistory", JSON.stringify(stage1HitHistory));
+            localStorage.setItem("stage1CumulativeMisses", String(stage1CumulativeMisses));
+            localStorage.setItem("hotHitList", JSON.stringify(hotHitList));
+            localStorage.setItem("hotHitHistory", JSON.stringify(hotHitHistory));
+            localStorage.setItem("hotHitCumulativeMisses", String(hotHitCumulativeMisses));
+            localStorage.setItem("eightyPlusCumulativeMisses", String(eightyPlusCumulativeMisses));
+            localStorage.setItem("eightyPlusHitHistory", JSON.stringify(eightyPlusHitHistory));
+            localStorage.setItem("sixtyPlusCumulativeMisses", String(sixtyPlusCumulativeMisses));
+            localStorage.setItem("sixtyPlusHitHistory", JSON.stringify(sixtyPlusHitHistory));
+            localStorage.setItem("sixtyOrMoreCumulativeMisses", String(sixtyOrMoreCumulativeMisses));
+            localStorage.setItem("sixtyOrMoreHitHistory", JSON.stringify(sixtyOrMoreHitHistory));
+            localStorage.setItem("summaryTotalMisses", String(summaryTotalMisses));
+            localStorage.setItem("summaryHitHistory", JSON.stringify(summaryHitHistory));
+            localStorage.setItem("overviewTotalMisses", String(overviewTotalMisses));
+            localStorage.setItem("overviewHitHistory", JSON.stringify(overviewHitHistory));
+        }
+
+        // ---------- STAGE 1 HITS LIST ----------
+        function updateStage1HitsForSpin(spinNumber) {
+            var hitIndex = -1;
+            for (var i = 0; i < stage1Hits.length; i++) {
+                if (stage1Hits[i].number === spinNumber) { hitIndex = i; break; }
+            }
+            var hitOccurred = (hitIndex !== -1);
+            var cumulativeBeforeReset = stage1CumulativeMisses;
+            var hitNumber = null;
+
+            if (hitOccurred) {
+                hitNumber = stage1Hits[hitIndex].number;
+                stage1HitHistory.push(cumulativeBeforeReset);
+                if (stage1HitHistory.length > 100) stage1HitHistory = stage1HitHistory.slice(-100);
+                stage1CumulativeMisses = 0;
+                stage1Hits.splice(hitIndex, 1);
+                for (var j = 0; j < stage1Hits.length; j++) {
+                    stage1Hits[j].currentMisses = 0;
+                }
+            } else {
+                stage1CumulativeMisses += stage1Hits.length;
+            }
+
+            for (var k = 0; k < stage1Hits.length; k++) {
+                stage1Hits[k].spinsLeft--;
+                stage1Hits[k].currentMisses++;
+            }
+
+            stage1Hits = stage1Hits.filter(function(hit) { return hit.spinsLeft > 0; });
+
+            return { hitOccurred: hitOccurred, hitNumber: hitNumber, cumulativeBefore: cumulativeBeforeReset };
+        }
+
+        // ---------- HOT HIT LIST ----------
+        function processHotHit(spinNumber) {
+            var hitIndex = -1;
+            for (var i = 0; i < hotHitList.length; i++) {
+                if (hotHitList[i].number === spinNumber) { hitIndex = i; break; }
+            }
+            if (hitIndex === -1) {
+                return false;
+            }
+            var cumBefore = hotHitCumulativeMisses;
+            hotHitHistory.push(cumBefore);
+            if (hotHitHistory.length > 100) hotHitHistory = hotHitHistory.slice(-100);
+            hotHitCumulativeMisses = 0;
+            hotHitList[hitIndex].spinsLeft = 40;
+            hotHitList[hitIndex].currentMisses = 0;
+            for (var j = 0; j < hotHitList.length; j++) {
+                if (j !== hitIndex) hotHitList[j].currentMisses = 0;
+            }
+            showAlert(spinNumber, 0, 'hot_hit');
+            return true;
+        }
+
+        function decrementHotList(skipNumbers) {
+            for (var i = 0; i < hotHitList.length; i++) {
+                if (skipNumbers.indexOf(hotHitList[i].number) === -1) {
+                    hotHitList[i].spinsLeft--;
+                    hotHitList[i].currentMisses++;
+                }
+            }
+            hotHitList = hotHitList.filter(function(hit) { return hit.spinsLeft > 0; });
+        }
+
+        // ---------- DISPLAY FUNCTIONS ----------
+        function updateStage1HitsDisplay() {
+            var container = document.getElementById("stage1HitsList");
+            var sorted = sortStage1Hits(stage1Hits);
+            if (!sorted.length) {
+                container.innerHTML =
+                    '<div class="empty-column">⏳ No numbers in Stage 1 HITS LIST. Hits will appear here & get removed on hit.</div>';
+            } else {
+                container.innerHTML = sorted.map(function(hit) {
+                    var colorClass = getColor(hit.number);
+                    return '<div class="hit-item">' +
+                        '<div class="number-info">' +
+                        '<div class="number-display ' + colorClass + '">' + hit.number + '</div>' +
+                        '<div>' +
+                        '<div class="tracking-stats">' + hit.spinsLeft +
+                        ' <span class="spins-left">spins left</span></div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            }
+            document.getElementById("hitsCumulativeMisses").innerHTML = 'Cumulative misses: ' + stage1CumulativeMisses;
+            updateStage1HitHistoryDisplay();
+        }
+
+        function updateStage1HitHistoryDisplay() {
+            var container = document.getElementById("stage1HitHistoryDisplay");
+            if (!stage1HitHistory.length) {
+                container.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = stage1HitHistory.map(function(v) { return '<span class="hit-record-badge">' + v + ' </span>'; })
+                    .join('');
+                container.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function updateHotHitListDisplay() {
+            var container = document.getElementById("hotHitList");
+            var sorted = sortStage1Hits(hotHitList);
+            if (!sorted.length) {
+                container.innerHTML =
+                    '<div class="empty-column">🔥 No numbers in HOT HIT LIST yet. Numbers move here when they hit again from Stage 1.</div>';
+            } else {
+                container.innerHTML = sorted.map(function(hit) {
+                    var colorClass = getColor(hit.number);
+                    return '<div class="hit-item">' +
+                        '<div class="number-info">' +
+                        '<div class="number-display ' + colorClass + '">' + hit.number + '</div>' +
+                        '<div>' +
+                        '<div class="tracking-stats">' + hit.spinsLeft +
+                        ' <span class="spins-left">spins left</span></div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            }
+            document.getElementById("hotHitCumulativeMissesDisplay").innerHTML = 'Total Misses: ' + hotHitCumulativeMisses;
+            updateHotHitHistoryDisplay();
+        }
+
+        function updateHotHitHistoryDisplay() {
+            var container = document.getElementById("hotHitHistoryDisplay");
+            if (!hotHitHistory.length) {
+                container.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = hotHitHistory.map(function(v) { return '<span class="hit-record-badge">' + v + ' </span>'; })
+                    .join('');
+                container.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function updateMissesDisplay() {
+            var misses = calculateMisses();
+            var container = document.getElementById("missesGrid");
+            var highMiss = allNumbers.filter(function(n) { return misses[n] >= 80; });
+            if (highMiss.length === 0) {
+                container.innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;color:#888;">No numbers with 80+ misses yet</div>';
+                return;
+            }
+            highMiss.sort(function(a, b) { return misses[b] - misses[a]; });
+            container.innerHTML = highMiss.map(function(n) {
+                var tracked = coldNumbers.some(function(cn) { return cn.number === n && cn.active; });
+                return '<div class="misses-item ' + (tracked ? 'highlight' : '') +
+                    '"><div class="number-display ' + getColor(n) +
+                    '" style="margin:0 auto; width:30px; height:30px; font-size:0.85rem;">' + n +
+                    '</div><div style="font-size:0.7rem;color:#ff6b6b;">' + misses[n] + ' misses</div></div>';
+            }).join('');
+        }
+
+        function updateSixtyPlusMissesGrid() {
+            var misses = calculateMisses();
+            var container = document.getElementById("sixtyPlusMissesGrid");
+            var rangeMiss = allNumbers.filter(function(n) { return misses[n] >= 60 && misses[n] <= 79; });
+            if (rangeMiss.length === 0) {
+                container.innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;color:#888;">No numbers with 60–79 misses yet</div>';
+                return;
+            }
+            rangeMiss.sort(function(a, b) { return misses[b] - misses[a]; });
+            container.innerHTML = rangeMiss.map(function(n) {
+                var tracked = coldNumbers.some(function(cn) { return cn.number === n && cn.active; });
+                return '<div class="misses-item ' + (tracked ? 'highlight' : '') +
+                    '"><div class="number-display ' + getColor(n) +
+                    '" style="margin:0 auto; width:30px; height:30px; font-size:0.85rem;">' + n +
+                    '</div><div style="font-size:0.7rem;color:#ff6b6b;">' + misses[n] + ' misses</div></div>';
+            }).join('');
+        }
+
+        function updateSixtyOrMoreMissesGrid() {
+            var misses = calculateMisses();
+            var container = document.getElementById("sixtyOrMoreMissesGrid");
+            var sixtyOrMore = allNumbers.filter(function(n) { return misses[n] >= 60; });
+            if (sixtyOrMore.length === 0) {
+                container.innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;color:#888;">No numbers with 60+ misses yet</div>';
+                return;
+            }
+            sixtyOrMore.sort(function(a, b) { return misses[b] - misses[a]; });
+            container.innerHTML = sixtyOrMore.map(function(n) {
+                var tracked = coldNumbers.some(function(cn) { return cn.number === n && cn.active; });
+                return '<div class="misses-item ' + (tracked ? 'highlight' : '') +
+                    '"><div class="number-display ' + getColor(n) +
+                    '" style="margin:0 auto; width:30px; height:30px; font-size:0.85rem;">' + n +
+                    '</div><div style="font-size:0.7rem;color:#ff6b6b;">' + misses[n] + ' misses</div></div>';
+            }).join('');
+        }
+
+        function updateOverviewDisplay() {
+            // HOT HIT LIST NUMBERS
+            var hotNumbers = hotHitList.map(function(h) { return h.number; });
+            var hotContainer = document.getElementById("overviewHotNumbers");
+            if (hotNumbers.length === 0) {
+                hotContainer.innerHTML = '<span class="cat-empty">none</span>';
+            } else {
+                hotContainer.innerHTML = sortNumberStrings(hotNumbers).map(function(n) {
+                    return '<span class="cat-number ' + getColor(n) + '">' + n + '</span>';
+                }).join('');
+            }
+
+            // Stage 1 HITS LIST ONLY
+            var hitNumbers = stage1Hits.map(function(h) { return h.number; });
+            var hitContainer = document.getElementById("overviewHitNumbers");
+            if (hitNumbers.length === 0) {
+                hitContainer.innerHTML = '<span class="cat-empty">none</span>';
+            } else {
+                hitContainer.innerHTML = sortNumberStrings(hitNumbers).map(function(n) {
+                    return '<span class="cat-number ' + getColor(n) + '">' + n + '</span>';
+                }).join('');
+            }
+
+            // Active
+            var activeNumbers = coldNumbers.filter(function(cn) { return cn.active === true && cn.waiting === false; })
+                .map(function(cn) { return cn.number; });
+            var activeContainer = document.getElementById("overviewActiveNumbers");
+            if (activeNumbers.length === 0) {
+                activeContainer.innerHTML = '<span class="cat-empty">none</span>';
+            } else {
+                activeContainer.innerHTML = sortNumberStrings(activeNumbers).map(function(n) {
+                    return '<span class="cat-number ' + getColor(n) + '">' + n + '</span>';
+                }).join('');
+            }
+
+            // Waiting
+            var waitingNumbers = coldNumbers.filter(function(cn) { return cn.waiting === true; })
+                .map(function(cn) { return cn.number; });
+            var waitingContainer = document.getElementById("overviewWaitingNumbers");
+            if (waitingNumbers.length === 0) {
+                waitingContainer.innerHTML = '<span class="cat-empty">none</span>';
+            } else {
+                waitingContainer.innerHTML = sortNumberStrings(waitingNumbers).map(function(n) {
+                    return '<span class="cat-number ' + getColor(n) + '">' + n + '</span>';
+                }).join('');
+            }
+
+            document.getElementById("overviewTotalMissesValue").textContent = overviewTotalMisses;
+            var historyContainer = document.getElementById("overviewHitHistoryDisplay");
+            if (!overviewHitHistory.length) {
+                historyContainer.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = overviewHitHistory.map(function(v) { return '<span class="hit-record-badge">' + v +
+                        ' </span>'; }).join('');
+                historyContainer.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function updateHitColdActiveWaitingDisplay() {
+            var sortedHits = sortStage1Hits(stage1Hits);
+            var hitNumbers = sortedHits.map(function(h) { return h.number; });
+            var hitCount = hitNumbers.length;
+            var misses = calculateMisses();
+            var coldNumbersList = allNumbers.filter(function(n) { return misses[n] >= 80; });
+            var coldCount = coldNumbersList.length;
+            var activeListRaw = coldNumbers.filter(function(cn) { return cn.active === true && cn.waiting === false; })
+                .map(function(cn) { return cn.number; });
+            var activeList = sortNumberStrings(activeListRaw);
+            var activeCount = activeList.length;
+            var waitingListRaw = coldNumbers.filter(function(cn) { return cn.waiting === true; }).map(function(cn) { return cn
+                    .number; });
+            var waitingList = sortNumberStrings(waitingListRaw);
+            var waitingCountVal = waitingList.length;
+
+            var hitContainer = document.getElementById("summaryHitNumbers");
+            document.getElementById("summaryHitCount").textContent = hitCount;
+            hitContainer.innerHTML = hitCount === 0 ? '<span class="cat-empty">none</span>' :
+                hitNumbers.map(function(n) { return '<span class="cat-number ' + getColor(n) + '">' + n + '</span>'; })
+                .join('');
+
+            var coldContainer = document.getElementById("summaryColdNumbers");
+            document.getElementById("summaryColdCount").textContent = coldCount;
+            coldContainer.innerHTML = coldCount === 0 ? '<span class="cat-empty">none</span>' :
+                coldNumbersList.map(function(n) { return '<span class="cat-number ' + getColor(n) + '">' + n +
+                    '</span>'; }).join('');
+
+            var activeContainer = document.getElementById("summaryActiveNumbers");
+            document.getElementById("summaryActiveCount").textContent = activeCount;
+            activeContainer.innerHTML = activeCount === 0 ? '<span class="cat-empty">none</span>' :
+                activeList.map(function(n) { return '<span class="cat-number ' + getColor(n) + '">' + n + '</span>'; })
+                .join('');
+
+            var waitingContainer = document.getElementById("summaryWaitingNumbers");
+            document.getElementById("summaryWaitingCount").textContent = waitingCountVal;
+            waitingContainer.innerHTML = waitingCountVal === 0 ? '<span class="cat-empty">none</span>' :
+                waitingList.map(function(n) { return '<span class="cat-number ' + getColor(n) + '">' + n +
+                    '</span>'; }).join('');
+
+            document.getElementById("summaryTotalMissesValue").textContent = summaryTotalMisses;
+            var historyContainer = document.getElementById("summaryHitHistoryDisplay");
+            if (!summaryHitHistory.length) {
+                historyContainer.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = summaryHitHistory.map(function(v) { return '<span class="hit-record-badge">' + v +
+                        ' </span>'; }).join('');
+                historyContainer.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function updateStageMissesDisplay() {
+            for (var i = 1; i <= 5; i++) document.getElementById('stage' + i + 'MissesTotal').innerText = trackingStats
+                .stageMisses[i - 1] || 0;
+            for (var j = 1; j <= 5; j++) {
+                var rowVal = document.getElementById('stageMissesRowValue' + j);
+                if (rowVal) rowVal.innerText = trackingStats.stageMisses[j - 1] || 0;
+            }
+        }
+
+        function displayHitRecords() {
+            for (var s = 1; s <= 5; s++) {
+                var container = document.getElementById('stageHitHistory' + s);
+                var records = trackingStats.stageHitRecords[s - 1] || [];
+                if (records.length === 0) {
+                    container.innerHTML = '<span class="hit-record-empty">⏳ No hit records yet</span>';
+                } else {
+                    var badges = records.map(function(v) { return '<span class="hit-record-badge">' + v + ' </span>'; })
+                        .join('');
+                    container.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+                }
+            }
+        }
+
+        function updateTrackingDisplay() {
+            for (var s = 1; s <= 5; s++) {
+                var container = document.getElementById('stage' + s + 'List');
+                var stageNumbers = coldNumbers.filter(function(cn) { return (cn.stage === s && cn.active) || (cn.waiting &&
+                        cn.nextStage === s); });
+                if (stageNumbers.length === 0) {
+                    container.innerHTML = '<div class="empty-column">⏳ No numbers in stage ' + s + '</div>';
+                    continue;
+                }
+                container.innerHTML = stageNumbers.map(function(cn) {
+                    var isWaiting = cn.waiting;
+                    var colorClass = getColor(cn.number);
+                    var statsHtml = '';
+                    if (isWaiting) {
+                        statsHtml = '<div class="waiting-status">Waiting for Stage ' + cn.nextStage + '</div>';
+                    } else {
+                        statsHtml =
+                            '<div class="tracking-stats">' + cn.spinsLeft +
+                            ' <span class="spins-left">spins left</span></div>';
+                    }
+                    return '<div class="cold-number ' + (isWaiting ? 'waiting' : 'stage-' + cn.stage) +
+                        '"><div class="number-info"><div class="number-display ' + colorClass + '">' + cn
+                        .number + '</div><div>' + statsHtml + '</div></div><div style="font-size:0.75rem;">' +
+                        (isWaiting ? 'Stage ' + (cn.nextStage - 1) + ' ⏳' : 'Stage ' + cn.stage) + '</div></div>';
+                }).join('');
+            }
+            var activeCount = coldNumbers.filter(function(cn) { return cn.active; }).length;
+            var waitingCountVal = coldNumbers.filter(function(cn) { return cn.waiting; }).length;
+            document.getElementById('totalColdNumbers').innerText = activeCount;
+            document.getElementById('waitingCount').innerText = waitingCountVal;
+            var stageCounts = [0, 0, 0, 0, 0];
+            coldNumbers.forEach(function(cn) { if (cn.active && !cn.waiting && cn.stage >= 1 && cn.stage <= 5) stageCounts[cn
+                    .stage - 1]++; });
+            for (var i = 1; i <= 5; i++) document.getElementById('stage' + i + 'Count').innerText = stageCounts[i - 1];
+            document.getElementById('totalHits').innerText = trackingStats.totalHits || 0;
+            updateStageMissesDisplay();
+            displayHitRecords();
+            updateStage1HitsDisplay();
+            updateHotHitListDisplay();
+            updateEightyPlusDisplay();
+            updateSixtyPlusDisplay();
+            updateSixtyOrMoreDisplay();
+            updateHitColdActiveWaitingDisplay();
+            updateOverviewDisplay();
+        }
+
+        function updateEightyPlusDisplay() {
+            document.getElementById("eightyPlusCumulativeDisplay").textContent = 'Cumulative misses: ' +
+                eightyPlusCumulativeMisses;
+            var container = document.getElementById("eightyPlusHitHistoryDisplay");
+            if (!eightyPlusHitHistory.length) {
+                container.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = eightyPlusHitHistory.map(function(v) { return '<span class="hit-record-badge">' + v +
+                        ' </span>'; }).join('');
+                container.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function updateSixtyPlusDisplay() {
+            document.getElementById("sixtyPlusCumulativeDisplay").textContent = 'Cumulative misses: ' +
+                sixtyPlusCumulativeMisses;
+            var container = document.getElementById("sixtyPlusHitHistoryDisplay");
+            if (!sixtyPlusHitHistory.length) {
+                container.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = sixtyPlusHitHistory.map(function(v) { return '<span class="hit-record-badge">' + v +
+                        ' </span>'; }).join('');
+                container.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function updateSixtyOrMoreDisplay() {
+            document.getElementById("sixtyOrMoreCumulativeDisplay").textContent = 'Cumulative misses: ' +
+                sixtyOrMoreCumulativeMisses;
+            var container = document.getElementById("sixtyOrMoreHitHistoryDisplay");
+            if (!sixtyOrMoreHitHistory.length) {
+                container.innerHTML =
+                    '<span class="hit-record-label">🎯 Hits @:</span> <span class="hit-record-empty">none yet</span>';
+            } else {
+                var badges = sixtyOrMoreHitHistory.map(function(v) { return '<span class="hit-record-badge">' + v +
+                        ' </span>'; }).join('');
+                container.innerHTML = '<span class="hit-record-label">🎯 Hits @:</span> ' + badges;
+            }
+        }
+
+        function checkAndAlertStageMisses(prevStageMisses, newStageMisses) {
+            for (var i = 0; i < 5; i++) {
+                var prev = prevStageMisses[i] || 0;
+                var curr = newStageMisses[i] || 0;
+                if (curr >= 100 && prev < 100) {
+                    var stageNum = i + 1;
+                    showGenericAlert('⚠️ HIGH STAGE MISSES!', 'Stage ' + stageNum +
+                        ' has accumulated <strong>' + curr +
+                        '</strong> cumulative misses (=100). Consider adjusting strategy.',
+                        "⚠️");
+                }
+            }
+        }
+
+        // ---------- CORE UPDATE ----------
+        function updateColdTracking(newNumber) {
+            try {
+                if (!Array.isArray(spinHistory)) {
+                    spinHistory = [];
+                    saveAllData();
+                }
+                var prevHistory = spinHistory.slice(0, -1);
+                var missesBefore = calculateMisses(prevHistory);
+
+                // --- Capture pre-update sets for summary/overview hit detection ---
+                var preStage1Numbers = stage1Hits.map(function(h) { return h.number; });
+                var preColdSet = allNumbers.filter(function(n) { return missesBefore[n] >= 80; });
+                var preActiveSet = coldNumbers.filter(function(cn) { return cn.active && !cn.waiting; })
+                    .map(function(cn) { return cn.number; });
+                var preWaitingSet = coldNumbers.filter(function(cn) { return cn.waiting; })
+                    .map(function(cn) { return cn.number; });
+
+                // ---- HOT logic ----
+                var currentHotSize = hotHitList.length;
+                var missedValue = hotHitCumulativeMisses + currentHotSize;
+                hotHitCumulativeMisses = missedValue;
+                var hotHitIndex = -1;
+                for (var i = 0; i < hotHitList.length; i++) {
+                    if (hotHitList[i].number === newNumber) { hotHitIndex = i; break; }
+                }
+                var hotHitOccurred = (hotHitIndex !== -1);
+                if (hotHitOccurred) {
+                    hotHitHistory.push(missedValue);
+                    if (hotHitHistory.length > 100) hotHitHistory = hotHitHistory.slice(-100);
+                    hotHitCumulativeMisses = 0;
+                    hotHitList[hotHitIndex].spinsLeft = 40;
+                    hotHitList[hotHitIndex].currentMisses = 0;
+                    for (var j = 0; j < hotHitList.length; j++) {
+                        if (j !== hotHitIndex) hotHitList[j].currentMisses = 0;
+                    }
+                    showAlert(newNumber, 0, 'hot_hit');
+                }
+
+                // ---- Stage 1 ----
+                var stage1Result = updateStage1HitsForSpin(newNumber);
+                var stage1HitOccurred = stage1Result.hitOccurred;
+                var stage1HitNumber = stage1Result.hitNumber;
+                var addedFromStage1 = false;
+                if (stage1HitOccurred && stage1HitNumber !== null) {
+                    var alreadyInHot = hotHitList.some(function(h) { return h.number === stage1HitNumber; });
+                    if (!alreadyInHot) {
+                        hotHitList.push({
+                            number: stage1HitNumber,
+                            spinsLeft: 40,
+                            currentMisses: 0,
+                            addedAtSpin: spinHistory.length
+                        });
+                        addedFromStage1 = true;
+                        showAlert(stage1HitNumber, 0, 'stage1_to_hot');
+                    }
+                }
+
+                // Decrement HOT numbers (skip hit and added)
+                var skipNumbers = [];
+                if (hotHitOccurred) skipNumbers.push(newNumber);
+                if (addedFromStage1) skipNumbers.push(stage1HitNumber);
+                for (var k = 0; k < hotHitList.length; k++) {
+                    if (skipNumbers.indexOf(hotHitList[k].number) === -1) {
+                        hotHitList[k].spinsLeft--;
+                        hotHitList[k].currentMisses++;
+                    }
+                }
+                hotHitList = hotHitList.filter(function(hit) { return hit.spinsLeft > 0; });
+
+                // ---- Summary box (uses pre-update sets) ----
+                var anyHitSummary = (preStage1Numbers.indexOf(newNumber) !== -1) ||
+                    (preColdSet.indexOf(newNumber) !== -1) ||
+                    (preActiveSet.indexOf(newNumber) !== -1) ||
+                    (preWaitingSet.indexOf(newNumber) !== -1);
+                var unionSet = new Set();
+                preStage1Numbers.forEach(function(n) { unionSet.add(n); });
+                preColdSet.forEach(function(n) { unionSet.add(n); });
+                preActiveSet.forEach(function(n) { unionSet.add(n); });
+                preWaitingSet.forEach(function(n) { unionSet.add(n); });
+                var unionSize = unionSet.size;
+
+                if (anyHitSummary) {
+                    summaryTotalMisses += unionSize;
+                    summaryHitHistory.push(summaryTotalMisses);
+                    if (summaryHitHistory.length > 100) summaryHitHistory = summaryHitHistory.slice(-100);
+                    summaryTotalMisses = 0;
+                } else {
+                    summaryTotalMisses += unionSize;
+                }
+                if (summaryTotalMisses >= 100) {
+                    showSummaryMissesAlert(summaryTotalMisses);
+                }
+
+                // ---- Overview box (uses pre-update sets without Cold) ----
+                var overviewSet = new Set();
+                preStage1Numbers.forEach(function(n) { overviewSet.add(n); });
+                preActiveSet.forEach(function(n) { overviewSet.add(n); });
+                preWaitingSet.forEach(function(n) { overviewSet.add(n); });
+                // Also include HOT HIT LIST numbers in the overview set for hit detection
+                var preHotNumbers = hotHitList.map(function(h) { return h.number; });
+                preHotNumbers.forEach(function(n) { overviewSet.add(n); });
+                var overviewSize = overviewSet.size;
+                var anyHitOverview = overviewSet.has(newNumber);
+
+                if (anyHitOverview) {
+                    overviewTotalMisses += overviewSize;
+                    overviewHitHistory.push(overviewTotalMisses);
+                    if (overviewHitHistory.length > 100) overviewHitHistory = overviewHitHistory.slice(-100);
+                    overviewTotalMisses = 0;
+                } else {
+                    overviewTotalMisses += overviewSize;
+                }
+
+                // ---- Cold stages (existing logic) ----
+                var prevStageMisses = trackingStats.stageMisses.slice();
+                var activeCountsByStage = [0, 0, 0, 0, 0];
+                coldNumbers.forEach(function(cn) { if (cn.active && !cn.waiting && cn.stage >= 1 && cn.stage <= 5)
+                        activeCountsByStage[cn.stage - 1]++; });
+
+                var hitsByStage = [0, 0, 0, 0, 0];
+                var hitNumbers = [];
+
+                coldNumbers.forEach(function(cn) {
+                    if (cn.active && cn.number === newNumber) {
+                        cn.hit = true;
+                        cn.active = false;
+                        trackingStats.totalHits++;
+                        hitsByStage[cn.stage - 1]++;
+                        hitNumbers.push({ number: cn.number, stage: cn.stage, missesBeforeHit: trackingStats
+                                .stageMisses[cn.stage - 1] });
+                        showAlert(newNumber, cn.stage, 'hit');
+                    }
+                });
+
+                hitNumbers.forEach(function(hit) {
+                    stage1Hits.push({
+                        number: hit.number,
+                        hitMisses: hit.missesBeforeHit,
+                        spinsLeft: 40,
+                        currentMisses: 0,
+                        addedAtSpin: spinHistory.length
+                    });
+                });
+
+                for (var s = 0; s < 5; s++) {
+                    if (hitsByStage[s] > 0) {
+                        trackingStats.stageHitRecords[s].push(trackingStats.stageMisses[s]);
+                    }
+                }
+
+                for (var i = 0; i < 5; i++) {
+                    if (hitsByStage[i] > 0) trackingStats.stageMisses[i] = 0;
+                    else trackingStats.stageMisses[i] = (trackingStats.stageMisses[i] || 0) + activeCountsByStage[i];
+                }
+                trackingStats.stageMissesHistory.push({ spinNumber: spinHistory.length, stageMisses: trackingStats
+                        .stageMisses.slice(), date: new Date().toISOString() });
+
+                coldNumbers = coldNumbers.filter(function(cn) { return !cn.hit; });
+
+                coldNumbers.forEach(function(cn) {
+                    if (cn.active && !cn.waiting) {
+                        cn.spinsLeft--;
+                        if (cn.spinsLeft <= 0 && !cn.hit) {
+                            if (cn.stage < 5) {
+                                cn.active = false;
+                                cn.waiting = true;
+                                cn.nextStage = cn.stage + 1;
+                                showAlert(cn.number, cn.nextStage, 'stage_completed');
+                            } else {
+                                cn.active = false;
+                                cn.waiting = false;
+                            }
+                        }
+                    }
+                });
+
+                var waitingMatch = null;
+                for (var j = 0; j < coldNumbers.length; j++) {
+                    if (coldNumbers[j].waiting && coldNumbers[j].number === newNumber) {
+                        waitingMatch = coldNumbers[j];
+                        break;
+                    }
+                }
+                if (waitingMatch) {
+                    waitingMatch.active = true;
+                    waitingMatch.waiting = false;
+                    waitingMatch.stage = waitingMatch.nextStage;
+                    waitingMatch.spinsLeft = 40;
+                    delete waitingMatch.nextStage;
+                    showAlert(newNumber, waitingMatch.stage, 'next_stage_started');
+                } else if (missesBefore[newNumber] >= 80 && !coldNumbers.some(function(cn) { return cn.number ===
+                        newNumber && (cn.active || cn.waiting); })) {
+                    coldNumbers.push({ number: newNumber, stage: 1, spinsLeft: 40, misses: missesBefore[newNumber],
+                        addedAtSpin: spinHistory.length - 1, active: true, waiting: false, hit: false });
+                    showAlert(newNumber, 1, 'start_tracking');
+                }
+
+                // ---- 80+ misses ----
+                var currentHighMiss = allNumbers.filter(function(n) { return missesBefore[n] >= 80; });
+                var isHit80 = currentHighMiss.indexOf(newNumber) !== -1;
+                if (isHit80) {
+                    var highMissCount = currentHighMiss.length;
+                    eightyPlusCumulativeMisses += highMissCount;
+                    eightyPlusHitHistory.push(eightyPlusCumulativeMisses);
+                    if (eightyPlusHitHistory.length > 100) eightyPlusHitHistory = eightyPlusHitHistory.slice(-100);
+                    eightyPlusCumulativeMisses = 0;
+                } else {
+                    eightyPlusCumulativeMisses += currentHighMiss.length;
+                }
+
+                // ---- 60-79 misses ----
+                var currentSixtyMiss = allNumbers.filter(function(n) { return missesBefore[n] >= 60 && missesBefore[n] <=
+                    79; });
+                var isHit60 = currentSixtyMiss.indexOf(newNumber) !== -1;
+                if (isHit60) {
+                    var sixtyCount = currentSixtyMiss.length;
+                    sixtyPlusCumulativeMisses += sixtyCount;
+                    sixtyPlusHitHistory.push(sixtyPlusCumulativeMisses);
+                    if (sixtyPlusHitHistory.length > 100) sixtyPlusHitHistory = sixtyPlusHitHistory.slice(-100);
+                    sixtyPlusCumulativeMisses = 0;
+                } else {
+                    sixtyPlusCumulativeMisses += currentSixtyMiss.length;
+                }
+
+                // ---- 60+ misses ----
+                var currentSixtyOrMore = allNumbers.filter(function(n) { return missesBefore[n] >= 60; });
+                var isHit60orMore = currentSixtyOrMore.indexOf(newNumber) !== -1;
+                if (isHit60orMore) {
+                    var sixtyOrMoreCount = currentSixtyOrMore.length;
+                    sixtyOrMoreCumulativeMisses += sixtyOrMoreCount;
+                    sixtyOrMoreHitHistory.push(sixtyOrMoreCumulativeMisses);
+                    if (sixtyOrMoreHitHistory.length > 100) sixtyOrMoreHitHistory = sixtyOrMoreHitHistory.slice(-100);
+                    sixtyOrMoreCumulativeMisses = 0;
+                } else {
+                    sixtyOrMoreCumulativeMisses += currentSixtyOrMore.length;
+                }
+
+                var currMisses = calculateMisses();
+                coldNumbers.forEach(function(cn) { if (cn.active || cn.waiting) cn.misses = currMisses[cn.number]; });
+
+                checkAndAlertStageMisses(prevStageMisses, trackingStats.stageMisses);
+                saveAllData();
+                updateTrackingDisplay();
+                updateMissesDisplay();
+                updateSixtyPlusMissesGrid();
+                updateSixtyOrMoreMissesGrid();
+            } catch (e) {
+                console.error("Error in updateColdTracking:", e);
+                alert("An error occurred while updating tracking. Check console for details.");
+            }
+        }
+
+        // ---------- FULL RECALC ----------
+        function fullRecalcFromHistory() {
+            try {
+                if (!Array.isArray(spinHistory)) {
+                    spinHistory = [];
+                    saveAllData();
+                }
+
+                coldNumbers = [];
+                trackingStats = { totalHits: 0, stageMisses: [0, 0, 0, 0, 0], stageMissesHistory: [],
+                    stageHitRecords: [
+                        [],
+                        [],
+                        [],
+                        [],
+                        []
+                    ] };
+                stage1Hits = [];
+                stage1HitHistory = [];
+                stage1CumulativeMisses = 0;
+                hotHitList = [];
+                hotHitHistory = [];
+                hotHitCumulativeMisses = 0;
+                eightyPlusCumulativeMisses = 0;
+                eightyPlusHitHistory = [];
+                sixtyPlusCumulativeMisses = 0;
+                sixtyPlusHitHistory = [];
+                sixtyOrMoreCumulativeMisses = 0;
+                sixtyOrMoreHitHistory = [];
+                summaryTotalMisses = 0;
+                summaryHitHistory = [];
+                overviewTotalMisses = 0;
+                overviewHitHistory = [];
+
+                if (spinHistory.length === 0) {
+                    saveAllData();
+                    updateTrackingDisplay();
+                    updateMissesDisplay();
+                    updateSixtyPlusMissesGrid();
+                    updateSixtyOrMoreMissesGrid();
+                    return;
+                }
+
+                for (var idx = 0; idx < spinHistory.length; idx++) {
+                    var spin = spinHistory[idx];
+                    var missesBefore2 = calculateMisses(spinHistory.slice(0, idx));
+
+                    // Pre-update sets for this spin
+                    var preStage1 = stage1Hits.map(function(h) { return h.number; });
+                    var preCold = allNumbers.filter(function(n) { return missesBefore2[n] >= 80; });
+                    var preActive = coldNumbers.filter(function(cn) { return cn.active && !cn.waiting; })
+                        .map(function(cn) { return cn.number; });
+                    var preWaiting = coldNumbers.filter(function(cn) { return cn.waiting; })
+                        .map(function(cn) { return cn.number; });
+                    var preHot = hotHitList.map(function(h) { return h.number; });
+
+                    // ---- HOT logic ----
+                    var currentHotSize = hotHitList.length;
+                    var missedValue = hotHitCumulativeMisses + currentHotSize;
+                    hotHitCumulativeMisses = missedValue;
+                    var hotHitIndex = -1;
+                    for (var i = 0; i < hotHitList.length; i++) {
+                        if (hotHitList[i].number === spin) { hotHitIndex = i; break; }
+                    }
+                    var hotHitOccurred = (hotHitIndex !== -1);
+                    if (hotHitOccurred) {
+                        hotHitHistory.push(missedValue);
+                        if (hotHitHistory.length > 100) hotHitHistory = hotHitHistory.slice(-100);
+                        hotHitCumulativeMisses = 0;
+                        hotHitList[hotHitIndex].spinsLeft = 40;
+                        hotHitList[hotHitIndex].currentMisses = 0;
+                        for (var j = 0; j < hotHitList.length; j++) {
+                            if (j !== hotHitIndex) hotHitList[j].currentMisses = 0;
+                        }
+                    }
+
+                    // ---- Stage 1 ----
+                    var stage1Result = updateStage1HitsForSpin(spin);
+                    var stage1HitOccurred = stage1Result.hitOccurred;
+                    var stage1HitNumber = stage1Result.hitNumber;
+                    var addedFromStage1 = false;
+                    if (stage1HitOccurred && stage1HitNumber !== null) {
+                        var alreadyInHot = hotHitList.some(function(h) { return h.number === stage1HitNumber; });
+                        if (!alreadyInHot) {
+                            hotHitList.push({
+                                number: stage1HitNumber,
+                                spinsLeft: 40,
+                                currentMisses: 0,
+                                addedAtSpin: idx + 1
+                            });
+                            addedFromStage1 = true;
+                        }
+                    }
+
+                    var skipNumbers = [];
+                    if (hotHitOccurred) skipNumbers.push(spin);
+                    if (addedFromStage1) skipNumbers.push(stage1HitNumber);
+                    for (var k = 0; k < hotHitList.length; k++) {
+                        if (skipNumbers.indexOf(hotHitList[k].number) === -1) {
+                            hotHitList[k].spinsLeft--;
+                            hotHitList[k].currentMisses++;
+                        }
+                    }
+                    hotHitList = hotHitList.filter(function(hit) { return hit.spinsLeft > 0; });
+
+                    // ---- Summary box ----
+                    var unionSet2 = new Set();
+                    preStage1.forEach(function(n) { unionSet2.add(n); });
+                    preCold.forEach(function(n) { unionSet2.add(n); });
+                    preActive.forEach(function(n) { unionSet2.add(n); });
+                    preWaiting.forEach(function(n) { unionSet2.add(n); });
+                    var unionSize2 = unionSet2.size;
+                    var anyHitSummary2 = unionSet2.has(spin);
+                    if (anyHitSummary2) {
+                        summaryTotalMisses += unionSize2;
+                        summaryHitHistory.push(summaryTotalMisses);
+                        if (summaryHitHistory.length > 100) summaryHitHistory = summaryHitHistory.slice(-100);
+                        summaryTotalMisses = 0;
+                    } else {
+                        summaryTotalMisses += unionSize2;
+                    }
+                    if (summaryTotalMisses >= 100) {
+                        showSummaryMissesAlert(summaryTotalMisses);
+                    }
+
+                    // ---- Overview box (includes HOT) ----
+                    var overviewSet2 = new Set();
+                    preStage1.forEach(function(n) { overviewSet2.add(n); });
+                    preActive.forEach(function(n) { overviewSet2.add(n); });
+                    preWaiting.forEach(function(n) { overviewSet2.add(n); });
+                    preHot.forEach(function(n) { overviewSet2.add(n); });
+                    var overviewSize2 = overviewSet2.size;
+                    var anyHitOverview2 = overviewSet2.has(spin);
+                    if (anyHitOverview2) {
+                        overviewTotalMisses += overviewSize2;
+                        overviewHitHistory.push(overviewTotalMisses);
+                        if (overviewHitHistory.length > 100) overviewHitHistory = overviewHitHistory.slice(-100);
+                        overviewTotalMisses = 0;
+                    } else {
+                        overviewTotalMisses += overviewSize2;
+                    }
+
+                    // ---- Cold stages ----
+                    var activeCountsByStage2 = [0, 0, 0, 0, 0];
+                    coldNumbers.forEach(function(cn) { if (cn.active && !cn.waiting && cn.stage >= 1 && cn.stage <= 5)
+                            activeCountsByStage2[cn.stage - 1]++; });
+                    var hitsByStage2 = [0, 0, 0, 0, 0];
+                    var hitNumbers2 = [];
+                    coldNumbers.forEach(function(cn) {
+                        if (cn.active && cn.number === spin) {
+                            cn.hit = true;
+                            cn.active = false;
+                            trackingStats.totalHits++;
+                            hitsByStage2[cn.stage - 1]++;
+                            hitNumbers2.push({ number: cn.number, stage: cn.stage, missesBeforeHit: trackingStats
+                                    .stageMisses[cn.stage - 1] });
+                        }
+                    });
+                    hitNumbers2.forEach(function(hit) {
+                        stage1Hits.push({
+                            number: hit.number,
+                            hitMisses: hit.missesBeforeHit,
+                            spinsLeft: 40,
+                            currentMisses: 0,
+                            addedAtSpin: idx + 1
+                        });
+                    });
+                    for (var s2 = 0; s2 < 5; s2++) {
+                        if (hitsByStage2[s2] > 0) {
+                            trackingStats.stageHitRecords[s2].push(trackingStats.stageMisses[s2]);
+                        }
+                    }
+                    for (var i2 = 0; i2 < 5; i2++) {
+                        if (hitsByStage2[i2] > 0) trackingStats.stageMisses[i2] = 0;
+                        else trackingStats.stageMisses[i2] = (trackingStats.stageMisses[i2] || 0) + activeCountsByStage2[
+                            i2];
+                    }
+                    trackingStats.stageMissesHistory.push({ spinNumber: idx + 1, stageMisses: trackingStats
+                            .stageMisses.slice(), date: new Date().toISOString() });
+                    coldNumbers = coldNumbers.filter(function(cn) { return !cn.hit; });
+                    coldNumbers.forEach(function(cn) {
+                        if (cn.active && !cn.waiting) {
+                            cn.spinsLeft--;
+                            if (cn.spinsLeft <= 0 && !cn.hit) {
+                                if (cn.stage < 5) {
+                                    cn.active = false;
+                                    cn.waiting = true;
+                                    cn.nextStage = cn.stage + 1;
+                                } else {
+                                    cn.active = false;
+                                    cn.waiting = false;
+                                }
+                            }
+                        }
+                    });
+                    var waitingMatch2 = null;
+                    for (var j2 = 0; j2 < coldNumbers.length; j2++) {
+                        if (coldNumbers[j2].waiting && coldNumbers[j2].number === spin) {
+                            waitingMatch2 = coldNumbers[j2];
+                            break;
+                        }
+                    }
+                    if (waitingMatch2) {
+                        waitingMatch2.active = true;
+                        waitingMatch2.waiting = false;
+                        waitingMatch2.stage = waitingMatch2.nextStage;
+                        waitingMatch2.spinsLeft = 40;
+                        delete waitingMatch2.nextStage;
+                    } else if (missesBefore2[spin] >= 80 && !coldNumbers.some(function(cn) { return cn.number === spin && (
+                            cn.active || cn.waiting); })) {
+                        coldNumbers.push({ number: spin, stage: 1, spinsLeft: 40, misses: missesBefore2[spin],
+                            addedAtSpin: idx, active: true, waiting: false, hit: false });
+                    }
+
+                    // ---- 80+ ----
+                    var highMissAtThisPoint = allNumbers.filter(function(n) { return missesBefore2[n] >= 80; });
+                    var isHit80_2 = highMissAtThisPoint.indexOf(spin) !== -1;
+                    if (isHit80_2) {
+                        eightyPlusHitHistory.push(eightyPlusCumulativeMisses);
+                        if (eightyPlusHitHistory.length > 100) eightyPlusHitHistory = eightyPlusHitHistory.slice(-100);
+                        eightyPlusCumulativeMisses = 0;
+                    } else {
+                        eightyPlusCumulativeMisses += highMissAtThisPoint.length;
+                    }
+
+                    // ---- 60-79 ----
+                    var sixtyMissAtThisPoint = allNumbers.filter(function(n) { return missesBefore2[n] >= 60 && missesBefore2[
+                            n] <= 79; });
+                    var isHit60_2 = sixtyMissAtThisPoint.indexOf(spin) !== -1;
+                    if (isHit60_2) {
+                        sixtyPlusHitHistory.push(sixtyPlusCumulativeMisses);
+                        if (sixtyPlusHitHistory.length > 100) sixtyPlusHitHistory = sixtyPlusHitHistory.slice(-100);
+                        sixtyPlusCumulativeMisses = 0;
+                    } else {
+                        sixtyPlusCumulativeMisses += sixtyMissAtThisPoint.length;
+                    }
+
+                    // ---- 60+ ----
+                    var sixtyOrMoreAtThisPoint = allNumbers.filter(function(n) { return missesBefore2[n] >= 60; });
+                    var isHit60orMore_2 = sixtyOrMoreAtThisPoint.indexOf(spin) !== -1;
+                    if (isHit60orMore_2) {
+                        sixtyOrMoreHitHistory.push(sixtyOrMoreCumulativeMisses);
+                        if (sixtyOrMoreHitHistory.length > 100) sixtyOrMoreHitHistory = sixtyOrMoreHitHistory.slice(-100);
+                        sixtyOrMoreCumulativeMisses = 0;
+                    } else {
+                        sixtyOrMoreCumulativeMisses += sixtyOrMoreAtThisPoint.length;
+                    }
+
+                    var currentMisses2 = calculateMisses(spinHistory.slice(0, idx + 1));
+                    coldNumbers.forEach(function(cn) { if (cn.active || cn.waiting) cn.misses = currentMisses2[cn
+                            .number]; });
+                }
+
+                // Trim histories
+                if (stage1HitHistory.length > 100) stage1HitHistory = stage1HitHistory.slice(-100);
+                if (hotHitHistory.length > 100) hotHitHistory = hotHitHistory.slice(-100);
+                if (eightyPlusHitHistory.length > 100) eightyPlusHitHistory = eightyPlusHitHistory.slice(-100);
+                if (sixtyPlusHitHistory.length > 100) sixtyPlusHitHistory = sixtyPlusHitHistory.slice(-100);
+                if (sixtyOrMoreHitHistory.length > 100) sixtyOrMoreHitHistory = sixtyOrMoreHitHistory.slice(-100);
+                if (summaryHitHistory.length > 100) summaryHitHistory = summaryHitHistory.slice(-100);
+                if (overviewHitHistory.length > 100) overviewHitHistory = overviewHitHistory.slice(-100);
+
+                saveAllData();
+                updateTrackingDisplay();
+                updateMissesDisplay();
+                updateSixtyPlusMissesGrid();
+                updateSixtyOrMoreMissesGrid();
+            } catch (e) {
+                console.error("Error in fullRecalcFromHistory:", e);
+                alert("Error during full recalc. Check console.");
+            }
+        }
+
+        // ---------- UI ----------
+        function updateDisplay() {
+            var container = document.getElementById("recentSpins");
+            container.innerHTML = "";
+            for (var i = 0; i < 21; i++) {
+                var div = document.createElement("div");
+                var idx = spinHistory.length - 1 - i;
+                if (idx >= 0) {
+                    var n = spinHistory[idx];
+                    div.className = 'spin-box ' + getColor(n);
+                    div.textContent = n;
+                } else {
+                    div.className = "spin-box empty";
+                    div.textContent = "";
+                }
+                container.appendChild(div);
+            }
+            document.getElementById("entryCount").textContent = 'Total spins: ' + spinHistory.length;
+        }
+
+        // ---------- ACTIONS ----------
+        function addNumber() {
+            try {
+                var input = document.getElementById("numberInput");
+                var status = document.getElementById("inputStatus");
+                var val = input.value.trim();
+                if (!val) { status.textContent = "Enter a number"; return; }
+                if (val !== "00") {
+                    var num = parseInt(val, 10);
+                    if (isNaN(num) || num < 0 || num > 36) { status.textContent = "Invalid (0-36 or 00)"; return; }
+                    val = num.toString();
+                }
+                if (!Array.isArray(spinHistory)) spinHistory = [];
+                spinHistory.push(val);
+                updateColdTracking(val);
+                input.value = "";
+                saveAllData();
+                updateDisplay();
+                status.textContent = 'Added spin: ' + val;
+            } catch (e) {
+                console.error("Error in addNumber:", e);
+                alert("Error adding spin. See console.");
+            }
+        }
+
+        function undo() {
+            if (spinHistory.length === 0) { document.getElementById("inputStatus").textContent = "Nothing to undo"; return; }
+            spinHistory.pop();
+            fullRecalcFromHistory();
+            updateDisplay();
+            document.getElementById("inputStatus").textContent = "Undo + full tracking recalculated";
+        }
+
+        function resetAll() {
+            if (confirm("Reset all spins & tracking?")) {
+                spinHistory = [];
+                fullRecalcFromHistory();
+                closeAlert();
+                document.getElementById("inputStatus").textContent = "All data reset";
+            }
+        }
+
+        function numpadClick(n) {
+            var inp = document.getElementById("numberInput");
+            if (n === '00') inp.value = '00';
+            else { if (inp.value.length < 2) inp.value += n; }
+            document.getElementById("inputStatus").textContent = "";
+        }
+
+        function backspace() {
+            var inp = document.getElementById("numberInput");
+            inp.value = inp.value.slice(0, -1);
+        }
+
+        // ---------- INIT ----------
+        document.addEventListener("DOMContentLoaded", function() {
+            fullRecalcFromHistory();
+            updateDisplay();
+            saveAllData();
+            document.getElementById("numberInput").addEventListener("keydown", function(e) { if (e.key === "Enter")
+                    addNumber(); });
+        });
+    </script>
+</body>
+</html>
